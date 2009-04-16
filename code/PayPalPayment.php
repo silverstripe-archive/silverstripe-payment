@@ -35,7 +35,7 @@
  * (search for renderWith). On the PayPalPaymentPage you can use
  * $PayPalInstructions (see above)
  * 
- * @package ecommerce 
+ * @package payment 
  */
 class PayPalPayment extends Payment {
 	static $db = array(

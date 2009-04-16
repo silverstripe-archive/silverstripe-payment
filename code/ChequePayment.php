@@ -3,7 +3,7 @@
 /**
  * Payment object representing a cheque payment.
  * 
- * @package ecommerce
+ * @package payment
  */
 class ChequePayment extends Payment {
 	

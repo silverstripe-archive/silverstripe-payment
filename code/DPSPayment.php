@@ -27,7 +27,7 @@
  * 
  * @TODO Fix the validation problem on the credit card number and date expiry.
  * 
- * @package ecommerce
+ * @package payment
  */	
 class DPSPayment extends Payment {
 	static $db = array(

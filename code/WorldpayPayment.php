@@ -11,7 +11,7 @@
  * WorldpayPayment::set_testmode(100);
  * WorldpayPayment::set_callback_password(blahblah);
  * 
- * @package ecommerce
+ * @package payment
  */
 class WorldpayPayment extends Payment {
 	
@@ -19,7 +19,7 @@ class WorldpayPayment extends Payment {
 	
 	protected static $privacy_link = 'http://www.worldpay.com/about_us/index.php?page=privacy';
 
-	protected static $logo = 'ecommerce/images/payments/worldpay.gif';
+	protected static $logo = 'payment/images/payments/worldpay.gif';
 	
 	// URL
 
@@ -112,11 +112,11 @@ class WorldpayPayment extends Payment {
 			new LiteralField('WorldPayInfo', $privacyLink),
 			new LiteralField(
 				'WorldPayPaymentsList',
-				'<img src="ecommerce/images/payments/methods/visa.jpg" alt="Visa"/>' .
-				'<img src="ecommerce/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
-				'<img src="ecommerce/images/payments/methods/american-express.gif" alt="American Express"/>' .
-				'<img src="ecommerce/images/payments/methods/dinners-club.jpg" alt="Dinners Club"/>' .
-				'<img src="ecommerce/images/payments/methods/jcb.jpg" alt="JCB"/>'
+				'<img src="payment/images/payments/methods/visa.jpg" alt="Visa"/>' .
+				'<img src="payment/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
+				'<img src="payment/images/payments/methods/american-express.gif" alt="American Express"/>' .
+				'<img src="payment/images/payments/methods/dinners-club.jpg" alt="Dinners Club"/>' .
+				'<img src="payment/images/payments/methods/jcb.jpg" alt="JCB"/>'
 			)
 		);
 	}
@@ -134,7 +134,7 @@ class WorldpayPayment extends Payment {
 
 		$controller = new Page_Controller($page);
 		
-		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
+		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
 		
 		$form = $controller->renderWith('PaymentProcessingPage');
 		
@@ -202,7 +202,9 @@ class WorldpayPayment extends Payment {
 		return <<<HTML
 			<form id="PaymentForm" method="post" action="$url">$fields</form>
 			<script type="text/javascript">
-				jQuery(document).ready(function() {jQuery('#PaymentForm').submit();});
+				jQuery(document).ready(function() {
+					jQuery('#PaymentForm').submit();
+				});
 			</script>
 HTML;
 	}
