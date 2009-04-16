@@ -62,11 +62,11 @@ class DPSPayment extends Payment {
 	}
 		
 	protected static $credit_cards = array(
-		'Visa' => 'ecommerce/images/payments/methods/visa.jpg',
-		'MasterCard' => 'ecommerce/images/payments/methods/mastercard.jpg',
-		'American Express' => 'ecommerce/images/payments/methods/american-express.gif',
-		'Dinners Club' => 'ecommerce/images/payments/methods/dinners-club.jpg',
-		'JCB' => 'ecommerce/images/payments/methods/jcb.jpg'
+		'Visa' => 'payment/images/payments/methods/visa.jpg',
+		'MasterCard' => 'payment/images/payments/methods/mastercard.jpg',
+		'American Express' => 'payment/images/payments/methods/american-express.gif',
+		'Dinners Club' => 'payment/images/payments/methods/dinners-club.jpg',
+		'JCB' => 'payment/images/payments/methods/jcb.jpg'
 	);
 	
 	static function remove_credit_card($creditCard) {
