@@ -112,11 +112,11 @@ class PayPalPayment extends Payment {
 			new LiteralField('PayPalInfo', $privacyLink),
 			new LiteralField(
 				'PayPalPaymentsList',
-				'<img src="ecommerce/images/payments/methods/visa.jpg" alt="Visa"/>' .
-				'<img src="ecommerce/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
-				'<img src="ecommerce/images/payments/methods/american-express.gif" alt="American Express"/>' .
-				'<img src="ecommerce/images/payments/methods/discover.jpg" alt="Discover"/>' .
-				'<img src="ecommerce/images/payments/methods/paypal.jpg" alt="PayPal"/>'
+				'<img src="payment/images/payments/methods/visa.jpg" alt="Visa"/>' .
+				'<img src="payment/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
+				'<img src="payment/images/payments/methods/american-express.gif" alt="American Express"/>' .
+				'<img src="payment/images/payments/methods/discover.jpg" alt="Discover"/>' .
+				'<img src="payment/images/payments/methods/paypal.jpg" alt="PayPal"/>'
 			)
 		);
 	}
@@ -132,14 +132,13 @@ class PayPalPayment extends Payment {
 
 		$controller = new Page_Controller($page);
 		
-		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
-		
 		$form = $controller->renderWith('PaymentProcessingPage');
 
 		return new Payment_Processing($form);
 	}
 
 	function PayPalForm() {
+		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
 		
 		// 1) Main Informations
 		
@@ -206,10 +205,12 @@ class PayPalPayment extends Payment {
 
 		foreach($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . Convert::raw2xml($value) . '"/>';
 
-		return<<<HTML
+		return <<<HTML
 			<form id="PaymentForm" method="post" action="$url">$fields</form>
 			<script type="text/javascript">
-				jQuery(document).ready(function() {jQuery('#PaymentForm').submit();});
+				jQuery(document).ready(function() {
+					jQuery('#PaymentForm').submit();
+				});
 			</script>
 HTML;
 	}
