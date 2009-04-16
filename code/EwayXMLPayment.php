@@ -8,7 +8,7 @@ class EwayXMLPayment extends Payment {
 	
 	protected static $privacy_link = 'http://www.eway.com.au/Company/About/Privacy.aspx';
 	
-	protected static $logo = 'ecommerce/images/payments/eway.gif';
+	protected static $logo = 'payment/images/payments/eway.gif';
 	
 	// Test Mode
 	
@@ -39,11 +39,11 @@ class EwayXMLPayment extends Payment {
 			new LiteralField('EwayInfo', $privacyLink),
 			new LiteralField(
 				'EwayXMLPaymentsList',
-				'<img src="ecommerce/images/payments/methods/visa.jpg" alt="Visa"/>' .
-				'<img src="ecommerce/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
-				'<img src="ecommerce/images/payments/methods/american-express.gif" alt="American Express"/>' .
-				'<img src="ecommerce/images/payments/methods/dinners-club.jpg" alt="Dinners Club"/>' .
-				'<img src="ecommerce/images/payments/methods/jcb.jpg" alt="JCB"/>'
+				'<img src="payment/images/payments/methods/visa.jpg" alt="Visa"/>' .
+				'<img src="payment/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
+				'<img src="payment/images/payments/methods/american-express.gif" alt="American Express"/>' .
+				'<img src="payment/images/payments/methods/dinners-club.jpg" alt="Dinners Club"/>' .
+				'<img src="payment/images/payments/methods/jcb.jpg" alt="JCB"/>'
 			),
 			new TextField('Eway_CreditCardHolderName', 'Credit Card Holder Name :')
 		);
@@ -77,7 +77,7 @@ JS;
 			$this->requireField("Eway_CreditCardExpiry", $data);
 		';
 		if(self::$cvn_mode) {
-			Requirements::javascript('ecommerce/javascript/payments/Eway.js');
+			Requirements::javascript('payment/javascript/Eway.js');
 			$jsCode .= <<<JS
 				var ewayCreditCardType = document.getElementsByName('Eway_CreditCardType')[0];
 				if(ewayCreditCardType.value == 'VISA' || ewayCreditCardType.value == 'MASTERCARD' || ewayCreditCardType.value == 'AMEX') require('Eway_CreditCardCVN');
