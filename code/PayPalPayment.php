@@ -203,10 +203,15 @@ class PayPalPayment extends Payment {
 
 		// 8) Form Creation
 
-		foreach($inputs as $name => $value) $fields .= '<input type="hidden" name="' . $name . '" value="' . Convert::raw2xml($value) . '"/>';
+		foreach($inputs as $name => $value) {
+			$ATT_value = Convert::raw2att($value);
+			$fields .= "<input type=\"hidden\" name=\"$name\" value=\"$ATT_value\" />";
+		}
 
 		return <<<HTML
-			<form id="PaymentForm" method="post" action="$url">$fields</form>
+			<form id="PaymentForm" method="post" action="$url">
+				$fields
+			</form>
 			<script type="text/javascript">
 				jQuery(document).ready(function() {
 					jQuery('#PaymentForm').submit();
