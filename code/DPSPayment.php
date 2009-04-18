@@ -197,7 +197,7 @@ JS;
 				$startLevel = 1;
 				$phpArray = '$resultPhp';
 				while($startLevel < $xmlElement['level']) $phpArray .= '[$level['. $startLevel++ .']]';
-				$phpArray .= '[$xmlElement[\'tag\']] = $xmlElement[\'value\'];';
+				$phpArray .= '[$xmlElement[\'tag\']] = array_key_exists(\'value\', $xmlElement)? $xmlElement[\'value\'] : null;';
 				eval($phpArray);
 			}
 		}
