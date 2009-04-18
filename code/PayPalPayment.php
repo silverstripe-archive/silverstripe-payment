@@ -46,7 +46,7 @@ class PayPalPayment extends Payment {
 	
 	protected static $privacy_link = 'https://www.paypal.com/us/cgi-bin/webscr?cmd=p/gen/ua/policy_privacy-outside';
 	
-	protected static $logo = 'ecommerce/images/payments/paypal.jpg';
+	protected static $logo = 'payment/images/payments/paypal.jpg';
 	
 	// URLs
 
