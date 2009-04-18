@@ -211,9 +211,11 @@ class PayPalPayment extends Payment {
 		return <<<HTML
 			<form id="PaymentForm" method="post" action="$url">
 				$fields
+				<input type="submit" value="Submit" />
 			</form>
 			<script type="text/javascript">
 				jQuery(document).ready(function() {
+					jQuery("input[type='submit']").hide();
 					jQuery('#PaymentForm').submit();
 				});
 			</script>
