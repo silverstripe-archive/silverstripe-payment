@@ -38,7 +38,7 @@ class DPSPayment extends Payment {
 	
 	protected static $privacy_link = 'http://www.paymentexpress.com/privacypolicy.htm';
 	
-	protected static $logo = 'ecommerce/images/payments/dps.gif';
+	protected static $logo = 'payment/images/payments/dps.gif';
 	
 	// URLs
 	
