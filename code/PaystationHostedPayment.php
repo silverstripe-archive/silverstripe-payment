@@ -6,7 +6,7 @@ class PaystationHostedPayment extends Payment {
 	
 	protected static $privacy_link = 'http://paystation.co.nz/privacy-policy';
 	
-	protected static $logo = 'ecommerce/images/payments/paystation.jpg';
+	protected static $logo = 'payment/images/payments/paystation.jpg';
 	
 	// URLs
 
@@ -41,9 +41,9 @@ class PaystationHostedPayment extends Payment {
 			new LiteralField('PaystationInfo', $privacyLink),
 			new LiteralField(
 				'PaystationPaymentsList',
-				'<img src="ecommerce/images/payments/methods/visa.jpg" alt="Visa"/>' .
-				'<img src="ecommerce/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
-				'<img src="ecommerce/images/payments/methods/american-express.gif" alt="American Express"/>'
+				'<img src="payment/images/payments/methods/visa.jpg" alt="Visa"/>' .
+				'<img src="payment/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
+				'<img src="payment/images/payments/methods/american-express.gif" alt="American Express"/>'
 			)
 		);
 	}
@@ -61,7 +61,7 @@ class PaystationHostedPayment extends Payment {
 		
 		$controller = new Page_Controller($page);
 		
-		Requirements::javascript('ecommerce/javascript/jquery/jquery.js');
+		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
 		
 		$form = $controller->renderWith('PaymentProcessingPage');
 		
@@ -87,7 +87,9 @@ class PaystationHostedPayment extends Payment {
 		
 		return<<<HTML
 			<script type="text/javascript">
-				jQuery(document).ready(function() {location = "$url";});
+				jQuery(document).ready(function() {
+					location = "$url";
+				});
 			</script>
 HTML;
 	}
