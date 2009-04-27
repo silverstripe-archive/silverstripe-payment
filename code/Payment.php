@@ -1,19 +1,26 @@
 <?php 
-
 /**
- * Payment class.
- * Use this to process all manner of payments
+ * "Abstract" class for a number of different payment
+ * types allowing a user to pay for something on a site.
+ *
+ * @see DPSPayment
+ * @see WorldPayPayment
+ * @see ChequePayment
+ *
+ * This can't be an abstract class because sapphire doesn't
+ * support abstract DataObject classes.
  * 
  * @package payment
  */
 class Payment extends DataObject {
+
 	/**
- 	 * Incomplete(Default) : Payment created but no successful yet or the process has been stop instantly
- 	 * Success : Payment successful
- 	 * Failure : Payment failed during process
- 	 * Pending : Payment waiting on receipts/bank transfer etc.
+ 	 * Incomplete (default): Payment created but nothing confirmed as successful
+ 	 * Success: Payment successful
+ 	 * Failure: Payment failed during process
+ 	 * Pending: Payment awaiting receipt/bank transfer etc
  	 */
-	static $db = array(
+	public static $db = array(
 		'Status' => "Enum('Incomplete,Success,Failure,Pending','Incomplete')",
 		'Amount' => 'Currency',
 		'Currency' => 'Varchar(3)',
@@ -22,18 +29,22 @@ class Payment extends DataObject {
 		'ProxyIP' => 'Varchar'
 	);
 	
-	static $has_one = array();
+	/**
+	 * Instances of Payment supported (usable) on this site.
+	 * @var array
+	 */
+	protected static $supported_methods = array(
+		'ChequePayment' => 'Cheque'
+	);
 	
 	/**
 	 * The currency code used for payments.
-	 * 
 	 * @var string
 	 */
 	protected static $site_currency = 'USD';
 	
 	/**
 	 * Set the currency code that this site uses.
-	 *
 	 * @param string $currency Currency code. e.g. "NZD"
 	 */
 	public static function set_site_currency($currency) {
@@ -42,13 +53,21 @@ class Payment extends DataObject {
 	
 	/**
 	 * Return the site currency in use.
-	 *
 	 * @return string
 	 */
 	public static function site_currency() {
 		return self::$site_currency;
 	}
 	
+	/**
+	 * Set the payment types that this site supports.
+	 * The classes should all be subclasses of Payment.
+	 *
+	 * @param array $methodMap A map of class names to human-readable descriptions of the payment methods.
+	 */
+	static function set_supported_methods($methodMap) {
+		self::$supported_methods = $methodMap;
+	}
 	
 	function populateDefaults() {
 		parent::populateDefaults();
@@ -58,13 +77,15 @@ class Payment extends DataObject {
  	}
 	
 	/**
-	 * Set the IP address and Proxy IP (if available) from the site visitor.
-	 * Does an ok job of proxy detection. Probably can't be too much better because anonymous proxies
-	 * will make themselves invisible.
-	 */	
+	 * Set the IP address of the user to this payment record.
+	 * This isn't perfect - IP addresses can be hidden fairly easily.
+	 */
 	function setClientIP() {
+		$proxy = null;
+		$ip = null;
+		
 		if(isset($_SERVER['HTTP_CLIENT_IP'])) $ip = $_SERVER['HTTP_CLIENT_IP'];
-		else if(isset($_SERVER['REMOTE_ADDR'])) $ip = $_SERVER['REMOTE_ADDR'];
+		elseif(isset($_SERVER['REMOTE_ADDR'])) $ip = $_SERVER['REMOTE_ADDR'];
 		else $ip = null;
 		
 		if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -72,48 +93,18 @@ class Payment extends DataObject {
 			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 		}
 		
-		// If the IP and/or Proxy IP have already been set, we want to be sure we don't set it again.
+		// Only set the IP and ProxyIP if none currently set
 		if(!$this->IP) $this->IP = $ip;
-		if(!$this->ProxyIP && isset($proxy)) $this->ProxyIP = $proxy;
+		if(!$this->ProxyIP) $this->ProxyIP = $proxy;
 	}
 	
 	/**
-	 * Subclasses of Payment that are allowed to be used on this site.
-	 */
-	protected static $supported_methods = array(
-		'ChequePayment' => 'Cheque'
-	);
-	
-	/**
-	 * Set the payment methods that this site supports.
-	 * 
-	 *The classes should all be subclasses of Payment.
-	 *
-	 * @param array $methodMap A map, mapping class names to human-readable descriptions of the payment methods.
-	 */
-	static function set_supported_methods($methodMap) {
-		self::$supported_methods = $methodMap;
-	}
-	
-	/**
-	 * Returns the 'nice' title of the payment method given.
-	 * 
-	 * @param string $method The ClassName of the payment method.
-	 */
-	static function findPaymentMethod($method) {
-		return self::$supported_methods[$method];
-	}
-	
-	/**
-	 * Returns the Payment method used. It just resolves the classname
-	 * to the 'nice' title as defined in Payment::set_supported_methods().
-	 * For example: 'ChequePayment' => 'Cheque'
-	 * 
+	 * Returns the Payment type currently in use.
 	 * @return string
 	 */
 	function PaymentMethod() {
-		if(self::findPaymentMethod($this->ClassName)) {
-			return self::findPaymentMethod($this->ClassName);
+		if(isset(self::$supported_methods[$this->ClassName])) {
+			return self::$supported_methods[$this->ClassName];
 		}
 	}
 	
@@ -191,18 +182,27 @@ class Payment extends DataObject {
 	/**
 	 * Return the payment form fields that should
 	 * be shown on the checkout order form for the
-	 * payment type. e.g. for {@link DPSPayment},
+	 * payment type. Example: for {@link DPSPayment},
 	 * this would be a set of fields to enter your
 	 * credit card details.
-	 * 
-	 * This needs to be implemented on your subclass
-	 * of Payment, even if it only returns NULL. It
-	 * should return a {@link FieldSet}.
 	 * 
 	 * @return FieldSet
 	 */
 	function getPaymentFormFields() {
 		user_error("Please implement getPaymentFormFields() on $this->class", E_USER_ERROR);
+	}
+
+	/**
+	 * Define what fields defined in {@link Order->getPaymentFormFields()}
+	 * should be required. 
+	 * 
+	 * @see DPSPayment->getPaymentFormRequirements() for an example on how
+	 * this is implemented.
+	 * 
+	 * @return array
+	 */
+	function getPaymentFormRequirements() {
+		user_error("Please implement getPaymentFormRequirements() on $this->class", E_USER_ERROR);
 	}
 	
 	/**
@@ -222,21 +222,9 @@ class Payment extends DataObject {
 		user_error("Please implement processPayment() on $this->class", E_USER_ERROR);
 	}
 	
-	/**
-	 * Define what fields defined in {@link Order->getPaymentFormFields()}
-	 * should be required. 
-	 * 
-	 * @see DPSPayment->getPaymentFormRequirements() for an example on how
-	 * this is implemented.
-	 * 
-	 * @return array
-	 */
-	function getPaymentFormRequirements() {
-		user_error("Please implement getPaymentFormRequirements() on $this->class", E_USER_ERROR);
-	}
 }
-
 abstract class Payment_Result {
+	
 	protected $value;
 	
 	function __construct($value = null) {
@@ -248,10 +236,12 @@ abstract class Payment_Result {
 	}
 
 	abstract function isSuccess();
+	
 	abstract function isProcessing();
+	
 }
-
 class Payment_Success extends Payment_Result {
+
 	function isSuccess() {
 		return true;
 	}
@@ -259,9 +249,10 @@ class Payment_Success extends Payment_Result {
 	function isProcessing() {
 		return false;
 	}
+	
 }
-
 class Payment_Processing extends Payment_Result {
+
 	function isSuccess() {
 		return false;
 	}
@@ -269,9 +260,10 @@ class Payment_Processing extends Payment_Result {
 	function isProcessing() {
 		return true;
 	}
+	
 }
-
 class Payment_Failure extends Payment_Result {
+
 	function isSuccess() {
 		return false;
 	}
@@ -279,6 +271,6 @@ class Payment_Failure extends Payment_Result {
 	function isProcessing() {
 		return false;
 	}
+	
 }
-
 ?>
