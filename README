@@ -1,0 +1,14 @@
+###############################################
+Payment Module
+###############################################
+
+Maintainer Contact
+-----------------------------------------------
+Sean Harvey (Nickname: sharvey, halkyon)
+<sean (at) silverstripe (dot) com>
+
+Requirements
+-----------------------------------------------
+This module is generally used with ecommerce, but
+can be also used to add payment capabilities to
+forms on your SilverStripe site.
