@@ -159,7 +159,7 @@ JS;
 			if($name == "Amount") {
 				$value = number_format($value, 2);
 			}
-			$trans .= "<$name>$value</$name>";
+			$transaction .= "<$name>$value</$name>";
 		}
 		$transaction .= "</Txn>";
 		
