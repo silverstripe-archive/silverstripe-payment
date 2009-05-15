@@ -154,10 +154,14 @@ JS;
 	function doPayment(array $inputs) {
 		
 		// 1) Transaction Creation
-		
-		$transaction = '<Txn>';
-		foreach($inputs as $name => $value) $transaction .= "<$name>$value</$name>"; 
-		$transaction .= '</Txn>';
+		$transaction = "<Txn>";
+		foreach($inputs as $name => $value) {
+			if($name == "Amount") {
+				$value = number_format($value, 2);
+			}
+			$trans .= "<$name>$value</$name>";
+		}
+		$transaction .= "</Txn>";
 		
 		// 2) CURL Creation
 		
