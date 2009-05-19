@@ -37,6 +37,14 @@ class Payment extends DataObject {
 		'ChequePayment' => 'Cheque'
 	);
 	
+	
+	/**
+	 * Make payment table transactional.
+	 */
+	static $create_table_options = array(
+		'MySQLDatabase' => 'ENGINE=InnoDB'
+	);
+		
 	/**
 	 * The currency code used for payments.
 	 * @var string
