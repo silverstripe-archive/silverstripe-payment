@@ -157,7 +157,7 @@ JS;
 		$transaction = "<Txn>";
 		foreach($inputs as $name => $value) {
 			if($name == "Amount") {
-				$value = number_format($value, 2);
+				$value = number_format($value, 2, '.', '');
 			}
 			$transaction .= "<$name>$value</$name>";
 		}
