@@ -34,7 +34,9 @@ class ChequePayment extends Payment {
 	 * Returns the Cheque content from the CheckoutPage
 	 */
 	function ChequeContent() {
-		return DataObject::get_one('CheckoutPage')->ChequeMessage;
+		if(class_exists('CheckoutPage')) {
+			return DataObject::get_one('CheckoutPage')->ChequeMessage;
+		}
 	}
 	
 }
