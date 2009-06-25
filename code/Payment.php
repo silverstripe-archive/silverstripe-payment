@@ -123,7 +123,7 @@ class Payment extends DataObject {
 	 * 
 	 * @return FieldSet
 	 */
-	static function combined_form_fields($amount, $subtotal) {
+	static function combined_form_fields($amount) {
 
 		// Create the initial form fields, which defines an OptionsetField
 		// allowing the user to choose which payment method to use.
