@@ -4,6 +4,10 @@
  * Payment type to support credit-card payments through Paystation. This uses the direct ("2 party") mode, keeping the payment within
  * the SS site.
  * 
+ * Paystation accepts different currencies, but these are determined by the paystation gateway, which the merchant will know. Ecommerce
+ * has to be defined accordingly. If you get an error code of 101 with a message of "merchant id disabled", it really means that the currency
+ * is not supported.
+ * 
  * @package payment
  */	
 
@@ -136,7 +140,7 @@ JS;
 		// 2) Payment Informations
 		
 		$inputs['pstn_am'] = $this->Amount;
-		if ($this->Currency) $inputs['pstn_cu'] = $this->Currency;
+//		if ($this->Currency) $inputs['pstn_cu'] = $this->Currency;
 		$inputs['pstn_mr'] = $this->ID;
 		$inputs['pstn_af'] = 'dollars.cents';
 
@@ -177,53 +181,34 @@ JS;
 	}
 
 	function doPayment(array $inputs) {
-		
-		// 1) Set-up post parameters
+		// Build a request
+		$formatted_data = http_build_query($inputs);
 
-		$params = "";
-		$sep = "";
-		foreach ($inputs as $key => $value) {
-			$params .= "{$sep}{$key}={$value}";
-			$sep = "&";
-		}
+		$context_options = array (
+			'http' => array (
+			'method' => 'POST',
+			'header'=> "Content-type: application/x-www-form-urlencoded\r\n"
+				. "Content-Length: " . strlen($formatted_data) . "\r\n",
+			'content' => $formatted_data
+			)
+		);
 
-//		Debug::show("URL is " . $params);
+		// Make a direct http request
+		$ctx = stream_context_create($context_options);
+		$fp = @fopen(self::$url, 'r', false, $ctx);
+		if (!$fp) Debug::show("error sending to paystation: " . $php_errormsg);
 
-		// 2) CURL Creation
-		
-		$clientURL = curl_init(); 
-		curl_setopt($clientURL, CURLOPT_URL, self::$url);
-		curl_setopt($clientURL, CURLOPT_POST, 1);
-		curl_setopt($clientURL, CURLOPT_POSTFIELDS, $params);
-		curl_setopt($clientURL, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($clientURL, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
-		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
-		curl_setopt($clientURL, CURLOPT_SSL_VERIFYHOST,  2);
+		$resultXml = @stream_get_contents($fp);
+		if ($resultXml === false) Debug::show("error receiving from paystation: " . $php_errormsg);
 
-		// This option shouldn't be turned off, but we're getting a certificate error, so this bypasses it.
-		curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, false);
-
-		// 3) CURL Execution
-		
-		$resultXml = curl_exec($clientURL);
-
-// test:		$resultXml = '<?xml version="1.0" standalone="yes"? ><response><ec>4</ec><em>Transaction not approved</em></response>';
-		// Debug::show("raw result from url is: " . $resultXml);
-
-		if (!$resultXml) Debug::show("curl error:" . curl_error($clientURL));
-
-		// 4) CURL Closing
-		
-		curl_close ($clientURL);
-		
-		// 5) XML Parser Creation
+		// XML Parser Creation
 		$xmlParser = xml_parser_create();
 		$values = null;
 		$indexes = null;
 		xml_parse_into_struct($xmlParser, $resultXml, $values, $indexes);
 		xml_parser_free($xmlParser);
 
-		// 6) XML Result Parsed In A PHP Array
+		// XML Result Parsed In A PHP Array
 		// We expect XML that looks like this:
 		// <?xml version="1.0" standalone="yes"? > 
 		// <response> 
