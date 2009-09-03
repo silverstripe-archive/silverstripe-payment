@@ -141,7 +141,7 @@ class PayPalPayment extends Payment {
 		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
 		
 		// 1) Main Informations
-		
+		$fields = '';
 		$order = $this->Order();
 		$items = $order->Items();
 		$member = $order->Member();
@@ -202,10 +202,11 @@ class PayPalPayment extends Payment {
 		if($member->hasMethod('getZip')) $inputs['zip'] = $member->getZip();
 
 		// 8) Form Creation
-
-		foreach($inputs as $name => $value) {
-			$ATT_value = Convert::raw2att($value);
-			$fields .= "<input type=\"hidden\" name=\"$name\" value=\"$ATT_value\" />";
+		if(is_array($inputs) && count($inputs)) { 
+			foreach($inputs as $name => $value) {
+				$ATT_value = Convert::raw2att($value);
+				$fields .= "<input type=\"hidden\" name=\"$name\" value=\"$ATT_value\" />";
+			}
 		}
 
 		return <<<HTML
@@ -272,7 +273,6 @@ class PayPalPayment_Handler extends Controller {
 		}
 		else {
 			user_error('error 4');
-			Debug::show($_REQUEST);
 		}
 	}
 }
