@@ -64,8 +64,8 @@ class PaystationPayment extends Payment {
 	}
 
 	function getPaymentFormFields() {
-		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by DPS"/>';
-		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read DPS\'s privacy policy">' . $logo . '</a><br/>';
+		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by Paystation"/>';
+		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read Paystation\'s privacy policy">' . $logo . '</a><br/>';
 		$paymentsList = '';
 		foreach(self::$credit_cards as $name => $image) $paymentsList .= '<img src="' . $image . '" alt="' . $name . '"/>';
 		$fields = new FieldSet(
