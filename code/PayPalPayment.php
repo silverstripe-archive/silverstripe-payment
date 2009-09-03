@@ -241,7 +241,6 @@ class PayPalPayment_Handler extends Controller {
 
 	/**
 	 * Manages the 'return' and 'cancel' PayPal replies
-	 * To-do : Escape as SQL : SQL_data
 	 */
 	function complete() {
 		if(isset($_REQUEST['custom']) && $custom = $_REQUEST['custom']) {
@@ -253,57 +252,15 @@ class PayPalPayment_Handler extends Controller {
 							$payment->Status = 'Success';
 							$payment->TxnRef = $_REQUEST['txn_id'];
 						}
-						else $payment->Status = 'Failure';
+						else {
+							$payment->Status = 'Failure';	
+						}
 						
 						$payment->write();
-						
 						$payment->redirectToOrder();
 					}
-					else {
-						user_error('error 1');
-					}
-				}
-				else {
-					user_error('error 2');
 				}
 			}
-			else {
-				user_error('error 3');
-			}
-		}
-		else {
-			user_error('error 4');
 		}
 	}
 }
-
-/* what comes back from Paypal as get variables (see https://www.paypal.com/IntegrationCenter/ic_ipn-pdt-variable-reference.html)
- txn_type=web_accept
- payment_date=19%3A09%3A25+Apr+15%2C+2008+PDT
- last_name=Tester
- residence_country=US
- item_name=templates
- payment_gross=70.00
- mc_currency=USD
- business=abc%40def.ghi (email of business owner)
- payment_type=instant
- payer_status=verified
- verify_sign=AFhW6IfTc.P96fDJUr48Gahf6BlHAhxUUkTH59p-rGnYUe2n5es5ZeLn
- test_ipn=1
- payer_email=testpayer%40abc.def.ghi (person paying)
- tax=0.00
- txn_id=40863971JS8149811
- first_name=Chester
- receiver_email=aaa%40bbb.com
- quantity=1
- payer_id=QW5PPSM3TFGPA
- receiver_id=LZZDEWP3XWLUG
- item_number=39
- payment_status=Completed
- mc_fee=3.03
- payment_fee=3.03
- shipping=0.00
- mc_gross=70.00
- custom=39
-*/
-?>
