@@ -222,6 +222,11 @@ class PayPalPayment extends Payment {
 			</script>
 HTML;
 	}
+	
+	function populateDefaults() {
+		parent::populateDefaults();
+		$this->AuthorisationCode = md5(uniqid(rand(), true));
+ 	}
 }
 
 /**
