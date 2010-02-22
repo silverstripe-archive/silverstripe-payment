@@ -74,13 +74,20 @@ class DPSPayment extends Payment {
 	}
 	
 	function getPaymentFormFields() {
-		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by DPS"/>';
-		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read DPS\'s privacy policy">' . $logo . '</a><br/>';
+		$privacyLink = '<div class="dpsLogo">
+							<a href="' . self::$privacy_link . '" target="_blank" title="Read DPS\'s privacy policy">
+								<img src="' . self::$logo . '" alt="Credit card payments powered by DPS"/>
+							</a>
+						</div>';
+						
 		$paymentsList = '';
 		foreach(self::$credit_cards as $name => $image) $paymentsList .= '<img src="' . $image . '" alt="' . $name . '"/>';
+		
 		$fields = new FieldSet(
-			new LiteralField('DPSInfo', $privacyLink),
-			new LiteralField('DPSPaymentsList', $paymentsList),
+			new LiteralField('DPSLogosContainer', '<div class="dpsLogoContainer">'),
+				new LiteralField('DPSInfo', $privacyLink),
+				new LiteralField('DPSPaymentsList', '<div class="dpsPaymentsList">' . $paymentsList . '</div>'),
+			new LiteralField('DPSLogosContainerClose', '</div>'),
 			new TextField('DPS_CreditCardHolderName', 'Credit Card Holder Name :'),
 			new CreditCardField('DPS_CreditCardNumber', 'Credit Card Number :'),
 			new TextField('DPS_CreditCardExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
