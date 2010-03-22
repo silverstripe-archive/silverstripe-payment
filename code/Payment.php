@@ -22,11 +22,17 @@ class Payment extends DataObject {
  	 */
 	public static $db = array(
 		'Status' => "Enum('Incomplete,Success,Failure,Pending','Incomplete')",
-		'Amount' => 'Currency',
-		'Currency' => 'Varchar(3)',
+		'Amount' => 'Money',
 		'Message' => 'Text',
 		'IP' => 'Varchar',
-		'ProxyIP' => 'Varchar'
+		'ProxyIP' => 'Varchar',
+		'PaidForID' => "Int",
+		'PaidForClass' => 'Varchar',
+		'PaymentDate' => "Date"
+	);
+	
+	public static $has_one = array(
+		'RecurringPayment' => 'RecurringPayment'
 	);
 	
 	/**
@@ -50,6 +56,11 @@ class Payment extends DataObject {
 	 * @var string
 	 */
 	protected static $site_currency = 'USD';
+	
+	/**
+	 * the testable form of the payemnt method
+	 */
+	protected static $testable_form = array();
 	
 	/**
 	 * Set the currency code that this site uses.
@@ -80,7 +91,7 @@ class Payment extends DataObject {
 	function populateDefaults() {
 		parent::populateDefaults();
 		
-		$this->Currency = Payment::site_currency();
+		$this->Amount->Currency = Payment::site_currency();
 		$this->setClientIP();
  	}
 	
@@ -230,6 +241,9 @@ class Payment extends DataObject {
 		user_error("Please implement processPayment() on $this->class", E_USER_ERROR);
 	}
 	
+	function getForm($whichTest){
+		user_error("Please implement getForm() on $this->class", E_USER_ERROR);
+	}
 }
 abstract class Payment_Result {
 	

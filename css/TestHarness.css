@@ -1,0 +1,38 @@
+#testharnessUI #rightcontent{
+	float: right;
+	/*border-left: 1px solid #000000;*/
+	width: 20%;
+}
+
+#testharnessUI #leftcontent{
+	float: left;
+	/*border-right: 1px solid #000000;*/
+	width: 25%;
+}
+
+#testharnessUI #middlecontent{
+	width: 45%;
+	float: left;
+}
+
+
+#testharnessUI .harnesscontent{
+	margin: 0;
+	padding: 5px;
+	clear: none;
+	display: inline;
+}
+
+#testharnessUI .clearfix{
+	clear: both;
+	display: block;
+}
+
+#testharnessUI {
+	background: url(../images/ui-bg.jpg) repeat-y !important;
+	border: 1px solid #000000;
+}
+
+#testharnessUI ul{
+	margin: 0;
+}

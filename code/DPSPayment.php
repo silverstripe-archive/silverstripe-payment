@@ -3,219 +3,247 @@
 /**
  * Payment type to support credit-card payments through DPS.
  * 	
- * Supported currencies: 
- * 	CAD  	Canadian Dollar
- * 	CHF 	Swiss Franc
- * 	EUR 	Euro
- * 	FRF 	French Franc
- * 	GBP 	United Kingdom Pound
- * 	HKD 	Hong Kong Dollar
- * 	JPY 	Japanese Yen
- * 	NZD 	New Zealand Dollar
- * 	SGD 	Singapore Dollar
- * 	USD 	United States Dollar
- * 	ZAR 	Rand
- * 	AUD 	Australian Dollar
- * 	WST 	Samoan Tala
- * 	VUV 	Vanuatu Vatu
- * 	TOP 	Tongan Pa'anga
- * 	SBD 	Solomon Islands Dollar
- * 	PGK 	Papua New Guinea Kina
- * 	MYR 	Malaysian Ringgit
- * 	KWD 	Kuwaiti Dinar
- * 	FJD 	Fiji Dollar
- * 
- * @TODO Fix the validation problem on the credit card number and date expiry.
- * 
  * @package payment
  */	
 class DPSPayment extends Payment {
 	static $db = array(
-		'TxnRef' => 'Text'
+		'TxnRef' => 'Text',
+		'TxnType' => "Enum('Purchase,Auth,Complete,Refund,Validate', 'Purchase')",
+		'AuthCode' => 'Varchar(22)',
+		'MerchantReference' => 'Varchar(64)',
+		'DPSHostedRedirectURL' => 'Text',
+		'SettlementDate' => 'Date'
 	);
 	
-	// DPS Informations
-	
-	protected static $privacy_link = 'http://www.paymentexpress.com/privacypolicy.htm';
-	
-	protected static $logo = 'payment/images/payments/dps.gif';
-	
-	// URLs
-	
-	protected static $url = 'https://www.paymentexpress.com/pxpost.aspx';
-	
-	// Payment Informations
-	
-	protected static $username;
-	
-	protected static $password;
-	
-	static function set_account($username, $password) {
-		self::$username = $username;
-		self::$password = $password;
-	}
-	
-	protected static $cvn_mode = true;
-	
-	static function unset_cvn_mode() {
-		self::$cvn_mode = false;
-	}
+	static $has_one = array(
+		//in case that TxnType is Complete, the DPSPayment could have one Auth DPSPayment
+		'AuthPayment' => 'DPSPayment',
 		
-	protected static $credit_cards = array(
-		'Visa' => 'payment/images/payments/methods/visa.jpg',
-		'MasterCard' => 'payment/images/payments/methods/mastercard.jpg',
-		'American Express' => 'payment/images/payments/methods/american-express.gif',
-		'Dinners Club' => 'payment/images/payments/methods/dinners-club.jpg',
-		'JCB' => 'payment/images/payments/methods/jcb.jpg'
+		//in case that TxnType is Refund, the DPSPayment could have one Refunded DPSPayment
+		'RefundedFor' => 'DPSPayment'
 	);
 	
-	static function remove_credit_card($creditCard) {
-		unset(self::$credit_cards[$creditCard]);
-	}
+	private static $input_elements = array(
+		'Amount',
+		'CardHolderName',
+		'CardNumber',
+		'BillingId',
+		'Cvc2',
+		'DateExpiry',
+		'DpsBillingId',
+		'DpsTxnRef',
+		'EnableAddBillCard',
+		'InputCurrency',
+		'MerchantReference',
+		'PostUsername',
+		'PostPassword',
+		'TxnType',
+		'TxnData1',
+		'TxnData2',
+		'TxnData3',
+		'TxnId',
+		'EnableAvsData',
+		'AvsAction',
+		'AvsPostCode',
+		'AvsStreetAddress',
+		'DateStart',
+		'IssueNumber',
+		'Track2',
+	);
+	
+	private static $dpshosted_input_elements = array(
+		'PxPayUserId',
+		'PxPayKey',
+		'AmountInput',
+		'CurrencyInput',
+		'EmailAddress',
+		'EnableAddBillCard',
+		'MerchantReference',
+		'TxnData1',
+		'TxnData2',
+		'TxnData3',
+		'TxnType',
+		'TxnId',
+		'UrlFail',
+		'UrlSuccess',
+	);
+	
+	protected static $testable_form = array(
+		"AuthForm" => "Authorising Payment Form",
+		"CompleteForm" => "Completing Payment Form",
+		"PurchaseForm" => "Direct Payment Form",
+		"RefundForm" => "Refund Payment Form",
+		"DPSHostedForm" => "DPS Hosted Payment Form",
+	);
+	
+	static $default_sort = "ID DESC";
 	
 	function getPaymentFormFields() {
-		$privacyLink = '<div class="dpsLogo">
-							<a href="' . self::$privacy_link . '" target="_blank" title="Read DPS\'s privacy policy">
-								<img src="' . self::$logo . '" alt="Credit card payments powered by DPS"/>
-							</a>
-						</div>';
-						
-		$paymentsList = '';
-		foreach(self::$credit_cards as $name => $image) $paymentsList .= '<img src="' . $image . '" alt="' . $name . '"/>';
-		
-		$fields = new FieldSet(
-			new LiteralField('DPSLogosContainer', '<div class="dpsLogoContainer">'),
-				new LiteralField('DPSInfo', $privacyLink),
-				new LiteralField('DPSPaymentsList', '<div class="dpsPaymentsList">' . $paymentsList . '</div>'),
-			new LiteralField('DPSLogosContainerClose', '</div>'),
-			new TextField('DPS_CreditCardHolderName', 'Credit Card Holder Name :'),
-			new CreditCardField('DPS_CreditCardNumber', 'Credit Card Number :'),
-			new TextField('DPS_CreditCardExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
-		);
-		if(self::$cvn_mode) $fields->push(new TextField('DPS_CreditCardCVN', 'Credit Card CVN : (3 or 4 digits)', '', 4));
-		return $fields;
+		$adapter = new DPSAdapter();
+		return $adapter->getPaymentFormFields();
 	}
 
 	/**
 	 * Returns the required fields to add to the order form, when using this payment method. 
 	 */
 	function getPaymentFormRequirements() {
-		$jsCode = <<<JS
-			require('DPS_CreditCardHolderName');
-			require('DPS_CreditCardNumber');
-			require('DPS_CreditCardExpiry');
-JS;
-		$phpCode = '
-			$this->requireField("DPS_CreditCardHolderName", $data);
-			$this->requireField("DPS_CreditCardNumber", $data);
-			$this->requireField("DPS_CreditCardExpiry", $data);
-		';
-		return array('js' => $jsCode, 'php' => $phpCode);
+		$adapter = new DPSAdapter();
+		return $adapter->getPaymentFormRequirements();
 	}
-		
+	
+	//This function is hooked with OrderForm/E-commerce at the moment, so we need to keep it as it is.
 	function processPayment($data, $form) {
-		
-		// 1) Main Settings
-		
-		$inputs['PostUsername'] = self::$username;
-		$inputs['PostPassword'] = self::$password;
-		
-		// 2) Payment Informations
-		
-		$inputs['Amount'] = $this->Amount;
-		$inputs['InputCurrency'] = $this->Currency;
+		$inputs['Amount'] = $this->Amount->Amount;
+		$inputs['InputCurrency'] = $this->Amount->Currency;
 		$inputs['TxnId'] = $this->ID;
 		$inputs['TxnType'] = 'Purchase';
 		
-		// 3) Credit Card Informations
+		$inputs['CardHolderName'] = $data['CardHolderName'];
+		$inputs['CardNumber'] = implode('', $data['CardNumber']);
+		$inputs['DateExpiry'] = $data['DateExpiry'];
+		if(self::$cvn_mode) $inputs['Cvc2'] = $data['Cvc2'] ? $data['Cvc2'] : '';
 		
-		$inputs['CardHolderName'] = $data['DPS_CreditCardHolderName'];
-		$inputs['CardNumber'] = implode('', $data['DPS_CreditCardNumber']);
-		$inputs['DateExpiry'] = $data['DPS_CreditCardExpiry'];
-		if(self::$cvn_mode) $inputs['Cvc2'] = $data['DPS_CreditCardCVN'] ? $data['DPS_CreditCardCVN'] : '';
-		
-		// 4) DPS Transaction Sending
-			
-  		$responseFields = $this->doPayment($inputs);
-		
-		// 5) DPS Response Management
-		
-		if($responseFields['SUCCESS']) {
-			$this->Status = 'Success';
+		$adapter = new DPSAdapter();
+		$responseFields = $adapter->doPayment($inputs);
+		$adapter->ProcessResponse($this, $responseFields);
+
+		if($this->Status == 'Success'){
 			$result = new Payment_Success();
-		}
-		else {
-			$this->Status = 'Failure';
+		} else {
 			$result = new Payment_Failure();
 		}
-		
-		if($transactionRef = $responseFields['DPSTXNREF']) $this->TxnRef = $transactionRef;
-		
-		if($helpText = $responseFields['HELPTEXT']) $this->Message = $helpText;
-		else if($responseText = $responseFields['RESPONSETEXT']) $this->Message = $responseText;
-		
-		$this->write();
+
 		return $result;
 	}
 	
-	function doPayment(array $inputs) {
-		
-		// 1) Transaction Creation
-		$transaction = "<Txn>";
-		foreach($inputs as $name => $value) {
-			if($name == "Amount") {
-				$value = number_format($value, 2, '.', '');
-			}
-			$transaction .= "<$name>$value</$name>";
-		}
-		$transaction .= "</Txn>";
-		
-		// 2) CURL Creation
-		
-		$clientURL = curl_init(); 
-		curl_setopt($clientURL, CURLOPT_URL, self::$url);
-		curl_setopt($clientURL, CURLOPT_POST, 1);
-		curl_setopt($clientURL, CURLOPT_POSTFIELDS, $transaction);
-		curl_setopt($clientURL, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
-		
-		// 3) CURL Execution
-		
-		$resultXml = curl_exec($clientURL); 
-		
-		// 4) CURL Closing
-		
-		curl_close ($clientURL);
-		
-		// 5) XML Parser Creation
-		
-		$xmlParser = xml_parser_create();
-		$values = null;
-		$indexes = null;
-		xml_parse_into_struct($xmlParser, $resultXml, $values, $indexes);
-		xml_parser_free($xmlParser);
-		
-		// 6) XML Result Parsed In A PHP Array
-		
-		$resultPhp = array();
-		$level = array();
-		foreach($values as $xmlElement) {
-			if($xmlElement['type'] == 'open') {
-				if(array_key_exists('attributes', $xmlElement)) list($level[$xmlElement['level']], $extra) = array_values($xmlElement['attributes']);
-				else $level[$xmlElement['level']] = $xmlElement['tag'];
-			}
-			else if ($xmlElement['type'] == 'complete') {
-				$startLevel = 1;
-				$phpArray = '$resultPhp';
-				while($startLevel < $xmlElement['level']) $phpArray .= '[$level['. $startLevel++ .']]';
-				$phpArray .= '[$xmlElement[\'tag\']] = array_key_exists(\'value\', $xmlElement)? $xmlElement[\'value\'] : null;';
-				eval($phpArray);
+	function getForm($formType){
+		$adapter = new DPSAdapter();
+		return $adapter->getFormByName($formType);
+	}
+	
+
+	function getTestableForms(){
+		return self::$testable_form;
+	}
+	
+	/**
+	 * called by a harness form submission
+	 */
+	function auth($data){
+		//processPayment
+		$adapter = new DPSAdapter();
+		$inputs = $this->prepareAuthInputs($data);
+		$adapter->doPayment($inputs, $this);
+	}
+	
+	private function prepareAuthInputs($data){
+		//never put this loop after $inputs['AmountInput'] = $this->Amount->Amount;, since it will change it to an array.
+		foreach($data as $element => $value){
+			if(in_array($element, self::$input_elements)){
+				$inputs[$element] = $value;
 			}
 		}
+		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnType'] = $this->TxnType;
+		$inputs['Amount'] = $this->Amount->Amount;
+		$inputs['InputCurrency'] = $this->Amount->Currency;
+		//special element
+		$inputs['CardNumber'] = implode('', $data['CardNumber']);
 		
-		$result = $resultPhp['TXN'];
+		return $inputs;
+	}
+	
+	function complete($data){
+		$adapter = new DPSAdapter();
+		$inputs = $this->prepareCompleteInputs($data);
+		$adapter->doPayment($inputs, $this);
+	}
+	
+	private function prepareCompleteInputs($data){
+		$auth = $this->AuthPayment();
+		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnType'] = $this->TxnType;
+		$inputs['Amount'] = $this->Amount->Amount;
+		$inputs['InputCurrency'] = $this->Amount->Currency;
+		$inputs['DpsTxnRef'] = $auth->TxnRef;
+		//$inputs['AuthCode'] = $auth->AuthCode;
+		return $inputs;
+	}
+	
+	function purchase($data){
+		$this->auth($data);
+	}
+	
+	function refund($data){
+		$adapter = new DPSAdapter();
+		$inputs = $this->prepareRefundInputs($data);
+		$adapter->doPayment($inputs, $this);
+	}
+	
+	private function prepareRefundInputs($data){	
+		$refundedFor = $this->RefundedFor();
+		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnType'] = $this->TxnType;
+		$inputs['Amount'] = $this->Amount->Amount;
+		$inputs['InputCurrency'] = $this->Amount->Currency;
+		$inputs['DpsTxnRef'] = $refundedFor->TxnRef;
+		return $inputs;
+	}
+	
+	function dpshostedPurchase($data){
+		$adapter = new DPSAdapter();
+		$inputs = $this->prepareDPSHostedRequest($data);
+		$adapter->doDPSHosedPayment($inputs, $this);
+	}
+	
+	private function prepareDPSHostedRequest($data){
+		//never put this loop after $inputs['AmountInput'] = $amount, since it will change it to an array.
+		foreach($data as $element => $value){
+			if(in_array($element, self::$dpshosted_input_elements)){
+				$inputs[$element] = $value;
+			}
+		}
 		
-		return $result;
+		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnType'] = $this->TxnType;
+		$amount = (float) ltrim($this->Amount->Amount, '$');
+		$inputs['AmountInput'] = $amount;
+		$inputs['InputCurrency'] = $this->Amount->Currency;
+		$inputs['MerchantReference'] = $this->MerchantReference;
+
+		$postProcess_url = Director::absoluteBaseURL() ."DPSAdapter/processDPSHostedResponse";
+		$inputs['UrlFail'] = $postProcess_url;
+		$inputs['UrlSuccess'] = $postProcess_url;
+		
+		return $inputs;
+	}
+	
+	function payAsRecurring() {
+		$adapter = new DPSAdapter();
+		$inputs = $this->prepareAsRecurringPaymentInputs();
+		$adapter->doPayment($inputs, $this);
+	}
+	
+	function prepareAsRecurringPaymentInputs(){
+		$reccurringPayment = DataObject::get_by_id('DPSRecurringPayment', $this->RecurringPaymentID);
+		$inputs['DpsBillingId'] = $reccurringPayment->DPSBillingID;
+		$inputs['TxnId'] = $reccurringPayment->ID;
+		$inputs['TxnType'] = $reccurringPayment->TxnType;
+		$amount = (float) ltrim($reccurringPayment->Amount->Amount, '$');
+		$inputs['AmountInput'] = $amount;
+		$inputs['InputCurrency'] = $reccurringPayment->Amount->Currency;
+		$inputs['MerchantReference'] = $reccurringPayment->MerchantReference;
+		
+		return $inputs;
+	}
+	
+	function CanComplete(){
+		$successComplete = $this->successCompletePayment();
+		return !($successComplete && $successComplete->ID);
+	}
+	
+	function successCompletePayment() {
+		return DataObject::get_one("DPSPayment", "\"Status\" = 'Success' AND \"TxnType\" = 'Complete' AND \"AuthPaymentID\" = '".$this->ID."'");
 	}
 }
 
