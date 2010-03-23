@@ -61,8 +61,8 @@ class DPSRecurringPayment extends RecurringPayment{
 	);
 
 	protected static $testable_form = array(
-		"DPSHostedRecurringForm" => "DPS Hosted Authorise Recurring Payment Form",
-		"MerchantHostedRecurringForm" => "Direct Authorise Recorring Payment Form",
+		"DPSHostedRecurringForm" => "DPS-hosted Recurring Payment Form",
+		"MerchantHostedRecurringForm" => "Merchant-hosted Recorring Payment Form",
 	);
 	
 	static $default_sort = "ID DESC";

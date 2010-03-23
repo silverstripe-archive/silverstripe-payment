@@ -76,9 +76,9 @@ class DPSPayment extends Payment {
 	protected static $testable_form = array(
 		"AuthForm" => "Authorising Payment Form",
 		"CompleteForm" => "Completing Payment Form",
-		"PurchaseForm" => "Direct Payment Form",
+		"PurchaseForm" => "Merchant-hosted Payment Form",
 		"RefundForm" => "Refund Payment Form",
-		"DPSHostedForm" => "DPS Hosted Payment Form",
+		"DPSHostedForm" => "DPS-hosted Payment Form",
 	);
 	
 	static $default_sort = "ID DESC";
