@@ -28,6 +28,9 @@ class Payment extends DataObject {
 		'ProxyIP' => 'Varchar',
 		'PaidForID' => "Int",
 		'PaidForClass' => 'Varchar',
+		
+		//This is used only when the payment is one of the recurring payemnts, when a scheduler is tring to 
+		//find which is the latest one for the recurring payments
 		'PaymentDate' => "Date"
 	);
 	

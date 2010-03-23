@@ -148,7 +148,9 @@ class TestHarness extends Page_Controller{
 	function doCompletePayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
+			$auth = $payment->AuthPayment();
 			$payment->TxnType = "Complete";
+			$payment->MerchantReference = "Complete: ".$auth->MerchantReference;
 			$payment->write();
 			
 			$payment->complete($data);
@@ -170,7 +172,9 @@ class TestHarness extends Page_Controller{
 	function doRefundPayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
+			$refunded = $payment->RefundedFor();
 			$payment->TxnType = "Refund";
+			$payment->MerchantReference = "Refund for: ".$refunded->MerchantReference;
 			$payment->write();
 			
 			$payment->refund($data);

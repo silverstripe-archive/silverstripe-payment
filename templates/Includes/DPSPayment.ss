@@ -9,7 +9,7 @@
 			<li>Currency: $Amount.Currency</li>
 			<li>AuthCode: $AuthCode</li>
 			<li>Message: $Message</li>
-			<li>Payment Date: $PaymentDate</li>
+			<% if PaymentDate %><li>Payment Date: $PaymentDate</li><% end_if %>
 		</ul>
 	<% end_control %>
 <% end_if %>
@@ -25,7 +25,7 @@
 			<li>Currency: $Amount.Currency</li>
 			<li>AuthCode: $AuthCode</li>
 			<li>Message: $Message</li>
-			<li>Payment Date: $PaymentDate</li>
+			<% if PaymentDate %><li>Payment Date: $PaymentDate</li><% end_if %>
 		</ul>A
 	<% end_control %>
 <% end_if %>
@@ -39,5 +39,5 @@
 	<li>Currency: $Amount.Currency</li>
 	<li>AuthCode: $AuthCode</li>
 	<li>Message: $Message</li>
-	<li>Payment Date: $PaymentDate</li>
+	<% if PaymentDate %><li>Payment Date: $PaymentDate</li><% end_if %>
 </ul>

@@ -10,6 +10,9 @@ class DPSRecurringPayment extends RecurringPayment{
 		'DPSHostedRedirectURL' => 'Text',
 		'DPSBillingID' => "Varchar(16)",
 		'AuthAmount' => 'Decimal',
+		
+		// We store the whole raw response xml in case that tracking back the payment is needed in a later stage for whatever the reason.
+		'ResponseXML' => "Text",
 	);
 	
 	private static $input_elements = array(

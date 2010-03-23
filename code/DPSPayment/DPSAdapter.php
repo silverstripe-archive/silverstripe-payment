@@ -420,6 +420,7 @@ JS;
 			$transaction .= "<$name>$value</$name>";
 		}
 		$transaction .= "</Txn>";
+		
 		// 2) CURL Creation
 		$clientURL = curl_init(); 
 		curl_setopt($clientURL, CURLOPT_URL, self::$pxPost_Url);
@@ -430,7 +431,8 @@ JS;
 		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
 		
 		// 3) CURL Execution
-		$resultXml = curl_exec($clientURL); 
+		$resultXml = curl_exec($clientURL);
+		$payment->ResponseXML = $resultXml;
 		// 4) CURL Closing
 		curl_close ($clientURL);
 
@@ -457,12 +459,10 @@ JS;
 				eval($phpArray);
 			}
 		}
-		$this->processResponse($payment, $resultPhp['TXN']);
-	}
+		
+		$responseFields = $resultPhp['TXN'];
 
-	//Parse XML response from eway and place them into an array
-	function processResponse($payment, $responseFields){
-		// 5) DPS Response Management
+		// 7) DPS Response Management
 		if($responseFields['SUCCESS']) {
 			$payment->Status = 'Success';
 			if($authcode = $responseFields['1']['AUTHCODE']) $payment->AuthCode = $authcode;
@@ -529,7 +529,9 @@ JS;
 			}else{
 				$payment = DataObject::get_by_id("DPSPayment", $SQL_paymentID);
 			}
+			
 			if($payment) {
+				$payment->ResponseXML = $rsp->toXml();
 				$success = $rsp->getSuccess();
 				if($success =='1'){
 					// @todo Use AmountSettlement for amount setting?

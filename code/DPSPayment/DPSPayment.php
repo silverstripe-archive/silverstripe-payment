@@ -12,7 +12,12 @@ class DPSPayment extends Payment {
 		'AuthCode' => 'Varchar(22)',
 		'MerchantReference' => 'Varchar(64)',
 		'DPSHostedRedirectURL' => 'Text',
-		'SettlementDate' => 'Date'
+		
+		// This field is stored for only when the payment is made thru merchant-hosted DPS gateway (PxPost);
+		'SettlementDate' => 'Date',
+		
+		// We store the whole raw response xml in case that tracking back the payment is needed in a later stage for whatever the reason.
+		'ResponseXML' => "Text",
 	);
 	
 	static $has_one = array(
