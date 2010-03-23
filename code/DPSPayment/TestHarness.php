@@ -4,7 +4,6 @@ class TestHarness extends Page_Controller{
 
 	function init(){
 		parent::init();
-		Requirements::javascript('payment/javascript/TestHarness.js');
 		Requirements::css('payment/css/TestHarness.css');
 	}
 	
