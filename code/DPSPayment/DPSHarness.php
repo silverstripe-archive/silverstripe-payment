@@ -1,16 +1,16 @@
 <?php
 
-class TestHarness extends Page_Controller{
+class DPSHarness extends Page_Controller{
 
 	function init(){
 		parent::init();
-		Requirements::css('payment/css/TestHarness.css');
+		Requirements::css('payment/css/DPSHarness.css');
 	}
 	
 	function show(){
-		$content = $this->renderWith("TestHarness");
+		$content = $this->renderWith("DPSHarness");
 		
-		$controller = new TestHarness();
+		$controller = new DPSHarness();
 		$controller->init();
 		
 		$customisedController = $controller->customise(array(

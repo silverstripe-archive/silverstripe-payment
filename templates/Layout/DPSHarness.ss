@@ -1,7 +1,7 @@
 <h2>$Title</h2>
 <br />
 <br />
-<div id="testharnessUI" class="typography">
+<div id="dpsharnessUI" class="typography">
 	<div class="harnesscontent" id="leftcontent">
 		<h3>Payment Methods</h3>
 		$LeftContent
