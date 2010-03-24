@@ -129,6 +129,10 @@ class DPSRecurringPayment extends RecurringPayment{
 		return $inputs;
 	}
 	
+	function HarnessPayNextLink(){
+		return 'harness/paynext/'.$this->ClassName."/".$this->ID;
+	}
+	
 	function payNext(){
 		if($next = $this->getNextPayment()){
 			$next->payAsRecurring();
@@ -142,6 +146,7 @@ class DPSRecurringPayment extends RecurringPayment{
 		$next->TxnType = 'Purchase';
 		$next->MerchantReference = $this->MerchantReference;
 		$next->write();
+		DB::getConn()->transactionSavepoint("NextPaymentGot");
 		return DataObject::get_by_id('DPSPayment', $next->ID);
 	}
 }

@@ -1,7 +1,6 @@
 <?php
 
 class DPSHarness extends Page_Controller{
-
 	function init(){
 		parent::init();
 		Requirements::css('payment/css/DPSHarness.css');
@@ -21,10 +20,23 @@ class DPSHarness extends Page_Controller{
 		return $customisedController->renderWith("Page");
 	}
 	
+	function handleError($payment, $e){
+		$payment->handleError($e);
+	}
+	
 	function paynext(){
+		DB::getConn()->startTransaction();
 		$payment = DataObject::get_by_id($this->URLParams['Class'], $this->URLParams['ID']);
-		$payment->paynext();
-		$this->showPayment($payment);
+		try{
+			$payment->paynext();
+			DB::getConn()->endTransaction();
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback('NextPaymentGot');
+			DB::getConn()->endTransaction();
+			$latestPayment = $payment->getLatestPayment($successonly = false);
+			$this->handleError($latestPayment, $e);
+		}
+		Director::redirectBack();
 	}
 	
 	function getTitle(){
@@ -91,10 +103,12 @@ class DPSHarness extends Page_Controller{
 			$payment = singleton($className);
 			$form = $payment->getForm($_GET['currentForm']);
 			$form -> setFormAction($this->FormActionLink("HarnessForm"));
-			return $form->forTemplate();
 		}else{
-			return "Click on a testable payment method that you want to test on";
+			$message = "Click on a testable payment method that you want to test on";
+			$form = new Form($this, 'HarnessForm', new FieldSet(), new FieldSet());
+			$form->sessionMessage($message, 'bad');
 		}
+		return $form->forTemplate();
 	}
 	
 	function HarnessForm(){
@@ -132,14 +146,20 @@ class DPSHarness extends Page_Controller{
 		}
 	}
 	
-	
 	function doAuthPayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			$payment->TxnType = "Auth";
-			$payment->write();
+			DB::getConn()->startTransaction();
+			try{
+				$payment->TxnType = "Auth";
+				$payment->write();
 			
-			$payment->auth($data);
+				$payment->auth($data);
+				DB::getConn()->endTransaction();
+			}catch(Exception $e){
+				DB::getConn()->transactionRollback();
+				$this->handleError($payment, $e);
+			}
 			$this->showPayment($payment);
 		}
 	}
@@ -147,12 +167,19 @@ class DPSHarness extends Page_Controller{
 	function doCompletePayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			$auth = $payment->AuthPayment();
-			$payment->TxnType = "Complete";
-			$payment->MerchantReference = "Complete: ".$auth->MerchantReference;
-			$payment->write();
+			DB::getConn()->startTransaction();
+			try{
+				$auth = $payment->AuthPayment();
+				$payment->TxnType = "Complete";
+				$payment->MerchantReference = "Complete: ".$auth->MerchantReference;
+				$payment->write();
 			
-			$payment->complete($data);
+				$payment->complete($data);
+				DB::getConn()->endTransaction();
+			}catch(Exception $e){
+				DB::getConn()->transactionRollback();
+				$this->handleError($payment, $e);
+			}
 			$this->showPayment($payment);
 		}
 	}
@@ -160,10 +187,17 @@ class DPSHarness extends Page_Controller{
 	function doPurchasePayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			$payment->TxnType = "Purchase";
-			$payment->write();
+			DB::getConn()->startTransaction();
+			try{
+				$payment->TxnType = "Purchase";
+				$payment->write();
 			
-			$payment->purchase($data);
+				$payment->purchase($data);
+				DB::getConn()->endTransaction();
+			}catch(Exception $e){
+				DB::getConn()->transactionRollback();
+				$this->handleError($payment, $e);
+			}
 			$this->showPayment($payment);
 		}
 	}
@@ -171,12 +205,19 @@ class DPSHarness extends Page_Controller{
 	function doRefundPayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			$refunded = $payment->RefundedFor();
-			$payment->TxnType = "Refund";
-			$payment->MerchantReference = "Refund for: ".$refunded->MerchantReference;
-			$payment->write();
-			
-			$payment->refund($data);
+			DB::getConn()->startTransaction();
+			try{
+				$refunded = $payment->RefundedFor();
+				$payment->TxnType = "Refund";
+				$payment->MerchantReference = "Refund for: ".$refunded->MerchantReference;
+				$payment->write();
+
+				$payment->refund($data);
+				DB::getConn()->endTransaction();
+			}catch(Exception $e){
+				DB::getConn()->transactionRollback();
+				$this->handleError($payment, $e);
+			}
 			$this->showPayment($payment);
 		}
 	}
@@ -184,41 +225,60 @@ class DPSHarness extends Page_Controller{
 	function doDPSHostedPayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			$payment->TxnType = "Purchase";
-			
-			$payment->write();
-			$query = "?currentMethod=".$_GET['currentMethod']."&currentForm=".$_GET['currentForm'];
-			$payment->DPSHostedRedirectURL = "harness/show/".$payment->ClassName."/".$payment->ID.$query;
-			$payment->write();
-			$payment->dpshostedPurchase($data);
+			DB::getConn()->startTransaction();
+			try{
+				$payment->TxnType = "Purchase";
+				$query = "?currentMethod=".$_GET['currentMethod']."&currentForm=".$_GET['currentForm'];
+				$payment->DPSHostedRedirectURL = "harness/show/".$payment->ClassName."/".$payment->ID.$query;
+				$payment->write();
+				$payment->dpshostedPurchase($data);
+			}catch(Exception $e){
+				DB::getConn()->transactionRollback();
+				$this->handleError($payment, $e);
+				$this->showPayment($payment);
+			}
 		}
 	}
 
 	function doDPSHostedRecurringPayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			$payment->TxnType = "Auth";
-			$payment->AuthAmount = 1.00;
-			
-			$payment->write();
-			$query = "?currentMethod=".$_GET['currentMethod']."&currentForm=".$_GET['currentForm'];
-			$payment->DPSHostedRedirectURL = "harness/show/".$payment->ClassName."/".$payment->ID.$query;
-			$payment->write();
-			$payment->recurringAuth($data);
-			$this->showPayment($payment);
+			DB::getConn()->startTransaction();
+			try{
+				$payment->TxnType = "Auth";
+				$payment->AuthAmount = 1.00;
+				$query = "?currentMethod=".$_GET['currentMethod']."&currentForm=".$_GET['currentForm'];
+				$payment->DPSHostedRedirectURL = "harness/show/".$payment->ClassName."/".$payment->ID.$query;
+				$payment->write();
+				$payment->recurringAuth($data);
+			}catch(Exception $e){
+				DB::getConn()->transactionRollback();
+				$this->handleError($payment, $e);
+				$this->showPayment($payment);
+			}
 		}
 	}
 	
 	function doMerchantHostedRecurringPayment($data, $form, $request){
-		$payment = $this->createPayment($data, $form, $request);
-		$payment->AuthAmount = 1.00;
-		
-		$payment->write();
-		$query = "?currentMethod=".$_GET['currentMethod']."&currentForm=".$_GET['currentForm'];
-		$payment->DPSHostedRedirectURL = "harness/show/".$payment->ClassName."/".$payment->ID.$query;
-		$payment->write();
-		$payment->merchantRecurringAuth($data);
-		$this->showPayment($payment);
+		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
+			$payment = $this->createPayment($data, $form, $request);
+			DB::getConn()->startTransaction();
+			try{
+				$payment->AuthAmount = 1.00;
+
+				$payment->write();
+				$query = "?currentMethod=".$_GET['currentMethod']."&currentForm=".$_GET['currentForm'];
+				$payment->DPSHostedRedirectURL = "harness/show/".$payment->ClassName."/".$payment->ID.$query;
+				$payment->write();
+				
+				$payment->merchantRecurringAuth($data);
+				DB::getConn()->endTransaction();
+			}catch(Exception $e){
+				DB::getConn()->transactionRollback();
+				$this->handleError($payment, $e);
+			}
+			$this->showPayment($payment);
+		}
 	}
 }
 ?>

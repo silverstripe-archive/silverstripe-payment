@@ -482,7 +482,6 @@ JS;
 	}
 	
 	function doDPSHosedPayment($inputs, $payment){
-		//Debug::show($inputs);
 		$request = new PxPayRequest();
 		foreach($inputs as $element => $value){
 			$funcName = 'set'.$element;
@@ -499,15 +498,16 @@ JS;
         $xml = new SimpleXMLElement($request_string);
         $urls = $xml->xpath('//URI');     
         $url = $urls[0].'';
+		DB::getConn()->endTransaction();
         header("Location: ".$url);
-        die;
+		die;
 	}
 	
 	function processDPSHostedResponse(){
 		if(preg_match('/^PXHOST/i', $_SERVER['HTTP_USER_AGENT'])){
 			$dpsDirectlyConnecting = 1;
 		}
-		
+	
 		$pxpay = new PxPay(self::$pxPay_Url, self::$pxPay_Userid, self::$pxPay_Key);
 
 		$enc_hex = $_REQUEST["result"];
@@ -529,20 +529,27 @@ JS;
 			}else{
 				$payment = DataObject::get_by_id("DPSPayment", $SQL_paymentID);
 			}
-			
+		
 			if($payment) {
-				$payment->ResponseXML = $rsp->toXml();
-				$success = $rsp->getSuccess();
-				if($success =='1'){
-					// @todo Use AmountSettlement for amount setting?
-					$payment->TxnRef = $rsp->getDpsTxnRef();
-					$payment->AuthCode = $rsp->getAuthCode();
-					$payment->Status="Success";
-				} else {
-					$payment->Status="Failure";
+				DB::getConn()->startTransaction();
+				try{
+					$payment->ResponseXML = $rsp->toXml();
+					$success = $rsp->getSuccess();
+					if($success =='1'){
+						// @todo Use AmountSettlement for amount setting?
+						$payment->TxnRef = $rsp->getDpsTxnRef();
+						$payment->AuthCode = $rsp->getAuthCode();
+						$payment->Status="Success";
+					} else {
+						$payment->Status="Failure";
+					}
+					$payment->Message=$rsp->getResponseText();
+					$payment->write();
+					DB::getConn()->endTransaction();
+				}catch(Exception $e){
+					DB::getConn()->transactionRollback();
+					$payment->handleError($e);
 				}
-				$payment->Message=$rsp->getResponseText();
-				$payment->write();
 				Director::redirect($payment->DPSHostedRedirectURL);
 			}
 		}

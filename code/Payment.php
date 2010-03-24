@@ -31,7 +31,10 @@ class Payment extends DataObject {
 		
 		//This is used only when the payment is one of the recurring payemnts, when a scheduler is tring to 
 		//find which is the latest one for the recurring payments
-		'PaymentDate' => "Date"
+		'PaymentDate' => "Date",
+		
+		//Usered for store any Exception during this payment Process.
+		'ExceptionError' => 'Text'
 	);
 	
 	public static $has_one = array(
@@ -247,6 +250,11 @@ class Payment extends DataObject {
 	function getForm($whichTest){
 		user_error("Please implement getForm() on $this->class", E_USER_ERROR);
 	}
+	
+	function handleError($e){
+		$this->ExceptionError = $e->getMessage();
+		$this->write();
+	}
 }
 abstract class Payment_Result {
 	
@@ -296,6 +304,5 @@ class Payment_Failure extends Payment_Result {
 	function isProcessing() {
 		return false;
 	}
-	
 }
 ?>

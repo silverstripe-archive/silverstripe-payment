@@ -36,3 +36,11 @@
 #dpsharnessUI ul{
 	margin: 0;
 }
+
+.exception.message {
+	margin: 0;
+	padding: 5px;
+	color: #979908;
+	border: 4px solid #F7F8B4;
+	background: #FFFFEA;
+}

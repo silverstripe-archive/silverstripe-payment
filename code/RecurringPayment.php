@@ -14,6 +14,9 @@ class RecurringPayment extends DataObject{
 		'Frequency' => "Enum('Weekly,Monthly,Yearly','Monthly')",
 		'StartingDate' => "Date",
 		'Times' => "Int",
+
+		//Usered for store any Exception during this payment Process.
+		'ExceptionError' => 'Text'
 	);
 	
 	static $has_many = array(
@@ -57,10 +60,6 @@ class RecurringPayment extends DataObject{
 		}
 	}
 	
-	function PayNextLink(){
-		return 'harness/paynext/'.$this->ClassName."/".$this->ID;
-	}
-	
 	function SuccessPayments(){
 		return DataObject::get("Payment", "\"RecurringPaymentID\" = '".$this->ID."' AND \"Status\" = 'Success'", "\"PaymentDate\" DESC");
 	}
@@ -73,8 +72,12 @@ class RecurringPayment extends DataObject{
 		}
 	}
 	
-	function getLatestPayment(){
-		return DataObject::get_one("Payment", "\"RecurringPaymentID\" = '".$this->ID."' AND \"Status\" = 'Success'", false, "\"PaymentDate\" DESC");
+	function getLatestPayment($successonly = true){
+		if($successonly){
+			return DataObject::get_one("Payment", "\"RecurringPaymentID\" = '".$this->ID."' AND \"Status\" = 'Success'", false, "\"PaymentDate\" DESC");
+		}else{
+			return DataObject::get_one("Payment", "\"RecurringPaymentID\" = '".$this->ID."'", false, "\"PaymentDate\" DESC, \"LastEdited\" DESC");
+		}
 	}
 	
 	function generateFirstPayment(){
@@ -107,6 +110,11 @@ class RecurringPayment extends DataObject{
 		$payment->Amount->Currency = $this->Amount->Currency;
 		$payment->write();
 		return $payment;
+	}
+	
+	function handleError($e){
+		$this->ExceptionError = $e->getMessage();
+		$this->write();
 	}
 }
 
