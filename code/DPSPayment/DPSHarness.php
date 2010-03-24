@@ -25,8 +25,8 @@ class DPSHarness extends Page_Controller{
 	}
 	
 	function paynext(){
-		DB::getConn()->startTransaction();
 		$payment = DataObject::get_by_id($this->URLParams['Class'], $this->URLParams['ID']);
+		DB::getConn()->startTransaction();
 		try{
 			$payment->paynext();
 			DB::getConn()->endTransaction();

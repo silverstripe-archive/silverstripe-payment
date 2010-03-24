@@ -80,6 +80,12 @@ class RecurringPayment extends DataObject{
 		}
 	}
 	
+	function payNext(){
+		if($next = $this->getNextPayment()){
+			$next->payAsRecurring();
+		}
+	}
+	
 	function generateFirstPayment(){
 		$payment = new Payment();
 		$payment->RecurringPaymentID = $this->ID;

@@ -133,12 +133,6 @@ class DPSRecurringPayment extends RecurringPayment{
 		return 'harness/paynext/'.$this->ClassName."/".$this->ID;
 	}
 	
-	function payNext(){
-		if($next = $this->getNextPayment()){
-			$next->payAsRecurring();
-		}
-	}
-	
 	function getNextPayment(){
 		$next = parent::getNextPayment();
 		$next->ClassName = 'DPSPayment';
