@@ -251,6 +251,10 @@ class Payment extends DataObject {
 		user_error("Please implement getForm() on $this->class", E_USER_ERROR);
 	}
 	
+	function payAsRecurring() {
+		user_error("Please implement payAsRecurring() on $this->class", E_USER_ERROR);
+	}
+	
 	function handleError($e){
 		$this->ExceptionError = $e->getMessage();
 		$this->write();
