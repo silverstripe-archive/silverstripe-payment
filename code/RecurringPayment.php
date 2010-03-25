@@ -66,10 +66,12 @@ class RecurringPayment extends DataObject{
 	
 	function getNextPayment(){
 		if($latest = $this->getLatestPayment()){
-			return $this->generateNextPaymentFrom($latest);
+			$next = $this->generateNextPaymentFrom($latest);
 		}else{
-			return $this->generateFirstPayment();
+			$next = $this->generateFirstPayment();
 		}
+		DB::getConn()->transactionSavepoint("NextPaymentGot");
+		return $next;
 	}
 	
 	function getLatestPayment($successonly = true){
@@ -81,8 +83,17 @@ class RecurringPayment extends DataObject{
 	}
 	
 	function payNext(){
-		if($next = $this->getNextPayment()){
-			$next->payAsRecurring();
+		DB::getConn()->startTransaction();
+		try{
+			if($next = $this->getNextPayment()){
+				$next->ddpayAsRecurring();
+			}
+			DB::getConn()->endTransaction();
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback('NextPaymentGot');
+			DB::getConn()->endTransaction();
+			$latestPayment = $this->getLatestPayment($successonly = false);
+			$latestPayment->handleError($e);
 		}
 	}
 	

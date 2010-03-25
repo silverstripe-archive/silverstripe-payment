@@ -77,9 +77,18 @@ class DPSRecurringPayment extends RecurringPayment{
 	}
 	
 	function recurringAuth($data){
-		$adapter = new DPSAdapter();
-		$inputs = $this->prepareDPSHostedRecurringAuthRequest($data);
-		$adapter->doDPSHosedPayment($inputs, $this);
+		DB::getConn()->startTransaction();
+		try{
+			$this->TxnType = "Auth";
+			$this->AuthAmount = 1.00;
+			$this->write();
+			$adapter = new DPSAdapter();
+			$inputs = $this->prepareDPSHostedRecurringAuthRequest($data);
+			$adapter->doDPSHosedPayment($inputs, $this);
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback();
+			$this->handleError($e);
+		}
 	}
 	
 	function prepareDPSHostedRecurringAuthRequest($data){
@@ -105,9 +114,19 @@ class DPSRecurringPayment extends RecurringPayment{
 	}
 	
 	function merchantRecurringAuth($data){
-		$adapter = new DPSAdapter();
-		$inputs = $this->prepareMerchantHostedRecurringAuthInputs($data);
-		$adapter->doPayment($inputs, $this);
+		DB::getConn()->startTransaction();
+		try{
+			$this->AuthAmount = 1.00;
+			$this->write();
+			
+			$adapter = new DPSAdapter();
+			$inputs = $this->prepareMerchantHostedRecurringAuthInputs($data);
+			$adapter->doPayment($inputs, $this);
+			DB::getConn()->endTransaction();
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback();
+			$this->handleError($e);
+		}
 	}
 	
 	function prepareMerchantHostedRecurringAuthInputs($data){
@@ -140,7 +159,6 @@ class DPSRecurringPayment extends RecurringPayment{
 		$next->TxnType = 'Purchase';
 		$next->MerchantReference = $this->MerchantReference;
 		$next->write();
-		DB::getConn()->transactionSavepoint("NextPaymentGot");
 		return DataObject::get_by_id('DPSPayment', $next->ID);
 	}
 }

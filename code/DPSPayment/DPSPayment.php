@@ -135,10 +135,19 @@ class DPSPayment extends Payment {
 	 * called by a harness form submission
 	 */
 	function auth($data){
-		//processPayment
-		$adapter = new DPSAdapter();
-		$inputs = $this->prepareAuthInputs($data);
-		$adapter->doPayment($inputs, $this);
+		DB::getConn()->startTransaction();
+		try{
+			$this->TxnType = "Auth";
+			$this->write();
+
+			$adapter = new DPSAdapter();
+			$inputs = $this->prepareAuthInputs($data);
+			$adapter->doPayment($inputs, $this);
+			DB::getConn()->endTransaction();
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback();
+			$this->handleError($e);
+		}
 	}
 	
 	private function prepareAuthInputs($data){
@@ -159,9 +168,21 @@ class DPSPayment extends Payment {
 	}
 	
 	function complete($data){
-		$adapter = new DPSAdapter();
-		$inputs = $this->prepareCompleteInputs($data);
-		$adapter->doPayment($inputs, $this);
+		DB::getConn()->startTransaction();
+		try{
+			$auth = $this->AuthPayment();
+			$this->TxnType = "Complete";
+			$this->MerchantReference = "Complete: ".$auth->MerchantReference;
+			$this->write();
+		
+			$adapter = new DPSAdapter();
+			$inputs = $this->prepareCompleteInputs($data);
+			$adapter->doPayment($inputs, $this);
+			DB::getConn()->endTransaction();
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback();
+			$this->handleError($e);
+		}
 	}
 	
 	private function prepareCompleteInputs($data){
@@ -176,13 +197,37 @@ class DPSPayment extends Payment {
 	}
 	
 	function purchase($data){
-		$this->auth($data);
+		DB::getConn()->startTransaction();
+		try{
+			$this->TxnType = "Purchase";
+			$this->write();
+		
+			$adapter = new DPSAdapter();
+			$inputs = $this->prepareAuthInputs($data);
+			$adapter->doPayment($inputs, $this);
+			DB::getConn()->endTransaction();
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback();
+			$this->handleError($e);
+		}
 	}
 	
 	function refund($data){
-		$adapter = new DPSAdapter();
-		$inputs = $this->prepareRefundInputs($data);
-		$adapter->doPayment($inputs, $this);
+		DB::getConn()->startTransaction();
+		try{
+			$refunded = $this->RefundedFor();
+			$this->TxnType = "Refund";
+			$this->MerchantReference = "Refund for: ".$refunded->MerchantReference;
+			$this->write();
+
+			$adapter = new DPSAdapter();
+			$inputs = $this->prepareRefundInputs($data);
+			$adapter->doPayment($inputs, $this);
+			DB::getConn()->endTransaction();
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback();
+			$this->handleError($e);
+		}
 	}
 	
 	private function prepareRefundInputs($data){	
@@ -196,9 +241,17 @@ class DPSPayment extends Payment {
 	}
 	
 	function dpshostedPurchase($data){
-		$adapter = new DPSAdapter();
-		$inputs = $this->prepareDPSHostedRequest($data);
-		$adapter->doDPSHosedPayment($inputs, $this);
+		DB::getConn()->startTransaction();
+		try{
+			$this->TxnType = "Purchase";
+			$this->write();
+			$adapter = new DPSAdapter();
+			$inputs = $this->prepareDPSHostedRequest($data);
+			$adapter->doDPSHosedPayment($inputs, $this);
+		}catch(Exception $e){
+			DB::getConn()->transactionRollback();
+			$this->handleError($e);
+		}
 	}
 	
 	private function prepareDPSHostedRequest($data){
