@@ -144,7 +144,7 @@ class DPSHarness extends Page_Controller{
 	function doCompletePayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			$payment->complete($data);
+			$payment->complete();
 			$this->showPayment($payment);
 		}
 	}
@@ -160,7 +160,7 @@ class DPSHarness extends Page_Controller{
 	function doRefundPayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			$payment->refund($data);
+			$payment->refund();
 			$this->showPayment($payment);
 		}
 	}

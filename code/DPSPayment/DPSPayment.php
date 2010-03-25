@@ -167,7 +167,7 @@ class DPSPayment extends Payment {
 		return $inputs;
 	}
 	
-	function complete($data){
+	function complete(){
 		DB::getConn()->startTransaction();
 		try{
 			$auth = $this->AuthPayment();
@@ -176,7 +176,7 @@ class DPSPayment extends Payment {
 			$this->write();
 		
 			$adapter = new DPSAdapter();
-			$inputs = $this->prepareCompleteInputs($data);
+			$inputs = $this->prepareCompleteInputs();
 			$adapter->doPayment($inputs, $this);
 			DB::getConn()->endTransaction();
 		}catch(Exception $e){
@@ -185,7 +185,7 @@ class DPSPayment extends Payment {
 		}
 	}
 	
-	private function prepareCompleteInputs($data){
+	private function prepareCompleteInputs(){
 		$auth = $this->AuthPayment();
 		$inputs['TxnId'] = $this->ID;
 		$inputs['TxnType'] = $this->TxnType;
@@ -212,7 +212,7 @@ class DPSPayment extends Payment {
 		}
 	}
 	
-	function refund($data){
+	function refund(){
 		DB::getConn()->startTransaction();
 		try{
 			$refunded = $this->RefundedFor();
@@ -221,7 +221,7 @@ class DPSPayment extends Payment {
 			$this->write();
 
 			$adapter = new DPSAdapter();
-			$inputs = $this->prepareRefundInputs($data);
+			$inputs = $this->prepareRefundInputs();
 			$adapter->doPayment($inputs, $this);
 			DB::getConn()->endTransaction();
 		}catch(Exception $e){
@@ -230,7 +230,7 @@ class DPSPayment extends Payment {
 		}
 	}
 	
-	private function prepareRefundInputs($data){	
+	private function prepareRefundInputs(){	
 		$refundedFor = $this->RefundedFor();
 		$inputs['TxnId'] = $this->ID;
 		$inputs['TxnType'] = $this->TxnType;

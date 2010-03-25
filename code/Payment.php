@@ -29,7 +29,7 @@ class Payment extends DataObject {
 		'PaidForID' => "Int",
 		'PaidForClass' => 'Varchar',
 		
-		//This is used only when the payment is one of the recurring payemnts, when a scheduler is tring to 
+		//This is used only when the payment is one of the recurring payments, when a scheduler is trying to 
 		//find which is the latest one for the recurring payments
 		'PaymentDate' => "Date",
 		
@@ -64,7 +64,7 @@ class Payment extends DataObject {
 	protected static $site_currency = 'USD';
 	
 	/**
-	 * the testable form of the payemnt method
+	 * the testable form of the payment method
 	 */
 	protected static $testable_form = array();
 	
