@@ -139,12 +139,11 @@ class DPSRecurringPayment extends RecurringPayment{
 		$inputs['TxnId'] = $this->ID;
 		$inputs['TxnType'] = 'Validate';
 		$inputs['EnableAddBillCard'] = 1;
-		$inputs['AmountInput'] = $this->AuthAmount;
+		$inputs['Amount'] = $this->AuthAmount;
 		$inputs['InputCurrency'] = $this->Amount->Currency;
 		$inputs['MerchantReference'] = $this->MerchantReference;
 		//special element
 		$inputs['CardNumber'] = implode('', $data['CardNumber']);
-		
 		return $inputs;
 	}
 	

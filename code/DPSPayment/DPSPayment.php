@@ -288,7 +288,7 @@ class DPSPayment extends Payment {
 		$inputs['TxnId'] = $reccurringPayment->ID;
 		$inputs['TxnType'] = $reccurringPayment->TxnType;
 		$amount = (float) ltrim($reccurringPayment->Amount->Amount, '$');
-		$inputs['AmountInput'] = $amount;
+		$inputs['Amount'] = $amount;
 		$inputs['InputCurrency'] = $reccurringPayment->Amount->Currency;
 		$inputs['MerchantReference'] = $reccurringPayment->MerchantReference;
 		
