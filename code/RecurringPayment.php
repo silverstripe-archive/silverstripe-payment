@@ -86,7 +86,7 @@ class RecurringPayment extends DataObject{
 		DB::getConn()->startTransaction();
 		try{
 			if($next = $this->getNextPayment()){
-				$next->ddpayAsRecurring();
+				$next->payAsRecurring();
 			}
 			DB::getConn()->endTransaction();
 		}catch(Exception $e){
@@ -110,13 +110,13 @@ class RecurringPayment extends DataObject{
 	function generateNextPaymentFrom($latest){
 		switch ($this->Frequency){
 			case 'Weekly':
-				$date = strftime(strtotime('+1 week', strtotime($latest->PaymentDate)));
+				$date = date('Y-m-d', strtotime('+1 week', strtotime($latest->PaymentDate)));
 				break;
 			case 'Monthly':
-				$date = strftime(strtotime('+1 month', strtotime($latest->PaymentDate)));
+				$date = date('Y-m-d', strtotime('+1 month', strtotime($latest->PaymentDate)));
 				break;
 			case 'Yearly':
-				$date = strftime(strtotime('+1 year', strtotime($latest->PaymentDate)));
+				$date = date('Y-m-d', strtotime('+1 year', strtotime($latest->PaymentDate)));
 				break;
 		}
 		
