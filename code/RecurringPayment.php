@@ -53,7 +53,7 @@ class RecurringPayment extends DataObject{
 	}
 	
 	function CanPayNext(){
-		$success = $this->Status = 'Success'
+		$success = $this->Status = 'Success';
 		if($this->Times && $successPayments = $this->SuccessPayments()){			
 			return $success && $this->Times > $successPayments->count();
 		}else{
