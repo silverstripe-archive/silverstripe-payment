@@ -5,7 +5,6 @@
 <ul>
 	<li>Status: $Status</li>
 	<% if TxnRef %><li>TxnRef: $TxnRef</li><% end_if %>
-	<li>Type: $TxnType</li>
 	<li>Amount: $Amount.Amount</li>
 	<li>Currency: $Amount.Currency</li>
 	<% if DPSBillingID %><li>DPSBillingID: $DPSBillingID</li><% end_if %>
