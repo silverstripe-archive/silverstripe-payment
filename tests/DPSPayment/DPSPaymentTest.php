@@ -209,12 +209,23 @@ class DPSPaymentTest extends SapphireTest{
 	}
 	
 	function testRecurringDPSPayment(){
-		$payment = $this->createARecurringPayment('NZD', '1.00');
+		$payment = $this->createARecurringPayment('NZD', '100.00');
 		$payment->Frequency = 'Monthly';
 		$payment->StartingDate = date('Y-m-d');
 		$payment->Times = 100;
 		$payment->merchantRecurringAuth(self::get_right_cc_data());
-		Debug::show($payment);
+		$this->assertEquals($payment->Status, 'Success');
+		$this->assertContains('Transaction Approved', $payment->Message);
+		
+		for($i=0;$i<3;$i++){
+			$payment->payNext();
+			
+			$date = date('Y-m-d', strtotime("+$i months"));
+			$next = $payment->getLatestPayment();
+			$this->assertEquals($next->Status, 'Success');
+			$this->assertContains('Transaction Approved', $next->Message);
+			$this->assertEquals($next->PaymentDate, $date);
+		}
 	}
 }
 
