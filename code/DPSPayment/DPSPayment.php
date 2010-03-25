@@ -297,7 +297,7 @@ class DPSPayment extends Payment {
 	
 	function CanComplete(){
 		$successComplete = $this->successCompletePayment();
-		return !($successComplete && $successComplete->ID);
+		return !($successComplete && $successComplete->ID) && $this->TxnType == 'Auth' && $this->Status = 'Success';
 	}
 	
 	function successCompletePayment() {
