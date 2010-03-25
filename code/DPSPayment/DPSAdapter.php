@@ -10,14 +10,14 @@ class DPSAdapter extends Controller{
 	protected static $pxPay_Key;
 	// DPS Informations
 	
-	protected static $privacy_link = 'http://www.paymentexpress.com/privacypolicy.htm';
+	public static $privacy_link = 'http://www.paymentexpress.com/privacypolicy.htm';
 	
-	protected static $logo = 'payment/images/payments/dps.gif';
+	public static $logo = 'payment/images/payments/dps.gif';
 	
 	// URLs
 	
-	protected static $pxPost_Url = 'https://www.paymentexpress.com/pxpost.aspx';
-	protected static $pxPay_Url = 'https://www.paymentexpress.com/pxpay/pxaccess.aspx';
+	public static $pxPost_Url = 'https://www.paymentexpress.com/pxpost.aspx';
+	public static $pxPay_Url = 'https://www.paymentexpress.com/pxpay/pxaccess.aspx';
 	
 	protected static $allowed_currencies = array(
 		'CAD'=>'Canadian Dollar',
@@ -494,14 +494,18 @@ JS;
 		$request_string = $pxpay->makeRequest($request);
 		$response = new MifMessage($request_string);
 		$valid = $response->get_attribute("valid");
-		
-		// MifMessage was clobbering ampersands on some environments; SimpleXMLElement is more robust
-        $xml = new SimpleXMLElement($request_string);
-        $urls = $xml->xpath('//URI');     
-        $url = $urls[0].'';
-		DB::getConn()->endTransaction();
-        header("Location: ".$url);
-		die;
+		if($valid){
+			// MifMessage was clobbering ampersands on some environments; SimpleXMLElement is more robust
+	        $xml = new SimpleXMLElement($request_string);
+	        $urls = $xml->xpath('//URI');     
+	        $url = $urls[0].'';
+			DB::getConn()->endTransaction();
+	        header("Location: ".$url);
+			die;
+		}else{
+			$payment->Message = "Invalid Request String";
+			$payment->write();
+		}
 	}
 	
 	function processDPSHostedResponse(){
