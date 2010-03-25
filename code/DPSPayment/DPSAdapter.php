@@ -471,7 +471,6 @@ JS;
 			$dateSettlement = $responseFields['1']['DATESETTLEMENT'];
 			$payment->SettlementDate = substr($dateSettlement, 0, 4) ."-".substr($dateSettlement, 4, 2)."-".substr($dateSettlement, 6, 2);
 			$payment->Amount->Currency = $responseFields['1']['INPUTCURRENCYNAME'];
-			$payment->Amount->Amount = $responseFields['1']['AMOUNT'];
 		}
 		else {
 			$payment->Status = 'Failure';
