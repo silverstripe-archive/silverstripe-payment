@@ -243,7 +243,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		$this->assertContains("https://www.paymentexpress.com/pxpay/pxpay.aspx?userid=", $url);
 	}
 	
-	/*function testErrorHandling(){
+	function testErrorHandling(){
 		$purchase = $this->createAPayment('NZD', '100.00');
 		DPSAdapter::set_mode('Error_Handling_Mode');
 		$purchase->purchase(self::get_right_cc_data());
@@ -276,7 +276,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		
 		$this->assertEquals($payment->Payments()->count(), 3);
 		$this->assertEquals($payment->SuccessPayments()->count(), 2);
-	}*/
+	}
 }
 
 ?>

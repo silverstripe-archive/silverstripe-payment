@@ -512,10 +512,10 @@ JS;
 	        $xml = new SimpleXMLElement($request_string);
 	        $urls = $xml->xpath('//URI');     
 	        $url = $urls[0].'';
+			DB::getConn()->endTransaction();
 			if(self::$mode == "Unit_Test_Only"){
 				return $url;
 			}else{
-				DB::getConn()->endTransaction();
 		        header("Location: ".$url);
 				die;
 			}
