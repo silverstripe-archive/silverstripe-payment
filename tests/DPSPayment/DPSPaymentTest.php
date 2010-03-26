@@ -1,6 +1,6 @@
 <?php
 
-class DPSPaymentTest extends SapphireTest{
+class DPSPaymentTest extends SapphireTest implements TestOnly{
 	static $right_cc_data = array(
 		'CardHolderName' => 'SilverStripe Tester',
 		'CardNumber' => array(
@@ -135,6 +135,12 @@ class DPSPaymentTest extends SapphireTest{
 		$purchase->purchase(self::get_expired_cc_data());
 		$this->assertEquals($purchase->Status, 'Failure');
 		$this->assertContains('Card Expired', $purchase->Message);
+		
+		DPSAdapter::set_pxpost_account(DPSPOST_USERNAME, 'wrongpass');
+		$purchase->purchase(self::get_right_cc_data());
+		$this->assertEquals($purchase->Status, 'Failure');
+		$this->assertContains('The transaction was Declined', $purchase->Message);
+		DPSAdapter::set_pxpost_account(DPSPOST_USERNAME, DPSPOST_PASSWORD);
 	}
 	
 	function testRefundSeccess(){
@@ -213,6 +219,7 @@ class DPSPaymentTest extends SapphireTest{
 		$payment->Frequency = 'Monthly';
 		$payment->StartingDate = date('Y-m-d');
 		$payment->Times = 100;
+		$payment->write();
 		$payment->merchantRecurringAuth(self::get_right_cc_data());
 		$this->assertEquals($payment->Status, 'Success');
 		$this->assertContains('Transaction Approved', $payment->Message);
@@ -227,6 +234,49 @@ class DPSPaymentTest extends SapphireTest{
 			$this->assertEquals($next->PaymentDate, $date);
 		}
 	}
+	
+	function testDPShostedPurchase(){
+		$purchase = $this->createAPayment('NZD', '100.00');
+		DPSAdapter::set_mode('Unit_Test_Only');
+		$url = $purchase->dpshostedPurchase(array());
+		DPSAdapter::set_mode('Normal');
+		$this->assertContains("https://www.paymentexpress.com/pxpay/pxpay.aspx?userid=", $url);
+	}
+	
+	/*function testErrorHandling(){
+		$purchase = $this->createAPayment('NZD', '100.00');
+		DPSAdapter::set_mode('Error_Handling_Mode');
+		$purchase->purchase(self::get_right_cc_data());
+		DPSAdapter::set_mode('Normal');
+		
+		$purchase = DataObject::get_by_id('DPSPayment', $purchase->ID);
+		$this->assertEquals('Incomplete', $purchase->Status);
+		$this->assertContains("'tsixe_dluoc_reven_taht_noitcnuf_a_function_that_never_could_exist' does not exist", $purchase->ExceptionError);
+	}
+	
+	function testDBTransaction(){
+		$payment = $this->createARecurringPayment('NZD', '100.00');
+		$payment->Frequency = 'Monthly';
+		$payment->StartingDate = date('Y-m-d');
+		$payment->Times = 100;
+		$payment->write();
+		$payment->merchantRecurringAuth(self::get_right_cc_data());
+		
+		DPSAdapter::set_mode('Rolling_Back_Mode');
+		$payment->payNext();
+		DPSAdapter::set_mode('Normal');
+		
+		DPSAdapter::set_mode('Error_Handling_Mode');
+		$payment->payNext();
+		DPSAdapter::set_mode('Normal');
+		
+		for($i=0;$i<2;$i++){
+			$payment->payNext();
+		}
+		
+		$this->assertEquals($payment->Payments()->count(), 3);
+		$this->assertEquals($payment->SuccessPayments()->count(), 2);
+	}*/
 }
 
 ?>

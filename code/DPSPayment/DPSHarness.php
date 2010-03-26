@@ -179,7 +179,6 @@ class DPSHarness extends Page_Controller{
 	function doDPSHostedRecurringPayment($data, $form, $request){
 		if(isset($_GET['currentMethod']) && $_GET['currentMethod'] && isset($_GET['currentForm']) && $formname = $_GET['currentForm']) {
 			$payment = $this->createPayment($data, $form, $request);
-			DB::getConn()->startTransaction();
 			$query = "?currentMethod=".$_GET['currentMethod']."&currentForm=".$_GET['currentForm'];
 			$payment->DPSHostedRedirectURL = "harness/show/".$payment->ClassName."/".$payment->ID.$query;
 			$payment->write();

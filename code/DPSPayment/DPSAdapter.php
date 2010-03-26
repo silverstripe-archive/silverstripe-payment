@@ -8,6 +8,7 @@ class DPSAdapter extends Controller{
 	protected static $pxPost_Password;
 	protected static $pxPay_Userid;
 	protected static $pxPay_Key;
+	private static $mode = 'Normal';
 	// DPS Informations
 	
 	public static $privacy_link = 'http://www.paymentexpress.com/privacypolicy.htm';
@@ -68,6 +69,10 @@ class DPSAdapter extends Controller{
 	
 	static function unset_cvn_mode() {
 		self::$cvn_mode = false;
+	}
+	
+	static function set_mode($mode){
+		self::$mode = $mode;
 	}
 	
 	function getBasicBrandFields(){
@@ -405,6 +410,9 @@ JS;
 	
 	//Payment Function
 	function doPayment($inputs, $payment) {
+		if(self::$mode === 'Error_Handling_Mode'){
+			$this->tsixe_dluoc_reven_taht_noitcnuf_a_function_that_never_could_exist();
+		}
 		// 1) Main Settings
 		//$inputs = array();
 		$inputs['PostUsername'] = self::$pxPost_Username;
@@ -431,6 +439,7 @@ JS;
 		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
 		
 		// 3) CURL Execution
+		
 		$resultXml = curl_exec($clientURL);
 		$payment->ResponseXML = $resultXml;
 		// 4) CURL Closing
@@ -480,6 +489,10 @@ JS;
 		else if($responseText = $responseFields['RESPONSETEXT']) $payment->Message = $responseText;
 
 		$payment->write();
+		
+		if(self::$mode === 'Rolling_Back_Mode'){
+			DB::getConn()->transactionRollback();
+		}
 	}
 	
 	function doDPSHosedPayment($inputs, $payment){
@@ -499,9 +512,13 @@ JS;
 	        $xml = new SimpleXMLElement($request_string);
 	        $urls = $xml->xpath('//URI');     
 	        $url = $urls[0].'';
-			DB::getConn()->endTransaction();
-	        header("Location: ".$url);
-			die;
+			if(self::$mode == "Unit_Test_Only"){
+				return $url;
+			}else{
+				DB::getConn()->endTransaction();
+		        header("Location: ".$url);
+				die;
+			}
 		}else{
 			$payment->Message = "Invalid Request String";
 			$payment->write();

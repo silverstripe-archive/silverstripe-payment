@@ -247,7 +247,7 @@ class DPSPayment extends Payment {
 			$this->write();
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareDPSHostedRequest($data);
-			$adapter->doDPSHosedPayment($inputs, $this);
+			return $adapter->doDPSHosedPayment($inputs, $this);
 		}catch(Exception $e){
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
