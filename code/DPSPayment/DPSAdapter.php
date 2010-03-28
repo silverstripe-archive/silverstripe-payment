@@ -162,7 +162,7 @@ JS;
 
 		$validator = new CustomRequiredFields($customised);
 		$actions = new FieldSet(
-			new FormAction('doAuthPayment', "Sumbit")
+			new FormAction('doAuthPayment', "Submit")
 		);
 		$form = new Form(Controller::curr(), 'AuthForm', $fields, $actions, $validator);
 		return $form;
@@ -176,7 +176,7 @@ JS;
 
 		$validator = new CustomRequiredFields($customised);
 		$actions = new FieldSet(
-			new FormAction('doCompletePayment', "Sumbit")
+			new FormAction('doCompletePayment', "Submit")
 		);
 		$form = new Form(Controller::curr(), 'CompleteForm', $fields, $actions, $validator);
 		return $form;
@@ -190,7 +190,7 @@ JS;
 
 		$validator = new CustomRequiredFields($customised);
 		$actions = new FieldSet(
-			new FormAction('doPurchasePayment', "Sumbit")
+			new FormAction('doPurchasePayment', "Submit")
 		);
 		$form = new Form(Controller::curr(), 'PurchaseForm', $fields, $actions, $validator);
 		return $form;
@@ -204,7 +204,7 @@ JS;
 
 		$validator = new CustomRequiredFields($customised);
 		$actions = new FieldSet(
-			new FormAction('doRefundPayment', "Sumbit")
+			new FormAction('doRefundPayment', "Submit")
 		);
 		$form = new Form(Controller::curr(), 'RefundForm', $fields, $actions, $validator);
 		return $form;
@@ -218,7 +218,7 @@ JS;
 
 		$validator = new CustomRequiredFields($customised);
 		$actions = new FieldSet(
-			new FormAction('doDPSHostedPayment', "Sumbit")
+			new FormAction('doDPSHostedPayment', "Submit")
 		);
 		$form = new Form(Controller::curr(), 'DPSHostedForm', $fields, $actions, $validator);
 		return $form;
@@ -242,7 +242,7 @@ JS;
 
 		$validator = new CustomRequiredFields($customised);
 		$actions = new FieldSet(
-			new FormAction('doDPSHostedRecurringPayment', "Sumbit")
+			new FormAction('doDPSHostedRecurringPayment', "Submit")
 		);
 		$form = new Form(Controller::curr(), 'DPSHostedRecurringForm', $fields, $actions, $validator);
 		return $form;
@@ -266,7 +266,7 @@ JS;
 
 		$validator = new CustomRequiredFields($customised);
 		$actions = new FieldSet(
-			new FormAction('doMerchantHostedRecurringPayment', "Sumbit")
+			new FormAction('doMerchantHostedRecurringPayment', "Submit")
 		);
 		$form = new Form(Controller::curr(), 'MerchantHostedRecurringForm', $fields, $actions, $validator);
 		return $form;
