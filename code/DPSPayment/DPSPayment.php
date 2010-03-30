@@ -318,10 +318,12 @@ class DPSPayment extends Payment {
 		$member = $this->PaidBy();
 		if($member->exists() && $member->Email){
 			$from = DPSAdapter::get_receipt_from();
-			$body =  $this->renderWith($this->ClassName."_receipt");
-			$body .= $member->ReceiptMessage();
-			$email = new Email($from, $member->Email, "Payment receipt (Ref no. #".$this->ID.")", $body);
-			$email->send();
+			if($from){
+				$body =  $this->renderWith($this->ClassName."_receipt");
+				$body .= $member->ReceiptMessage();
+				$email = new Email($from, $member->Email, "Payment receipt (Ref no. #".$this->ID.")", $body);
+				$email->send();
+			}
 		}
 	}
 }
