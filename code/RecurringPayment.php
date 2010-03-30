@@ -19,6 +19,10 @@ class RecurringPayment extends DataObject{
 		'ExceptionError' => 'Text'
 	);
 	
+	static $has_one = array(
+		'PaidBy' => 'Member'
+	);
+	
 	static $has_many = array(
 		'Payments' => "Payment"
 	);

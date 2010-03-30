@@ -38,7 +38,8 @@ class Payment extends DataObject {
 	);
 	
 	public static $has_one = array(
-		'RecurringPayment' => 'RecurringPayment'
+		'RecurringPayment' => 'RecurringPayment',
+		'PaidBy' => 'Member',
 	);
 	
 	/**
@@ -259,6 +260,10 @@ class Payment extends DataObject {
 		$this->ExceptionError = $e->getMessage();
 		$this->write();
 	}
+	
+	function PaidObject(){
+		return DataObject::get_by_id($this->PaidForClass, $this->PaidForID);
+	}	
 }
 abstract class Payment_Result {
 	

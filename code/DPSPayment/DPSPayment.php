@@ -100,7 +100,7 @@ class DPSPayment extends Payment {
 	function processPayment($data, $form) {
 		$inputs['Amount'] = $this->Amount->Amount;
 		$inputs['InputCurrency'] = $this->Amount->Currency;
-		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = 'Purchase';
 		
 		$inputs['CardHolderName'] = $data['CardHolderName'];
@@ -157,7 +157,7 @@ class DPSPayment extends Payment {
 				$inputs[$element] = $value;
 			}
 		}
-		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = $this->TxnType;
 		$inputs['Amount'] = $this->Amount->Amount;
 		$inputs['InputCurrency'] = $this->Amount->Currency;
@@ -187,7 +187,7 @@ class DPSPayment extends Payment {
 	
 	private function prepareCompleteInputs(){
 		$auth = $this->AuthPayment();
-		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = $this->TxnType;
 		$inputs['Amount'] = $this->Amount->Amount;
 		$inputs['InputCurrency'] = $this->Amount->Currency;
@@ -232,7 +232,7 @@ class DPSPayment extends Payment {
 	
 	private function prepareRefundInputs(){	
 		$refundedFor = $this->RefundedFor();
-		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = $this->TxnType;
 		$inputs['Amount'] = $this->Amount->Amount;
 		$inputs['InputCurrency'] = $this->Amount->Currency;
@@ -263,7 +263,7 @@ class DPSPayment extends Payment {
 			}
 		}
 		
-		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = $this->TxnType;
 		$amount = (float) ltrim($this->Amount->Amount, '$');
 		$inputs['AmountInput'] = $amount;
@@ -286,8 +286,8 @@ class DPSPayment extends Payment {
 	function prepareAsRecurringPaymentInputs(){
 		$reccurringPayment = DataObject::get_by_id('DPSRecurringPayment', $this->RecurringPaymentID);
 		$inputs['DpsBillingId'] = $reccurringPayment->DPSBillingID;
-		$inputs['TxnId'] = $reccurringPayment->ID;
-		$inputs['TxnType'] = $reccurringPayment->TxnType;
+		$inputs['TxnData1'] = $this->ID;
+		$inputs['TxnType'] = 'Purchase';
 		$amount = (float) ltrim($reccurringPayment->Amount->Amount, '$');
 		$inputs['Amount'] = $amount;
 		$inputs['InputCurrency'] = $reccurringPayment->Amount->Currency;
@@ -303,6 +303,26 @@ class DPSPayment extends Payment {
 	
 	function successCompletePayment() {
 		return DataObject::get_one("DPSPayment", "\"Status\" = 'Success' AND \"TxnType\" = 'Complete' AND \"AuthPaymentID\" = '".$this->ID."'");
+	}
+	
+	
+	function onAfterWrite(){
+		$this->sendReceipt();
+		if($this->isChanged('Status') && $this->Status == 'Success'){
+			$this->sendReceipt();
+		}
+		parent::onAfterWrite();
+	}
+	
+	function sendReceipt(){
+		$member = $this->PaidBy();
+		if($member->exists() && $member->Email){
+			$from = DPSAdapter::get_receipt_from();
+			$body =  $this->renderWith($this->ClassName."_receipt");
+			$body .= $member->ReceiptMessage();
+			$email = new Email($from, $member->Email, "Payment receipt (Ref no. #".$this->ID.")", $body);
+			$email->send();
+		}
 	}
 }
 

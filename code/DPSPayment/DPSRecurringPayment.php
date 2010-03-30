@@ -99,7 +99,7 @@ class DPSRecurringPayment extends RecurringPayment{
 			}
 		}
 		
-		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = 'Auth';
 		$inputs['EnableAddBillCard'] = 1;
 		$inputs['AmountInput'] = $this->AuthAmount;
@@ -136,7 +136,7 @@ class DPSRecurringPayment extends RecurringPayment{
 				$inputs[$element] = $value;
 			}
 		}
-		$inputs['TxnId'] = $this->ID;
+		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = 'Validate';
 		$inputs['EnableAddBillCard'] = 1;
 		$inputs['Amount'] = $this->AuthAmount;

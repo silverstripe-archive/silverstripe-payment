@@ -9,6 +9,7 @@ class DPSAdapter extends Controller{
 	protected static $pxPay_Userid;
 	protected static $pxPay_Key;
 	private static $mode = 'Normal';
+	private static $receipt_from;
 	// DPS Informations
 	
 	public static $privacy_link = 'http://www.paymentexpress.com/privacypolicy.htm';
@@ -20,7 +21,7 @@ class DPSAdapter extends Controller{
 	public static $pxPost_Url = 'https://www.paymentexpress.com/pxpost.aspx';
 	public static $pxPay_Url = 'https://www.paymentexpress.com/pxpay/pxaccess.aspx';
 	
-	protected static $allowed_currencies = array(
+	public static $allowed_currencies = array(
 		'CAD'=>'Canadian Dollar',
 		'CHF'=>'Swiss Franc',
 		'EUR'=>'Euro',
@@ -65,6 +66,14 @@ class DPSAdapter extends Controller{
 	
 	static function remove_credit_card($creditCard) {
 		unset(self::$credit_cards[$creditCard]);
+	}
+	
+	static function set_receipt_from($address){
+		self::$receipt_from = $address;
+	}
+	
+	static function get_receipt_from(){
+		return self::$receipt_from;
 	}
 	
 	static function unset_cvn_mode() {
@@ -121,7 +130,7 @@ JS;
 		$fields = new FieldSet(
 			new EmailField("EmailAddress", "Email Address (optional)<br /><span class=\"helptxt\">Optional email address field. Will be returned to origin site for emailing of receipts etc.</span>"),
 			new TextField("MerchantReference", "Merchant Reference (optional)<br /><span class=\"helptxt\">Optional Reference to Appear on Transaction Reports Max 64 Characters</span>"),
-			new TextField("TxnData1", "Txn Data 1 (optional)<br /><span class=\"helptxt\">Optional free text</span>"),
+			//new TextField("TxnData1", "Txn Data 1 (optional)<br /><span class=\"helptxt\">Optional free text</span>"),
 			new TextField("TxnData2", "Txn Data 2 (optional)<br /><span class=\"helptxt\">Optional free text</span>"),
 			new TextField("TxnData3", "Txn Data 3 (optional)<br /><span class=\"helptxt\">Optional free text</span>")		
 		);
@@ -542,7 +551,7 @@ JS;
 			echo ($success =='1') ? "success" : "failure";
 		} else {
 			// Human visitor
-			$paymentID = $rsp->getMerchantTxnId();
+			$paymentID = $rsp->getTxnData1();
 			$SQL_paymentID = (int)$paymentID;
 
 			if($dpsBillingID = $rsp->getDpsBillingId()){
