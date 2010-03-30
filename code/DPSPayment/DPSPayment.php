@@ -307,7 +307,6 @@ class DPSPayment extends Payment {
 	
 	
 	function onAfterWrite(){
-		$this->sendReceipt();
 		if($this->isChanged('Status') && $this->Status == 'Success'){
 			$this->sendReceipt();
 		}
