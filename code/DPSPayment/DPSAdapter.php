@@ -504,7 +504,7 @@ JS;
 		}
 	}
 	
-	function doDPSHosedPayment($inputs, $payment){
+	function doDPSHostedPayment($inputs, $payment){
 		$request = new PxPayRequest();
 		foreach($inputs as $element => $value){
 			$funcName = 'set'.$element;

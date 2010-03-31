@@ -84,7 +84,7 @@ class DPSRecurringPayment extends RecurringPayment{
 			$this->write();
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareDPSHostedRecurringAuthRequest($data);
-			$adapter->doDPSHosedPayment($inputs, $this);
+			$adapter->doDPSHostedPayment($inputs, $this);
 		}catch(Exception $e){
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
