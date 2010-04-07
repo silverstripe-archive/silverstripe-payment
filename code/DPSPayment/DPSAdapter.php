@@ -179,15 +179,23 @@ JS;
 	
 	function CompleteForm(){
 		$fields =$this->getCompleteFormFields();
-		$requires = $this->getCompleteFormRequirements();
-		$customised = array();
-		$customised[] = $requires;
+		if($fields){
+			$requires = $this->getCompleteFormRequirements();
+			$customised = array();
+			$customised[] = $requires;
 
-		$validator = new CustomRequiredFields($customised);
-		$actions = new FieldSet(
-			new FormAction('doCompletePayment', "Submit")
-		);
-		$form = new Form(Controller::curr(), 'CompleteForm', $fields, $actions, $validator);
+			$validator = new CustomRequiredFields($customised);
+			$actions = new FieldSet(
+				new FormAction('doCompletePayment', "Submit")
+			);
+			$form = new Form(Controller::curr(), 'CompleteForm', $fields, $actions, $validator);
+
+		}else{
+			$fields = new FieldSet(
+				new LiteralField("NoAuth", 'Sorry, there is no successful authorised payment in the system. To complete a payment, you need to authorise a payment first.')
+			);
+			$form = new Form(Controller::curr(), 'CompleteForm', $fields, new FieldSet());
+		}
 		return $form;
 	}
 	
@@ -207,15 +215,21 @@ JS;
 	
 	function RefundForm(){
 		$fields =$this->getRefundFormFields();
-		$requires = $this->getRefundFormRequirements();
-		$customised = array();
-		$customised[] = $requires;
+		if($fields){
+			$requires = $this->getRefundFormRequirements();
+			$customised = array();
+			$customised[] = $requires;
 
-		$validator = new CustomRequiredFields($customised);
-		$actions = new FieldSet(
-			new FormAction('doRefundPayment', "Submit")
-		);
-		$form = new Form(Controller::curr(), 'RefundForm', $fields, $actions, $validator);
+			$validator = new CustomRequiredFields($customised);
+			$actions = new FieldSet(
+				new FormAction('doRefundPayment', "Submit")
+			);
+			$form = new Form(Controller::curr(), 'RefundForm', $fields, $actions, $validator);
+		}else{
+			$fields = new FieldSet(
+				new LiteralField('NeitherCompleteNorPurchase', "Sorry, there is no successful purchased/completed payment in the system. To refund a payment, you need to purchase/complete a payment first."));
+			$form = new Form(Controller::curr(), 'RefundForm', $fields, new FieldSet());
+		}
 		return $form;
 	}
 	
@@ -321,15 +335,15 @@ JS;
 					$auth->MatchTitle = $auth->TxnType . " Payment #".$auth->ID." (" .$auth->Amount->Currency." ".$auth->Amount->Amount.")";
 				}
 			}
+		
+			$fields = new FieldSet(
+				new DropdownField("AuthPaymentID", "Authorised Payments", $successAuths->map('ID', 'MatchTitle', "Select one Authorised Payment to Complete")),
+				$money = new MoneyField("Amount", "Complete Amoun / Currency")
+			);
+		
+			$money->allowedCurrencies = self::$allowed_currencies;
+			return $fields;
 		}
-		
-		$fields = new FieldSet(
-			new DropdownField("AuthPaymentID", "Authorised Payments", $successAuths->map('ID', 'MatchTitle', "Select one Authorised Payment to Complete")),
-			$money = new MoneyField("Amount", "Complete Amoun / Currency")
-		);
-		
-		$money->allowedCurrencies = self::$allowed_currencies;
-		return $fields;
 	}
 
 	private function getCompleteFormRequirements(){
@@ -350,15 +364,15 @@ JS;
 			foreach($refundables as $refundable){
 				$refundable->MatchTitle = $refundable->TxnType . " Payment #".$refundable->ID." (" .$refundable->Amount->Currency." ".$refundable->Amount->Amount.")";
 			}
+		
+			$fields = new FieldSet(
+				new DropdownField("RefundedForID", "Authorised Payments", $refundables->map('ID', 'MatchTitle', "Select one Refundable Payment to Refund")),
+				$money = new MoneyField("Amount", "Refund Amoun / Currency")
+			);
+		
+			$money->allowedCurrencies = self::$allowed_currencies;
+			return $fields;
 		}
-		
-		$fields = new FieldSet(
-			new DropdownField("RefundedForID", "Authorised Payments", $refundables->map('ID', 'MatchTitle', "Select one Refundable Payment to Refund")),
-			$money = new MoneyField("Amount", "Refund Amoun / Currency")
-		);
-		
-		$money->allowedCurrencies = self::$allowed_currencies;
-		return $fields;
 	}
 	
 	private function getRefundFormRequirements(){
