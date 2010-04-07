@@ -7,6 +7,9 @@
 	<% if TxnRef %><li>TxnRef: $TxnRef</li><% end_if %>
 	<li>Amount: $Amount.Amount</li>
 	<li>Currency: $Amount.Currency</li>
+	<li>How often? $Frequency</li>
+	<li>Start Date: $StartingDate.Nice</li>
+	<li>How many recurring times: $Times</li>
 	<% if DPSBillingID %><li>DPSBillingID: $DPSBillingID</li><% end_if %>
 	<% if AuthCode %><li>AuthCode: $AuthCode</li><% end_if %>
 	<% if Message %><li>Message: $Message</li><% end_if %>

@@ -391,7 +391,7 @@ JS;
 		$fields = $this->getBasicBrandFields();
 		$businessDataFields = $this->getBusinessDataFields();
 		$merchantReferenceFields = $businessDataFields->dataFieldByName('MerchantReference');
-		$merchantReferenceFields -> setTitle("Merchant Reference<br /><span class=\"helptxt\">Optional Reference to Appear on Transaction Reports Max 64 Characters</span>");
+		$merchantReferenceFields -> setTitle("Merchant Reference<br /><span class=\"helptxt\">Required Reference to Appear on Transaction Reports Max 64 Characters</span>");
 		foreach($businessDataFields as $businessDataField){
 			$fields->push($businessDataField);
 		}
@@ -412,10 +412,11 @@ JS;
 	private function getRecurringInfoFields(){
 		$fields = new FieldSet(
 			new DropdownField('Frequency', "Frequency", array(""=>"Select your payment frequency", 'Weekly'=>'Weekly', 'Monthly'=>'Monthly', 'Yearly'=>'Yearly')),
-			$stardingDate = new DateField("StartingDate", "Starting Date"),
+			$stardingDate = new DateField("StartingDate", "Starting Date (dd/mm/yyyy)"),
 			new NumericField("Times", "Recurring Times (if leave it blank, the payment will be set to pay without limitation of recurring counts)")
 		);
-		$stardingDate->setConfig('dmyfields', true);
+		//$stardingDate->setConfig('showcalendar', true);
+		$stardingDate->setConfig('dateformat', 'dd/MM/yyyy');
 		return $fields;
 	}
 	
