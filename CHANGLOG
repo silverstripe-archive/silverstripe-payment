@@ -1,0 +1,82 @@
+== 0.3 Changelog ==
+
+=== Features and Enhancements ===
+ * [101741] add more unit tests
+ * [101740] add more unit tests
+ * [101728] add validation check of $request_string when using DPS hosted
+ * [101712] make DPSPayment::canComplete() more strict.
+ * [101712] make !RecurringPayment::canPayNext() more strict.
+ * [101708] add more Unit Tests for DPSPayment
+ * [101677] UT added.
+ * [101676] update DPSPayment->Amount->Currency for a Refunding payment could change the required Currency to its !RefundedFor payment Currency.
+ * [101642] move DB transaction manipulation form harness to DPSPayment and DPSRecurringPayment.
+ * [101639] DB Transaction manipulation need to trigger from business logic level, add the db transaction manipulation in DPSHarness as code example. (SC #2)
+ * [101639] error handling: exception are captured by try-catch block and the exception message can be saved into Payment !ExceptionError field, this way Payment dataobject could refered back for its exception, but business process is hardly broken. (SC #16)
+ * [101575] rename !TestHarness to DPSHarness
+ * [101558] re-orgnase the file structure, remove unnecessary file
+ * [101557] re-orgnase the file structure, remove unnecessary file
+ * [101408] add !RecurringPayment and DPSRecurringPayment, make DPS payment method capable of recurring payment.
+ * [101408] use Money as db field type to replace Amount and Currency, for multiple currency support.
+ * [101408] add DPSHostedRedirectURL to DPSPayment and DPSRecurringPayment, so that after a dps hosted payment response has been handled, the user could be redirect to the place where the process has been triggered in the first place.
+ * [101408] all transaction types have been captured: Auth, Complete, Purchase, Refund, Validate. Recurring payment is occurred as the combination of "Auth" or "Validate" with recurring Purchases.
+
+
+=== API Changes ===
+ * [101408] add !TestHarness class as DPSPayment development tool, add DPSAdapter as DPSPayment API to DPS getway and dealing with return the right form for right Transaction type.
+ * [101408] integrate DPSHostedPayment into DPSPayment, let DPSAdapter to deal with DPS-hosted or Merchant-hosted.
+
+
+=== Bugfixes ===
+ * [102169] RecurringPayment !StartingDate field is set to be "dd/mm/yyyy".
+ * [102166] deal with the bug of trying to display complete form or refund form when there is no success auth payment or success purchase payment.
+ * [101943] disable DB::!TransationRollback() bit testing when not using PostgreSQL. BUGFIX: alway get next payment date from last payment date, rather than starting date + n months
+ * [101874] remove unnecessary call of sendReceipt().
+ * [101857] if DPSAdapter is not set $receipt_from, don't try to send receipt email
+ * [101843] using !TxnData1 to pass thru the paymentID, cos !TxnId need to be Unique across different sites if they using the same DPS account
+ * [101741] DPSAdapter need to DB::getConn()->endTransaction(); before return url in Unit_Test_Mode in doDPSHostedPayment()
+ * [101721] missing ";"
+ * [101705] correct the populating of a next payment !PaymentDate for recurring payment
+ * [101704] we never rewrite the payment Amount from the Response, since for !RecurringPayment, that response Amount is always 1 (because we send the request with amount of 1:00 !AuthAmount)
+ * [101702] when make a DPS Payment using PXPost, Amount is tagged as <Amount> rather than <!AmountInput>
+ * [101641] move payNext() from DPSRecurringPayment to !RecurringPayment.
+ * [101641] add payAsRecurring() in Payment though it is an indicator to show that subclass of current payment object need to implement its own payAsRecurring().
+ * [101640] start db transaction after getting the recurring payment
+ * [101640] move payNext() from DPSRecurringPayment to !RecurringPayment.
+ * [101640] add payAsRecurring() in Payment though it is an indicator to show that subclass of current payment object need to implement its own payAsRecurring().
+ * [101564] remove required !TestHarness.js which has been removed.
+ * [101408] the account settings for both DPS hosted or merchant hosted are both handled by DPSAdapter.
+
+== 0.2 Changelog ==
+
+
+=== Features and Enhancements ===
+ * [99549] tidied up the html output of dps fields to allow easier and more flexible styling
+ * [85466] replaced curl-based request with native PHP-base HTTP request to paystation, after a libcurl issue was causing problems connecting to them. http://curl.haxx.se/docs/sslcerts.html.
+ * [85456] Added Paystation as a payment option using direct payment, rather than hosted. This is an initial version, not fully integrated against paystations live API yet.
+ * [77215] Now order process is transactional
+
+
+=== API Changes ===
+ * [80061] Removed $subtotal argument to Payment::combined_form_fields() that is no longer used
+ * [75272] Removed Payment::findPaymentMethod() - Use !PaymentMethod() instead
+ * [74581] Moved Eway.js from ecommerce to payment module
+ * [74578] Moved Eway payments to payments module
+
+
+=== Bugfixes ===
+ * [91301] PayPalPayment broken due to its !AuthorizationCode is not populated from the first place - the code has been missing during version merging
+ * [80063] If !CheckoutPage class doesn't exist in !ChequePayment, don't give a fatal error because !CheckoutPage is specific to the ecommerce module
+ * [77314] fixed dps with 4 figure numbers
+ * [76950] fixed DPS payment so that amount is always passed as double
+ * [74680] If javascript is disabled, !PayPalForm() is still usable, because the input for submitting will be available always
+ * [74679] Fixed undefined index error if the array key doesn't exist on the XML response from DPS
+ * [74678] Convert the value for the value attribute in a paypal form using Convert::raw2att() instead of Convert::raw2xml()
+ * [74677] Fixed location of paystation images
+ * [74676] Fixed location of paypal image
+ * [74673] Fixed location of DPS image
+ * [74616] Fixed references to images
+ * [74605] Added re-write rules from ecommerce module that wasn't moved across
+ * [74582] Fixed references to payment instead of ecommerce
+ * [74576] Updated references to images and javascript
+ * [74575] Fixed references from "ecommerce" to "payment"
+ * [74575] Include jQuery properly, using the jQuery from the jsparty directory instead of a broken reference to ecommerce
