@@ -4,11 +4,18 @@ Payment Module
 
 Maintainer Contact
 -----------------------------------------------
-Sean Harvey (Nickname: sharvey, halkyon)
+Normann LOU (Nickname: nlou, cooldaddy)
+<normann (at) silverstripe (dot) com>
+
+Sean HARVEY (Nickname: sharvey, halkyon)
 <sean (at) silverstripe (dot) com>
 
 Requirements
 -----------------------------------------------
-This module is generally used with ecommerce, but
-can be also used to add payment capabilities to
-forms on your SilverStripe site.
+This module is a stand-alone module, only dependent with SilverStripe core.
+One of its common applications is to be used in E-commerce module. But in general,
+it can be hook-up with any data object as long as this data object is payable,
+such as a downloadable mp3, a E-book, booking a ticket on-line, donation, etc.
+
+payment-test module, which is dependent on this module, shows how our payment module is
+generic enough to be used to pay any kind of payable object.
