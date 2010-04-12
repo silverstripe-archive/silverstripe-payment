@@ -11,11 +11,48 @@ Sean HARVEY (Nickname: sharvey, halkyon)
 <sean (at) silverstripe (dot) com>
 
 Requirements
+SilverStripe 2.4
+
+Features:
+1.	Merchant-hosted DPSPayment supports all its payment types:
+	- Auth
+	- Complete
+	- Purchase
+	- Refund
+	- Validate
+2.	DPS-hosted DPSPayment supports all its payment types:
+	- Auth
+	- Purchase
+3.	Applying Auth/Validate and Purchase payment types, we could have recurring DPSPayment.
+4.	DPSHarness as an DPS development tool is added with all Forms according to different
+	payment types. Demo of DPSHarness can be find here:
+	http://demo.silverstripe.com/harness
+5.	DPS-hosted and Merchant-hosted DPS payments are combined into one class - DPSPayment.
+6.	Separated DPS API and DPSPayment object - DPSAdapter
+
+Configuration:
+A project using this module needs to set its PDS account in project _config.php file,
+-	If using DPS-hosted payment gateway (pxpost), set PXPost account:
+	DPSAdapter::set_pxpost_account($your_pxpost_username, $your_pxpost_password);
+-	If using Merchant-hosted payment geteway (pxpay), set PXPay account:
+	DPSAdapter::set_pxpay_account($your_pxpay_userid, $your_pxpay_key);
+-	If using both gateways, you need to set both above. This is very likely when using
+	DPS-hosted to Auth a Credit Card and using Merchant-hosted to recursively pay.
+
 -----------------------------------------------
-This module is a stand-alone module, only dependent with SilverStripe core.
+This module is a stand-alone module, it is only dependent on SilverStripe core.
+We have re-factored DPSPayment and make DPSPayment and previous DPSHostedPayment into one
+payment object, the only difference between the two is they call different functions when 
+making a transaction.
+
 One of its common applications is to be used in E-commerce module. But in general,
-it can be hook-up with any data object as long as this data object is payable,
+it should be hook-up with any data object as long as this data object is payable,
 such as a downloadable mp3, a E-book, booking a ticket on-line, donation, etc.
+DPSPayment has been re-implemented in this way, though we need to check all other payment
+methods in future releases.
+
+We recommend you use PostgreSQL for project that use this module and DPS payment method,
+since we had made the manipulation of database of DPSpayment transactional when using PostgreSQL.
 
 payment-test module, which is dependent on this module, shows how our payment module is
 generic enough to be used to pay any kind of payable object.
