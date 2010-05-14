@@ -55,7 +55,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		return $payment;
 	}
 	
-	/*function testAuthSuccess(){
+	function testAuthSuccess(){
 		$payment = $this->createAPayment('NZD', '1.00');
 		
 		$payment->auth(self::get_right_cc_data());
@@ -237,7 +237,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		}
 	}
 	
-	/*function testDPShostedPurchase(){
+	function testDPShostedPurchase(){
 		$purchase = $this->createAPayment('NZD', '100.00');
 		DPSAdapter::set_mode('Unit_Test_Only');
 		$url = $purchase->dpshostedPurchase(array());
@@ -254,8 +254,9 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		$purchase = DataObject::get_by_id('DPSPayment', $purchase->ID);
 		$this->assertEquals('Incomplete', $purchase->Status);
 		$this->assertContains("'tsixe_dluoc_reven_taht_noitcnuf_a_function_that_never_could_exist' does not exist", $purchase->ExceptionError);
-	}*/
+	}
 	
+	//ToDo: the test case is broken if using PostgreSQL.
 	function testDBTransaction(){
 		$payment = $this->createARecurringPayment('NZD', '100.00');
 		$payment->Frequency = 'Monthly';
