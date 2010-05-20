@@ -264,7 +264,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		$payment->write();
 		$payment->merchantRecurringAuth(self::get_right_cc_data());
 		
-		if(defined('SS_DATABASE_CLASS') && SS_DATABASE_CLASS == 'PostgreSQLDatabase'){		
+		if(DB::getConn() instanceof PostgreSQLDatabase){		
 			DPSAdapter::set_mode('Rolling_Back_Mode');
 			$payment->payNext();
 			DPSAdapter::set_mode('Normal');
