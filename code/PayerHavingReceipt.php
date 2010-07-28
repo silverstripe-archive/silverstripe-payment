@@ -1,6 +1,6 @@
 <?php
 
-class ProductBuyer extends DataObjectDecorator{
+class PayerHavingReceipt extends DataObjectDecorator{
 	function extraStatics(){
 		return array(
 			'db' => array(
@@ -13,7 +13,7 @@ class ProductBuyer extends DataObjectDecorator{
 	}
 	
 	function ReceiptMessage(){
-		return $this->owner->renderWith('ProductBuyer_receipt');
+		return $this->owner->renderWith('Payer_receipt');
 	}
 }
 ?>
