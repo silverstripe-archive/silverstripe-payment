@@ -103,7 +103,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		return $payment;
 	}
 	
-	/*function testAuthSuccess(){
+	function testAuthSuccess(){
 		if(self::get_runnable()){
 			$payment = $this->createAPayment('NZD', '1.00');
 		
@@ -307,7 +307,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		}
 	}
 	
-	/*function testDPShostedPurchase(){
+	function testDPShostedPurchase(){
 		if(self::get_runnable()){
 			$purchase = $this->createAPayment('NZD', '100.00');
 			DPSAdapter::set_mode('Unit_Test_Only');
@@ -328,7 +328,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 			$this->assertEquals('Incomplete', $purchase->Status);
 			$this->assertContains("'tsixe_dluoc_reven_taht_noitcnuf_a_function_that_never_could_exist' does not exist", $purchase->ExceptionError);
 		}
-	}*/
+	}
 	
 	function testDBTransaction(){
 		if(self::get_runnable()){
