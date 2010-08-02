@@ -64,6 +64,22 @@ class DPSAdapter extends Controller{
 		self::$pxPay_Key = $pxPay_Key;
 	}
 	
+	static function get_pxpost_username(){
+		return self::$pxPost_Username;
+	}
+	
+	static function get_pxpost_password(){
+		return self::$pxPost_Password;
+	}
+	
+	static function get_pxpay_userid(){
+		return self::$pxPay_Userid;
+	}
+	
+	static function get_pxpay_key(){
+		return self::$pxPay_Key;
+	}
+	
 	static function remove_credit_card($creditCard) {
 		unset(self::$credit_cards[$creditCard]);
 	}
@@ -430,6 +446,30 @@ JS;
 			$this->requireField("StartingDate", $data);
 		';
 		return $required;
+	}
+	
+	static function postConnect(){
+		$inputs['PostUsername'] = self::$pxPost_Username;
+		$inputs['PostPassword'] = self::$pxPost_Password;
+		$transaction = "<Txn>";
+		foreach($inputs as $name => $value) {
+			$transaction .= "<$name>$value</$name>";
+		}
+		$transaction .= "</Txn>";
+		// 2) CURL Creation
+		$clientURL = curl_init(); 
+		curl_setopt($clientURL, CURLOPT_URL, self::$pxPost_Url);
+		curl_setopt($clientURL, CURLOPT_POST, 1);
+		curl_setopt($clientURL, CURLOPT_POSTFIELDS, $transaction);
+		curl_setopt($clientURL, CURLOPT_RETURNTRANSFER, 1);
+		//curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0); //Needs to be included if no *.crt is available to verify SSL certificates
+		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
+		
+		// 3) CURL Execution
+		
+		$resultXml = curl_exec($clientURL);
+		$match = preg_match('/^\<Txn\>(.*)\<\/Txn\>$/i', $resultXml, $matches);
+		return $match;
 	}
 	
 	//Payment Function
