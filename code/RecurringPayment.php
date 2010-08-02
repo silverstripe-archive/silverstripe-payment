@@ -69,6 +69,10 @@ class RecurringPayment extends DataObject{
 		return DataObject::get("Payment", "\"RecurringPaymentID\" = '".$this->ID."' AND \"Status\" = 'Success'", "\"PaymentDate\" DESC");
 	}
 	
+	function Payments(){
+		return DataObject::get("Payment", "\"RecurringPaymentID\" = '".$this->ID."'");
+	}
+	
 	function getNextPayment(){
 		if($latest = $this->getLatestPayment()){
 			$next = $this->generateNextPaymentFrom($latest);
