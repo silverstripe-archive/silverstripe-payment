@@ -1,15 +1,19 @@
 <?php
 
-class DPSHarness extends Page_Controller{
+class Harness extends Page_Controller{
+	static $stand_alone_payments = array(
+		'DPSPayment', "DPSRecurringPayment", "PayPalPayment"
+	);
+	
 	function init(){
 		parent::init();
-		Requirements::css('payment/css/DPSHarness.css');
+		Requirements::css('payment/css/Harness.css');
 	}
 	
 	function show(){
-		$content = $this->renderWith("DPSHarness");
+		$content = $this->renderWith("Harness");
 		
-		$controller = new DPSHarness();
+		$controller = new Harness();
 		$controller->init();
 		
 		$customisedController = $controller->customise(array(
@@ -44,7 +48,7 @@ class DPSHarness extends Page_Controller{
 	
 	function LeftContent(){
 		// get all Payment subclasses
-		$payments = array('DPSPayment', "DPSRecurringPayment");
+		$payments = self::$stand_alone_payments;
 
 		// $payment[0] is the Payment base class, so need to shift
 
