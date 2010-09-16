@@ -136,6 +136,19 @@ class PayPalPayment extends Payment {
 
 		return new Payment_Processing($form);
 	}
+	
+	protected static $testable_form = array(
+		'PayPalForm' => 'Payment Form'
+	);
+	
+	function getTestableForms(){
+		return self::$testable_form;
+	}
+	
+	function getForm($formName){
+		$adapter = new PayPalAdapter();
+		return $adapter->getFormByName($formName);
+	}
 
 	function PayPalForm() {
 		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
