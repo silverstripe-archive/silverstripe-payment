@@ -464,7 +464,12 @@ JS;
 		curl_setopt($clientURL, CURLOPT_RETURNTRANSFER, 1);
 		//curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0); //Needs to be included if no *.crt is available to verify SSL certificates
 		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
-		
+		if(defined('CAINFO')) {
+			curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 1);
+			curl_setopt($clientURL, CURLOPT_CAINFO, CAINFO);
+		}else{
+			curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0);
+		}
 		// 3) CURL Execution
 		
 		$resultXml = curl_exec($clientURL);
@@ -501,7 +506,12 @@ JS;
 		curl_setopt($clientURL, CURLOPT_RETURNTRANSFER, 1);
 		//curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0); //Needs to be included if no *.crt is available to verify SSL certificates
 		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
-		
+		if(defined('CAINFO')) {
+			curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 1);
+			curl_setopt($clientURL, CURLOPT_CAINFO, CAINFO);
+		}else{
+			curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0);
+		}
 		// 3) CURL Execution
 		
 		$resultXml = curl_exec($clientURL);

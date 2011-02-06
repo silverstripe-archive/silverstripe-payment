@@ -13,14 +13,14 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		'CardNumber' => array(
 			'4111','1111','1111','1111'
 		),
-		'Cvc2' => '1111',
+		'Cvc2' => '123',
 	);
 	static $wrong_cc_data = array(
 		'CardHolderName' => 'SilverStripe Tester',
 		'CardNumber' => array(
 			'1234','5678','9012','3456'
 		),
-		'Cvc2' => '1111',
+		'Cvc2' => '123',
 	);
 	
 	static function get_right_cc_data(){
@@ -36,6 +36,9 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 	static function get_expired_cc_data(){
 		$data = self::$right_cc_data;
 		$data['DateExpiry'] = date('my', strtotime('-1 year'));
+		$data['CardNumber'] = array(
+			'9999','9900','0000','0402'
+		);
 		return $data;
 	}
 	function setUp(){
@@ -358,11 +361,6 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 			$this->assertEquals($payment->Payments()->count(), 3);
 			$this->assertEquals($payment->SuccessPayments()->count(), 2);
 		}
-
-		$this->assertType('DataObjectSet', $payment->Payments());
-		$this->assertEquals($payment->Payments()->count(), 3);
-		$this->assertType('DataObjectSet', $payment->SuccessPayments());
-		$this->assertEquals($payment->SuccessPayments()->count(), 2);
 	}
 }
 
