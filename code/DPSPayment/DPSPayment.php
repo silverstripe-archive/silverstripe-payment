@@ -135,7 +135,7 @@ class DPSPayment extends Payment {
 	 * called by a harness form submission
 	 */
 	function auth($data){
-		DB::getConn()->startTransaction();
+		DB::getConn()->transactionStart();
 		try{
 			$this->TxnType = "Auth";
 			$this->write();
@@ -143,7 +143,7 @@ class DPSPayment extends Payment {
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareAuthInputs($data);
 			$adapter->doPayment($inputs, $this);
-			DB::getConn()->endTransaction();
+			DB::getConn()->transactionEnd();
 		}catch(Exception $e){
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
@@ -168,7 +168,7 @@ class DPSPayment extends Payment {
 	}
 	
 	function complete(){
-		DB::getConn()->startTransaction();
+		DB::getConn()->transactionStart();
 		try{
 			$auth = $this->AuthPayment();
 			$this->TxnType = "Complete";
@@ -178,7 +178,7 @@ class DPSPayment extends Payment {
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareCompleteInputs();
 			$adapter->doPayment($inputs, $this);
-			DB::getConn()->endTransaction();
+			DB::getConn()->transactionEnd();
 		}catch(Exception $e){
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
@@ -197,7 +197,7 @@ class DPSPayment extends Payment {
 	}
 	
 	function purchase($data){
-		DB::getConn()->startTransaction();
+		DB::getConn()->transactionStart();
 		try{
 			$this->TxnType = "Purchase";
 			$this->write();
@@ -205,7 +205,7 @@ class DPSPayment extends Payment {
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareAuthInputs($data);
 			$adapter->doPayment($inputs, $this);
-			DB::getConn()->endTransaction();
+			DB::getConn()->transactionEnd();
 		}catch(Exception $e){
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
@@ -213,7 +213,7 @@ class DPSPayment extends Payment {
 	}
 	
 	function refund(){
-		DB::getConn()->startTransaction();
+		DB::getConn()->transactionStart();
 		try{
 			$refunded = $this->RefundedFor();
 			$this->TxnType = "Refund";
@@ -223,7 +223,7 @@ class DPSPayment extends Payment {
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareRefundInputs();
 			$adapter->doPayment($inputs, $this);
-			DB::getConn()->endTransaction();
+			DB::getConn()->transactionEnd();
 		}catch(Exception $e){
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
@@ -241,7 +241,7 @@ class DPSPayment extends Payment {
 	}
 	
 	function dpshostedPurchase($data){
-		DB::getConn()->startTransaction();
+		DB::getConn()->transactionStart();
 		try{
 			$this->TxnType = "Purchase";
 			$this->write();

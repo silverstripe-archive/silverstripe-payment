@@ -92,15 +92,15 @@ class RecurringPayment extends DataObject{
 	}
 	
 	function payNext(){
-		DB::getConn()->startTransaction();
+		DB::getConn()->transactionStart();
 		try{
 			if($next = $this->getNextPayment()){
 				$next->payAsRecurring();
 			}
-			DB::getConn()->endTransaction();
+			DB::getConn()->transactionEnd();
 		}catch(Exception $e){
 			DB::getConn()->transactionRollback('NextPaymentGot');
-			DB::getConn()->endTransaction();
+			DB::getConn()->transactionEnd();
 			$latestPayment = $this->getLatestPayment($successonly = false);
 			$latestPayment->handleError($e);
 		}

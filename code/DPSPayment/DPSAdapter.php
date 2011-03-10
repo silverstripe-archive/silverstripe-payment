@@ -586,7 +586,7 @@ JS;
 	        $xml = new SimpleXMLElement($request_string);
 	        $urls = $xml->xpath('//URI');     
 	        $url = $urls[0].'';
-			DB::getConn()->endTransaction();
+			DB::getConn()->transactionEnd();
 			if(self::$mode == "Unit_Test_Only"){
 				return $url;
 			}else{
@@ -627,7 +627,7 @@ JS;
 			}
 		
 			if($payment) {
-				DB::getConn()->startTransaction();
+				DB::getConn()->transactionStart();
 				try{
 					$payment->ResponseXML = $rsp->toXml();
 					$success = $rsp->getSuccess();
@@ -641,7 +641,7 @@ JS;
 					}
 					$payment->Message=$rsp->getResponseText();
 					$payment->write();
-					DB::getConn()->endTransaction();
+					DB::getConn()->transactionEnd();
 				}catch(Exception $e){
 					DB::getConn()->transactionRollback();
 					$payment->handleError($e);
