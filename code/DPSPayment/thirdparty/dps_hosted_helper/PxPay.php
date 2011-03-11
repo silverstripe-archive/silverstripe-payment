@@ -9,7 +9,7 @@ class PxPay
 	var $PxPay_Url;
 	var $PxPay_Userid;
 	function PxPay($Url, $UserId, $Key){
-		error_reporting(E_ERROR);
+		//error_reporting(E_ERROR);
 		$this->PxPay_Key = $Key;#pack("H*", $Key);
 		$this->PxPay_Url = $Url;
 		$this->PxPay_Userid = $UserId;
@@ -37,7 +37,7 @@ class PxPay
 
        // Building referrer
        if(!isset($referrer)||$referrer=="") // if not given use this script as referrer
-         $referrer=$_SERVER["HTTP_REFERER"];
+         $referrer=$_SERVER["SCRIPT_NAME"];
 
        // Find out which port is needed - if not given use standard (=80)
        if(!isset($URL_Info["port"]))
