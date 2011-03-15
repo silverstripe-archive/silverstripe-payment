@@ -258,5 +258,3 @@ class WorldpayPayment_Handler extends Controller {
 	}
 	
 }
-
-?>

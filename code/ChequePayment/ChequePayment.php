@@ -40,5 +40,3 @@ class ChequePayment extends Payment {
 	}
 	
 }
-
-?>

@@ -105,4 +105,3 @@ class EwayPaymentLive {
 		return $ip;
 	}
 }
-?>

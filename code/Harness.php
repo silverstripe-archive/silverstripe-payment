@@ -202,4 +202,3 @@ class Harness extends Page_Controller{
 		}
 	}
 }
-?>

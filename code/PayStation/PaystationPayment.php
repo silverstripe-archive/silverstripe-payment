@@ -225,5 +225,3 @@ JS;
 		return $result;
 	}
 }
-
-?>

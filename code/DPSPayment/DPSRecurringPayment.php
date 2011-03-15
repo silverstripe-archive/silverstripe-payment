@@ -161,5 +161,3 @@ class DPSRecurringPayment extends RecurringPayment{
 		return DataObject::get_by_id('DPSPayment', $next->ID);
 	}
 }
-
-?>

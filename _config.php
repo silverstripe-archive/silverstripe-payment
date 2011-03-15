@@ -7,5 +7,3 @@ Director::addRules(50, array(
 ));
 
 Object::add_extension('Member', 'PayerHavingReceipt');
-
-?>

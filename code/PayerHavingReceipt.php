@@ -16,4 +16,3 @@ class PayerHavingReceipt extends DataObjectDecorator{
 		return $this->owner->renderWith('Payer_receipt');
 	}
 }
-?>

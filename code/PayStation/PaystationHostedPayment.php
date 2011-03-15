@@ -126,5 +126,3 @@ class PaystationHostedPayment_Handler extends Controller {
 	}
 	
 }
-
-?>

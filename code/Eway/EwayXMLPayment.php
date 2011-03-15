@@ -161,5 +161,3 @@ JS;
 		return $result;
 	}
 }
-
-?>

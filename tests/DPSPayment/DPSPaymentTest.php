@@ -364,5 +364,3 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		}
 	}
 }
-
-?>

@@ -181,4 +181,3 @@ class PxAccess
 	  return gmstrftime("%Y%m%d%H%M%S", time());
 	}
 }
-?>

@@ -143,5 +143,3 @@ class RecurringPayment extends DataObject{
 		$this->write();
 	}
 }
-
-?>

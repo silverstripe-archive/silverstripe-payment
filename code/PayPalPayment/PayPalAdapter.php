@@ -111,5 +111,3 @@ class PayPalAdapter extends Controller{
 HTML;
 	}
 }
-
-?>
