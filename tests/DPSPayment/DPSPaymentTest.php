@@ -18,7 +18,8 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 	static $wrong_cc_data = array(
 		'CardHolderName' => 'SilverStripe Tester',
 		'CardNumber' => array(
-			'1234','5678','9012','3456'
+			'9999','9900','0000','0154'
+			//'1234','5678','9012','3456'
 		),
 		'Cvc2' => '123',
 	);
