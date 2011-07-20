@@ -18,8 +18,8 @@ class DPSAdapter extends Controller{
 	
 	// URLs
 	
-	public static $pxPost_Url = 'https://www.paymentexpress.com/pxpost.aspx';
-	public static $pxPay_Url = 'https://www.paymentexpress.com/pxpay/pxaccess.aspx';
+	public static $pxPost_Url = 'https://sec.paymentexpress.com/pxpost.aspx';
+	public static $pxPay_Url = 'https://sec.paymentexpress.com/pxpay/pxaccess.aspx';
 	
 	public static $allowed_currencies = array(
 		'CAD'=>'Canadian Dollar',

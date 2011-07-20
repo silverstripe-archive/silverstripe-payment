@@ -317,7 +317,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 			DPSAdapter::set_mode('Unit_Test_Only');
 			$url = $purchase->dpshostedPurchase(array());
 			DPSAdapter::set_mode('Normal');
-			$this->assertContains("https://www.paymentexpress.com/pxpay/pxpay.aspx?userid=", $url);
+			$this->assertContains("https://sec.paymentexpress.com/pxpay/pxpay.aspx?userid=", $url);
 		}
 	}
 	
