@@ -18,96 +18,50 @@ class PxPay
 	#******************************************************************************
 	# Create an encoded request for the PxPay Host.
 	#******************************************************************************
-	function makeRequest($request)
-	{		
-		#Validate the Request
+	function makeRequest($request) {
 		if($request->validData() == false) return "" ;
-			
-  	//	$txnId = uniqid("MI");  #You need to generate you own unqiue reference. 
-	//	$request->setTxnId($txnId);
+
 		$request->setTs($this->getCurrentTS());
 		$request->setSwVersion("1.0");
 		$request->setAppletType("PHPPxPay");		
 		$request->setUserId($this->PxPay_Userid);
 		$request->setKey($this->PxPay_Key);
 		$xml = $request->toXml();
-		
-		// parsing the given URL
-       $URL_Info=parse_url($this->PxPay_Url);
 
-       // Building referrer
-       if(!isset($referrer)||$referrer=="") // if not given use this script as referrer
-         $referrer=$_SERVER["SCRIPT_NAME"];
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $this->PxPay_Url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
 
-       // Find out which port is needed - if not given use standard (=80)
-       if(!isset($URL_Info["port"]))
-			$URL_Info["port"]=443;
-		#	$URL_Info["port"]=80;
+		$response = curl_exec($ch);
 
-	  // building POST-request:
-       $requestdata ="POST ".$URL_Info["path"]." HTTP/1.1\n";
-       $requestdata.="Host: ".$URL_Info["host"]."\n";
-	#   $requestdata.="User-Agent: PHP Script\n";
-       $requestdata.="Referer: $referrer\n";
-       $requestdata.="Content-type: application/x-www-form-urlencoded\n";
-       $requestdata.="Content-length: ".strlen($xml)."\n";
-       $requestdata.="Connection: close\n";
-       $requestdata.="\n";
-       $requestdata.=$xml."\n";
-	   $fp = fsockopen("ssl://".$URL_Info["host"],$URL_Info["port"]);
-	  # $fp = fsockopen($URL_Info["host"],$URL_Info["port"]);
-	 
-       fputs($fp, $requestdata);
-	   $result = '';
-       while(!feof($fp)) {
-           $result .= fgets($fp, 128);
-       }
-       fclose($fp);	
-	   $result = strstr($result, "<Request");
-		return $result;
-		
+		if(curl_error($ch)) {
+			throw new Exception(curl_error($ch));
+		}
+
+		return $response;
 	}
 			
 	#******************************************************************************
 	# Return the decoded response from the PxPay Host.
 	#******************************************************************************
-	function getResponse($resp_enc){
-			
-		
+	function getResponse($resp_enc) {
 		$xml = "<ProcessResponse><PxPayUserId>".$this->PxPay_Userid."</PxPayUserId><PxPayKey>".$this->PxPay_Key."</PxPayKey><Response>".$resp_enc."</Response></ProcessResponse>";
-		// parsing the given URL
-       $URL_Info=parse_url($this->PxPay_Url);
-       // Building referrer
-       if(!isset($referrer)||$referrer=="") // if not given use this script as referrer
-         $referrer=$_SERVER["SCRIPT_NAME"];
 
-       // Find out which port is needed - if not given use standard (=80)
-       if(!isset($URL_Info["port"]))
-         $URL_Info["port"]=443;
-		#	$URL_Info["port"]=80;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $this->PxPay_Url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
 
-       // building POST-request:
-       $requestdata ="POST ".$URL_Info["path"]." HTTP/1.1\n";
-       $requestdata.="Host: ".$URL_Info["host"]."\n";
-       $requestdata.="Referer: $referrer\n";
-       $requestdata.="Content-type: application/x-www-form-urlencoded\n";
-       $requestdata.="Content-length: ".strlen($xml)."\n";
-       $requestdata.="Connection: close\n";
-       $requestdata.="\n";
-       $requestdata.=$xml."\n";
-	  $fp = fsockopen("ssl://".$URL_Info["host"],$URL_Info["port"]);
-	  # $fp = fsockopen($URL_Info["host"],$URL_Info["port"]);
-       fputs($fp, $requestdata);
+		$response = curl_exec($ch);
 
-	   $result = "";
-       while(!feof($fp)) {
-           $result .= fgets($fp, 128);
-       }
-       fclose($fp);
-	   
-		$result = strstr($result, "<Response");
-		$pxresp = new PxPayResponse($result);
-		return $pxresp;	
+		if(curl_error($ch)) {
+			throw new Exception(curl_error($ch));
+		}
+
+		return new PxPayResponse($response);
 	}
 	
 	#******************************************************************************
