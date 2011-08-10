@@ -569,7 +569,7 @@ JS;
 		}
 	}
 	
-	function doDPSHostedPayment($inputs, $payment){
+	function doDPSHostedPayment($inputs, $payment) {
 		$request = new PxPayRequest();
 		foreach($inputs as $element => $value){
 			$funcName = 'set'.$element;
@@ -581,19 +581,24 @@ JS;
 		$request_string = $pxpay->makeRequest($request);
 		$response = new MifMessage($request_string);
 		$valid = $response->get_attribute("valid");
-		if($valid){
+		if($valid) {
 			// MifMessage was clobbering ampersands on some environments; SimpleXMLElement is more robust
 	        $xml = new SimpleXMLElement($request_string);
 	        $urls = $xml->xpath('//URI');     
-	        $url = $urls[0].'';
+	        $url = $urls[0] . '';
 			DB::getConn()->transactionEnd();
-			if(self::$mode == "Unit_Test_Only"){
+			if(self::$mode == 'Unit_Test_Only'){
 				return $url;
-			}else{
-		        header("Location: ".$url);
-				die;
+			} else {
+				if(Director::is_ajax()) {
+					echo $url;
+					die();
+				} else {
+			        header("Location: ".$url);
+					die();
+				}
 			}
-		}else{
+		} else {
 			$payment->Message = "Invalid Request String";
 			$payment->write();
 		}

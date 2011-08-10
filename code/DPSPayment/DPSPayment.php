@@ -240,29 +240,29 @@ class DPSPayment extends Payment {
 		return $inputs;
 	}
 	
-	function dpshostedPurchase($data){
+	function dpshostedPurchase($data = array()) {
 		DB::getConn()->transactionStart();
-		try{
+		try {
 			$this->TxnType = "Purchase";
 			$this->write();
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareDPSHostedRequest($data);
 			
 			return $adapter->doDPSHostedPayment($inputs, $this);
-		}catch(Exception $e){
+		} catch(Exception $e) {
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
 		}
 	}
-	
-	private function prepareDPSHostedRequest($data){
+
+	public function prepareDPSHostedRequest($data = array()) {
 		//never put this loop after $inputs['AmountInput'] = $amount, since it will change it to an array.
-		foreach($data as $element => $value){
-			if(in_array($element, self::$dpshosted_input_elements)){
+		foreach($data as $element => $value) {
+			if(in_array($element, self::$dpshosted_input_elements)) {
 				$inputs[$element] = $value;
 			}
 		}
-		
+
 		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = $this->TxnType;
 		$amount = (float) ltrim($this->Amount->Amount, '$');
@@ -273,10 +273,10 @@ class DPSPayment extends Payment {
 		$postProcess_url = Director::absoluteBaseURL() ."DPSAdapter/processDPSHostedResponse";
 		$inputs['UrlFail'] = $postProcess_url;
 		$inputs['UrlSuccess'] = $postProcess_url;
-		
+
 		return $inputs;
 	}
-	
+
 	function payAsRecurring() {
 		$adapter = new DPSAdapter();
 		$inputs = $this->prepareAsRecurringPaymentInputs();
