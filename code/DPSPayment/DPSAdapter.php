@@ -20,7 +20,9 @@ class DPSAdapter extends Controller{
 	
 	public static $pxPost_Url = 'https://sec.paymentexpress.com/pxpost.aspx';
 	public static $pxPay_Url = 'https://sec.paymentexpress.com/pxpay/pxaccess.aspx';
-	
+
+	public static $using_transaction = true;
+
 	public static $allowed_currencies = array(
 		'CAD'=>'Canadian Dollar',
 		'CHF'=>'Swiss Franc',
@@ -564,7 +566,7 @@ JS;
 
 		$payment->write();
 		
-		if(self::$mode === 'Rolling_Back_Mode'){
+		if(self::$mode === 'Rolling_Back_Mode' && self::$using_transaction) {
 			DB::getConn()->transactionRollback();
 		}
 	}
@@ -586,7 +588,7 @@ JS;
 	        $xml = new SimpleXMLElement($request_string);
 	        $urls = $xml->xpath('//URI');     
 	        $url = $urls[0] . '';
-			DB::getConn()->transactionEnd();
+			if(self::$using_transaction) DB::getConn()->transactionEnd();
 			if(self::$mode == 'Unit_Test_Only'){
 				return $url;
 			} else {
@@ -629,7 +631,7 @@ JS;
 		}
 	
 		if($payment) {
-			DB::getConn()->transactionStart();
+				if(self::$using_transaction) DB::getConn()->transactionStart();
 			try{
 				$payment->ResponseXML = $rsp->toXml();
 				$success = $rsp->getSuccess();
@@ -643,9 +645,9 @@ JS;
 				}
 				$payment->Message=$rsp->getResponseText();
 				$payment->write();
-				DB::getConn()->transactionEnd();
+					if(self::$using_transaction) DB::getConn()->transactionEnd();
 			}catch(Exception $e){
-				DB::getConn()->transactionRollback();
+					if(self::$using_transaction) DB::getConn()->transactionRollback();
 				$payment->handleError($e);
 			}
 			Director::redirect($payment->DPSHostedRedirectURL);
