@@ -637,12 +637,13 @@ JS;
 				$success = $rsp->getSuccess();
 				if($success =='1'){
 					// @todo Use AmountSettlement for amount setting?
-					$payment->TxnRef = $rsp->getDpsTxnRef();
-					$payment->AuthCode = $rsp->getAuthCode();
 					$payment->Status="Success";
 				} else {
 					$payment->Status="Failure";
 				}
+					$payment->TxnRef = $rsp->getDpsTxnRef();
+					$payment->AuthCode = $rsp->getAuthCode();
+					
 				$payment->Message=$rsp->getResponseText();
 				$payment->write();
 					if(self::$using_transaction) DB::getConn()->transactionEnd();
