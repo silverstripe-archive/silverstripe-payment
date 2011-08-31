@@ -227,7 +227,10 @@ class DPSPayment extends Payment {
 		} catch(Exception $e){
 			if(DPSAdapter::$using_transaction) DB::getConn()->transactionRollback();
 			$this->handleError($e);
+			return false;
 		}
+		
+		return true;
 	}
 	
 	private function prepareRefundInputs(){	
