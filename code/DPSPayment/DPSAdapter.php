@@ -481,9 +481,6 @@ JS;
 	
 	//Payment Function
 	function doPayment($inputs, $payment) {
-		if(self::$mode === 'Error_Handling_Mode'){
-			$this->tsixe_dluoc_reven_taht_noitcnuf_a_function_that_never_could_exist();
-		}
 		// 1) Main Settings
 		//$inputs = array();
 		$inputs['PostUsername'] = self::$pxPost_Username;

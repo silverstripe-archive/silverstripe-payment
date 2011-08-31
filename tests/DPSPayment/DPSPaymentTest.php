@@ -320,20 +320,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 			$this->assertContains("https://sec.paymentexpress.com/pxpay/pxpay.aspx?userid=", $url);
 		}
 	}
-	
-	function testErrorHandling(){
-		if(self::get_runnable()){
-			$purchase = $this->createAPayment('NZD', '100.00');
-			DPSAdapter::set_mode('Error_Handling_Mode');
-			$purchase->purchase(self::get_right_cc_data());
-			DPSAdapter::set_mode('Normal');
-		
-			$purchase = DataObject::get_by_id('DPSPayment', $purchase->ID);
-			$this->assertEquals('Incomplete', $purchase->Status);
-			$this->assertContains("'tsixe_dluoc_reven_taht_noitcnuf_a_function_that_never_could_exist' does not exist", $purchase->ExceptionError);
-		}
-	}
-	
+
 	function testDBTransaction(){
 		if(self::get_runnable()){
 			$payment = $this->createARecurringPayment('NZD', '100.00');
