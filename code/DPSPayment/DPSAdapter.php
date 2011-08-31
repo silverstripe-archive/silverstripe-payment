@@ -557,9 +557,9 @@ JS;
 		else {
 			$payment->Status = 'Failure';
 		}
-		if($transactionRef = $responseFields['DPSTXNREF']) $payment->TxnRef = $transactionRef;
-		if($helpText = $responseFields['HELPTEXT']) $payment->Message = $helpText;
-		else if($responseText = $responseFields['RESPONSETEXT']) $payment->Message = $responseText;
+		if($transactionRef = @$responseFields['DPSTXNREF']) $payment->TxnRef = $transactionRef;
+		if($helpText = @$responseFields['HELPTEXT']) $payment->Message = $helpText;
+		else if($responseText = @$responseFields['RESPONSETEXT']) $payment->Message = $responseText;
 
 		$payment->write();
 		
