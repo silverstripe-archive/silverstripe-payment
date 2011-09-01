@@ -32,6 +32,9 @@ class PxPay
 		curl_setopt($ch, CURLOPT_URL, $this->PxPay_Url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+		curl_setopt($ch, CURLOPT_CAINFO, BASE_PATH . '/payment/certs/sec.paymentexpress.com.crt');
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
 
 		$response = curl_exec($ch);
@@ -53,6 +56,9 @@ class PxPay
 		curl_setopt($ch, CURLOPT_URL, $this->PxPay_Url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+		curl_setopt($ch, CURLOPT_CAINFO, BASE_PATH . '/payment/certs/sec.paymentexpress.com.crt');
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
 
 		$response = curl_exec($ch);
