@@ -84,7 +84,7 @@ class DPSPayment extends Payment {
 	static $default_sort = "ID DESC";
 
 	function getPaymentFormFields() {
-		$adapter = new DPSAdapter();
+		$adapter = $this->getDPSAdapter();
 		return $adapter->getPaymentFormFields();
 	}
 
@@ -92,7 +92,7 @@ class DPSPayment extends Payment {
 	 * Returns the required fields to add to the order form, when using this payment method. 
 	 */
 	function getPaymentFormRequirements() {
-		$adapter = new DPSAdapter();
+		$adapter = $this->getDPSAdapter();
 		return $adapter->getPaymentFormRequirements();
 	}
 	
@@ -108,7 +108,7 @@ class DPSPayment extends Payment {
 		$inputs['DateExpiry'] = $data['DateExpiry'];
 		if(self::$cvn_mode) $inputs['Cvc2'] = $data['Cvc2'] ? $data['Cvc2'] : '';
 		
-		$adapter = new DPSAdapter();
+		$adapter = $this->getDPSAdapter();
 		$responseFields = $adapter->doPayment($inputs);
 		$adapter->ProcessResponse($this, $responseFields);
 
@@ -122,7 +122,7 @@ class DPSPayment extends Payment {
 	}
 	
 	function getForm($formType){
-		$adapter = new DPSAdapter();
+		$adapter = $this->getDPSAdapter();
 		return $adapter->getFormByName($formType);
 	}
 	
@@ -140,7 +140,7 @@ class DPSPayment extends Payment {
 			$this->TxnType = "Auth";
 			$this->write();
 
-			$adapter = new DPSAdapter();
+			$adapter = $this->getDPSAdapter();
 			$inputs = $this->prepareAuthInputs($data);
 			$adapter->doPayment($inputs, $this);
 			if(DPSAdapter::$using_transaction) DB::getConn()->transactionEnd();
@@ -175,7 +175,7 @@ class DPSPayment extends Payment {
 			$this->MerchantReference = "Complete: ".$auth->MerchantReference;
 			$this->write();
 		
-			$adapter = new DPSAdapter();
+			$adapter = $this->getDPSAdapter();
 			$inputs = $this->prepareCompleteInputs();
 			$adapter->doPayment($inputs, $this);
 			if(DPSAdapter::$using_transaction) DB::getConn()->transactionEnd();
@@ -202,7 +202,7 @@ class DPSPayment extends Payment {
 			$this->TxnType = "Purchase";
 			$this->write();
 		
-			$adapter = new DPSAdapter();
+			$adapter = $this->getDPSAdapter();
 			$inputs = $this->prepareAuthInputs($data);
 			$adapter->doPayment($inputs, $this);
 			if(DPSAdapter::$using_transaction) DB::getConn()->transactionEnd();
@@ -220,7 +220,7 @@ class DPSPayment extends Payment {
 			$this->MerchantReference = "Refund for: ".$refunded->MerchantReference;
 			$this->write();
 
-			$adapter = new DPSAdapter();
+			$adapter = $this->getDPSAdapter();
 			$inputs = $this->prepareRefundInputs();
 			$adapter->doPayment($inputs, $this);
 			if(DPSAdapter::$using_transaction) DB::getConn()->transactionEnd();
@@ -249,7 +249,7 @@ class DPSPayment extends Payment {
 		try {
 			$this->TxnType = "Purchase";
 			$this->write();
-			$adapter = new DPSAdapter();
+			$adapter = $this->getDPSAdapter();
 			$inputs = $this->prepareDPSHostedRequest($data);
 			
 			return $adapter->doDPSHostedPayment($inputs, $this);
@@ -282,7 +282,7 @@ class DPSPayment extends Payment {
 	}
 
 	function payAsRecurring() {
-		$adapter = new DPSAdapter();
+		$adapter = $this->getDPSAdapter();
 		$inputs = $this->prepareAsRecurringPaymentInputs();
 		$adapter->doPayment($inputs, $this);
 	}
@@ -356,6 +356,17 @@ class DPSPayment extends Payment {
 	public function getCardNumber() {
 		$xml = $this->parsedResponseXML();
 		return ($xml) ? (string) $xml->CardNumber : false;
+	}
+	
+	protected $dpsAdapter;
+	
+	function getDPSAdapter() {
+		if(!$this->dpsAdapter) $this->dpsAdapter = new DPSAdapter();
+		return $this->dpsAdapter;
+	}
+	
+	function setDPSAdapter($adapter) {
+		$this->dpsAdapter = $adapter;
 	}
 
 }
