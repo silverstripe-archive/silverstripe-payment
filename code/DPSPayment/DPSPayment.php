@@ -240,6 +240,7 @@ class DPSPayment extends Payment {
 		$inputs['Amount'] = $this->Amount->Amount;
 		$inputs['InputCurrency'] = $this->Amount->Currency;
 		$inputs['DpsTxnRef'] = $refundedFor->TxnRef;
+		$inputs['MerchantReference'] = $this->MerchantReference;
 		return $inputs;
 	}
 	
