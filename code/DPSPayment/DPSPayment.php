@@ -350,6 +350,15 @@ class DPSPayment extends Payment {
 	}
 
 	/**
+	 * From the ResponseXML, retrieve the DateExpiry value.
+	 * @return bool|string
+	 */
+	public function getDateExpiry() {
+		$xml = $this->parsedResponseXML();
+		return ($xml) ? (string) $xml->DateExpiry : false;
+	}
+
+	/**
 	 * From the ResponseXML, retrieve the CardNumber value.
 	 * @return string
 	 */
