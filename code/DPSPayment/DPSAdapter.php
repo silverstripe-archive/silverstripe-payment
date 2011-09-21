@@ -536,26 +536,30 @@ JS;
 			DB::getConn()->transactionRollback();
 		}
 	}
-	
+
+	public function getPxpay() {
+		return new PxPay(self::$pxPay_Url, self::$pxPay_Userid, self::$pxPay_Key);
+	}
+
 	function doDPSHostedPayment($inputs, $payment) {
 		$request = new PxPayRequest();
-		foreach($inputs as $element => $value){
-			$funcName = 'set'.$element;
+		foreach($inputs as $element => $value) {
+			$funcName = 'set' . $element;
 			$request->$funcName($value);
 		}
 
 		// submit payment request to get the URL for redirection
-		$pxpay = new PxPay(self::$pxPay_Url, self::$pxPay_Userid, self::$pxPay_Key);
+		$pxpay = $this->getPxpay();
 		$request_string = $pxpay->makeRequest($request);
 		$response = new MifMessage($request_string);
 		$valid = $response->get_attribute("valid");
 		if($valid) {
 			// MifMessage was clobbering ampersands on some environments; SimpleXMLElement is more robust
 	        $xml = new SimpleXMLElement($request_string);
-	        $urls = $xml->xpath('//URI');     
+			$urls = $xml->xpath('//URI');
 	        $url = $urls[0] . '';
 			if(self::$using_transaction) DB::getConn()->transactionEnd();
-			if(self::$mode == 'Unit_Test_Only'){
+			if(self::$mode == 'Unit_Test_Only') {
 				return $url;
 			} else {
 				if(Director::is_ajax()) {
