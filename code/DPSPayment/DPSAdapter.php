@@ -550,14 +550,13 @@ JS;
 
 		// submit payment request to get the URL for redirection
 		$pxpay = $this->getPxpay();
-		$request_string = $pxpay->makeRequest($request);
-		$response = new MifMessage($request_string);
-		$valid = $response->get_attribute("valid");
+		$requestXML = $pxpay->makeRequest($request);
+		$xml = new SimpleXMLElement($requestXML);
+		$requestElement = $xml->xpath('//Request');
+		$valid = (bool) $requestElement[0]['valid'];
 		if($valid) {
-			// MifMessage was clobbering ampersands on some environments; SimpleXMLElement is more robust
-	        $xml = new SimpleXMLElement($request_string);
 			$urls = $xml->xpath('//URI');
-	        $url = $urls[0] . '';
+			$url = (string) $urls[0];
 			if(self::$using_transaction) DB::getConn()->transactionEnd();
 			if(self::$mode == 'Unit_Test_Only') {
 				return $url;
@@ -566,12 +565,12 @@ JS;
 					echo $url;
 					die();
 				} else {
-			        header("Location: ".$url);
+					header('Location: ' . $url);
 					die();
 				}
 			}
 		} else {
-			$payment->Message = "Invalid Request String";
+			$payment->Message = 'Invalid Request String';
 			$payment->write();
 		}
 	}
