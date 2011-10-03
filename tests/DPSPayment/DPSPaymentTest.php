@@ -110,8 +110,8 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 	function testAuthSuccess(){
 		if(self::get_runnable()){
 			$payment = $this->createAPayment('NZD', '1.00');
-		
 			$payment->auth(self::get_right_cc_data());
+
 			$this->assertEquals($payment->TxnType, 'Auth');
 			$this->assertEquals($payment->Status, 'Success');
 		}
@@ -120,26 +120,32 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 	function testAuthFailure(){
 		if(self::get_runnable()){
 			$payment = $this->createAPayment('NZD', '1.00');
-		
 			$payment->auth(self::get_wrong_cc_data());
+
+			sleep(5);
+
 			$this->assertEquals($payment->Status, 'Failure');
 			$this->assertContains('Invalid Card', $payment->Message);
 		
 			$payment->auth(self::get_expired_cc_data());
+
 			$this->assertEquals($payment->Status, 'Failure');
 			$this->assertContains('Card Expired', $payment->Message);
 		}
 	}
 	
-	function testCompleteSuccess(){
-		if(self::get_runnable()){
+	function testCompleteSuccess() {
+		if(self::get_runnable()) {
 			$auth = $this->createAPayment('NZD', '1.00');
 			$auth->auth(self::get_right_cc_data());
-		
+
+			sleep(5);
+
 			$complete = $this->createAPayment('USD', '100.00');
 			$complete->AuthPaymentID = $auth->ID;
 			$complete->write();
 			$complete->complete();
+
 			$this->assertEquals($complete->TxnType, 'Complete');
 			$this->assertEquals($complete->Status, 'Success');
 		}
@@ -149,27 +155,34 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		if(self::get_runnable()){
 			$auth = $this->createAPayment('NZD', '1.00');
 			$auth->auth(self::get_wrong_cc_data());
-		
+
+			sleep(5);
+
 			$complete = $this->createAPayment('USD', '100.00');
 			$complete->AuthPaymentID = $auth->ID;
 			$complete->write();
 			$complete->complete();
+
 			$this->assertEquals($complete->Status, 'Failure');
 			$this->assertContains('The transaction was Declined', $complete->Message);
 		}
 	}
 	
-	function testCompleteOnlyOnce(){
-		if(self::get_runnable()){
+	function testCompleteOnlyOnce() {
+		if(self::get_runnable()) {
 			$auth = $this->createAPayment('NZD', '1.00');
 			$auth->auth(self::get_right_cc_data());
-		
+
+			sleep(5);
+
 			$complete1 = $this->createAPayment('USD', '100.00');
 			$complete1->AuthPaymentID = $auth->ID;
 			$complete1->write();
 			$complete1->complete();
 			$this->assertEquals($complete1->Status, 'Success');
-		
+
+			sleep(5);
+
 			$complete2 = $this->createAPayment('USD', '100.00');
 			$complete2->AuthPaymentID = $auth->ID;
 			$complete2->write();
@@ -255,6 +268,8 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 			$purchase1 = $this->createAPayment('NZD', '100.00');
 			$purchase1->purchase(self::get_expired_cc_data());
 
+			sleep(5);
+
 			$refund1 = $this->createAPayment('NZD', '100.00');
 			$refund1->RefundedForID = $purchase1->ID;
 			$refund1->write();
@@ -265,6 +280,8 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 
 			$purchase2 = $this->createAPayment('NZD', '100.00');
 			$purchase2->purchase(self::get_right_cc_data());
+
+			sleep(5);
 
 			$refund2 = $this->createAPayment('NZD', '1000.00');
 			$refund2->RefundedForID = $purchase2->ID;
