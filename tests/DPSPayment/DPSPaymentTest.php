@@ -209,16 +209,20 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		}
 	}
 	
-	function testRefundSeccess(){
-		if(self::get_runnable()){
+	function testRefundSuccess() {
+		if(self::get_runnable()) {
 			$auth = $this->createAPayment('NZD', '1.00');
 			$auth->auth(self::get_right_cc_data());
-		
+
+			sleep(5);
+
 			$complete = $this->createAPayment('USD', '100.00');
 			$complete->AuthPaymentID = $auth->ID;
 			$complete->write();
 			$complete->complete();
-		
+
+			sleep(5);
+
 			$refund1 = $this->createAPayment('USD', '100.00');
 			$refund1->RefundedForID = $complete->ID;
 			$refund1->write();
@@ -226,14 +230,19 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		
 			$this->assertEquals($refund1->TxnType, 'Refund');
 			$this->assertEquals($refund1->Status, 'Success');
+
+			sleep(5);
 		
 			$purchase = $this->createAPayment('NZD', '100.00');
 			$purchase->purchase(self::get_right_cc_data());
+
+			sleep(5);
 		
 			$refund2 = $this->createAPayment('USD', '100.00');
 			$refund2->RefundedForID = $purchase->ID;
 			$refund2->write();
 			$refund2->refund();
+
 			$this->assertEquals($refund2->TxnType, 'Refund');
 			$this->assertEquals($refund2->Status, 'Success');
 			$this->assertEquals($refund2->Amount->Amount, 100.00);
@@ -241,42 +250,49 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		}
 	}
 	
-	function testRefundFailure(){
-		if(self::get_runnable()){
+	function testRefundFailure() {
+		if(self::get_runnable()) {
 			$purchase1 = $this->createAPayment('NZD', '100.00');
 			$purchase1->purchase(self::get_expired_cc_data());
-		
+
 			$refund1 = $this->createAPayment('NZD', '100.00');
 			$refund1->RefundedForID = $purchase1->ID;
 			$refund1->write();
 			$refund1->refund();
+
 			$this->assertEquals($refund1->Status, 'Failure');
 			$this->assertContains('The transaction was Declined', $refund1->Message);
-		
+
 			$purchase2 = $this->createAPayment('NZD', '100.00');
 			$purchase2->purchase(self::get_right_cc_data());
+
 			$refund2 = $this->createAPayment('NZD', '1000.00');
 			$refund2->RefundedForID = $purchase2->ID;
 			$refund2->write();
 			$refund2->refund();
+
 			$this->assertEquals($refund2->Status, 'Failure');
 			$this->assertContains('The transaction was Declined', $refund2->Message);
 		}
 	}
 	
-	function testMultipleRefund(){
-		if(self::get_runnable()){
+	function testMultipleRefund() {
+		if(self::get_runnable()) {
 			$purchase = $this->createAPayment('NZD', '2.00');
 			$purchase->purchase(self::get_right_cc_data());
-		
-			for($i=0;$i<2;$i++){
+
+			sleep(5); // artificial delay to confirm the payment with DPS
+
+			for($i = 0; $i < 2; $i++) {
 				$refund = $this->createAPayment('NZD', '1.00');
 				$refund->RefundedForID = $purchase->ID;
 				$refund->write();
 				$refund->refund();
 				$this->assertEquals($refund->Status, 'Success');
+
+				sleep(5); // artifical delay
 			}
-		
+
 			$refund = $this->createAPayment('NZD', '1.00');
 			$refund->RefundedForID = $purchase->ID;
 			$refund->write();
@@ -285,9 +301,9 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 			$this->assertContains('The transaction has already been fully refunded', $refund->Message);
 		}
 	}
-	
-	function testRecurringDPSPayment(){
-		if(self::get_runnable()){
+
+	function testRecurringDPSPayment() {
+		if(self::get_runnable()) {
 			$payment = $this->createARecurringPayment('NZD', '100.00');
 			$payment->Frequency = 'Monthly';
 			$payment->StartingDate = date('Y-m-d');
@@ -298,7 +314,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 			$this->assertContains('Transaction Approved', $payment->Message);
 		
 			$date = $payment->StartingDate;
-			for($i=0;$i<3;$i++){
+			for($i = 0; $i < 3; $i++) {
 				$payment->payNext();
 
 				$next = $payment->getLatestPayment();
