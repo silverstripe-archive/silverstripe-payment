@@ -23,6 +23,7 @@ class PxPayResponse extends PxPayMessage
 	var $ResponseText;
 	var $DpsTxnRef;
 	var $MerchantTxnId;
+	var $DateExpiry;
 	var $TS;
   
 	function PxPayResponse($xml){
@@ -48,6 +49,7 @@ class PxPayResponse extends PxPayMessage
 		$this->MerchantTxnId = $msg->get_element_text("TxnId");
 		$this->CardHolderName = $msg->get_element_text("CardHolderName");
 		$this->CardNumber = $msg->get_element_text("CardNumber");
+		$this->DateExpiry = $msg->get_element_text("DateExpiry");
 		$this->CurrencyInput = $msg->get_element_text("CurrencyInput");
 		
 	}
@@ -72,6 +74,12 @@ class PxPayResponse extends PxPayMessage
 	}
 	function getCardNumber() {
 		return $this->CardNumber;
+	}
+	function getCardHolderName() {
+		return $this->CardHolderName;
+	}
+	function getDateExpiry() {
+		return $this->DateExpiry;
 	}
 	function getCurrencySettlement(){
 		$this->CurrencySettlement;

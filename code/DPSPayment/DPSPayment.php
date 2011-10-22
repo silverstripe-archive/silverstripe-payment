@@ -18,6 +18,9 @@ class DPSPayment extends Payment {
 		
 		// We store the whole raw response xml in case that tracking back the payment is needed in a later stage for whatever the reason.
 		'ResponseXML' => "Text",
+		'CardNumberTruncated' => 'Varchar(32)', // The first six and two last digits of the CC
+		'CardHolderName' => 'Varchar(255)', 
+		'DateExpiry' => 'Varchar(4)', // four digits (mm/yy)
 	);
 	
 	static $has_one = array(

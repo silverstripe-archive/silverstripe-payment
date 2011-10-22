@@ -522,6 +522,9 @@ JS;
 			$dateSettlement = $responseFields['1']['DATESETTLEMENT'];
 			$payment->SettlementDate = substr($dateSettlement, 0, 4) ."-".substr($dateSettlement, 4, 2)."-".substr($dateSettlement, 6, 2);
 			$payment->Amount->Currency = $responseFields['1']['INPUTCURRENCYNAME'];
+			$payment->DateExpiry = $responseFields['1']['DATEEXPIRY'];
+			$payment->CardNumberTruncated = $responseFields['1']['CARDNUMBER'];
+			$payment->CardHolderName = $responseFields['1']['CARDHOLDERNAME'];
 		}
 		else {
 			$payment->Status = 'Failure';
@@ -612,6 +615,9 @@ JS;
 				}
 					$payment->TxnRef = $rsp->getDpsTxnRef();
 					$payment->AuthCode = $rsp->getAuthCode();
+					$payment->DateExpiry = $rsp->getDateExpiry();
+					$payment->CardNumberTruncated = $rsp->getCardNumber();
+					$payment->CardHolderName = $rsp->getCardHolderName();
 					
 				$payment->Message=$rsp->getResponseText();
 				$payment->write();
