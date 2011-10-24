@@ -330,6 +330,12 @@ class DPSPayment extends Payment {
 		}
 	}
 
+	/**
+	 * From the ResponseXML, retrieve the AmountSettlement value.
+	 * CAUTION: Only works for transactions created through PXPay, not PXPost!
+	 * 
+	 * @return bool|string
+	 */
 	public function getAmountSettlement() {
 		$xml = $this->parsedResponseXML();
 		return ($xml) ? (string) $xml->AmountSettlement : false;
@@ -337,7 +343,8 @@ class DPSPayment extends Payment {
 
 	public function getCardName() {
 		$xml = $this->parsedResponseXML();
-		return ($xml) ? (string) $xml->CardName : false;
+		if(!$xml) return false;
+		return ($xml->Transaction) ? (string)$xml->Transaction->CardName : (string)$xml->CardName;
 	}
 
 	/**
@@ -346,7 +353,8 @@ class DPSPayment extends Payment {
 	 */
 	public function getCardHolderName() {
 		$xml = $this->parsedResponseXML();
-		return ($xml) ? (string) $xml->CardHolderName : false;
+		if(!$xml) return false;
+		return ($xml->Transaction) ? (string)$xml->Transaction->CardHolderName : (string)$xml->CardHolderName;
 	}
 
 	/**
@@ -355,7 +363,8 @@ class DPSPayment extends Payment {
 	 */
 	public function getDateExpiry() {
 		$xml = $this->parsedResponseXML();
-		return ($xml) ? (string) $xml->DateExpiry : false;
+		if(!$xml) return false;
+		return ($xml->Transaction) ? (string)$xml->Transaction->DateExpiry : (string)$xml->DateExpiry;
 	}
 
 	/**
@@ -364,7 +373,8 @@ class DPSPayment extends Payment {
 	 */
 	public function getCardNumber() {
 		$xml = $this->parsedResponseXML();
-		return ($xml) ? (string) $xml->CardNumber : false;
+		if(!$xml) return false;
+		return ($xml->Transaction) ? (string)$xml->Transaction->CardNumber : (string)$xml->CardNumber;
 	}
 	
 	protected $dpsAdapter;
