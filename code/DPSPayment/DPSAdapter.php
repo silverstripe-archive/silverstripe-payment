@@ -627,7 +627,7 @@ JS;
 			}
 		
 			if($payment) {
-				DB::getConn()->transactionStart();
+				DB::getConn()->startTransaction();
 				try{
 					$payment->ResponseXML = $rsp->toXml();
 					$success = $rsp->getSuccess();
@@ -641,7 +641,7 @@ JS;
 					}
 					$payment->Message=$rsp->getResponseText();
 					$payment->write();
-					DB::getConn()->transactionEnd();
+					DB::getConn()->endTransaction();
 				}catch(Exception $e){
 					DB::getConn()->transactionRollback();
 					$payment->handleError($e);
