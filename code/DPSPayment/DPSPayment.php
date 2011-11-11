@@ -21,6 +21,7 @@ class DPSPayment extends Payment {
 		'CardNumberTruncated' => 'Varchar(32)', // The first six and two last digits of the CC
 		'CardHolderName' => 'Varchar(255)', 
 		'DateExpiry' => 'Varchar(4)', // four digits (mm/yy)
+		'TimeOutDate' => 'SS_Datetime'
 	);
 	
 	static $has_one = array(
@@ -43,6 +44,7 @@ class DPSPayment extends Payment {
 		'EnableAddBillCard',
 		'InputCurrency',
 		'MerchantReference',
+		'Opt',
 		'PostUsername',
 		'PostPassword',
 		'TxnType',
@@ -276,6 +278,7 @@ class DPSPayment extends Payment {
 		$inputs['AmountInput'] = $amount;
 		$inputs['InputCurrency'] = $this->Amount->Currency;
 		$inputs['MerchantReference'] = $this->MerchantReference;
+		if (isset($this->TimeOutDate)) $inputs['Opt'] = $this->TimeOutDate;
 
 		$postProcess_url = Director::absoluteBaseURL() ."DPSAdapter/processDPSHostedResponse";
 		$inputs['UrlFail'] = $postProcess_url;

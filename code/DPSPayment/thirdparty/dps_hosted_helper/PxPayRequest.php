@@ -82,6 +82,10 @@ class PxPayRequest extends PxPayMessage
 		$this->PxPayKey = $Key;
 	}
 	
+	function setOpt($timeOut){
+		if($timeOut) $this->Opt = 'TO='.gmdate('ymdHi', $timeOut->format('U'));
+	}
+	
 	function setSwVersion($SwVersion){
 		$this->AppletVersion = $SwVersion;
 	}
