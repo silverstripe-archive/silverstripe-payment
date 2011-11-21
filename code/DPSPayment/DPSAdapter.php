@@ -585,7 +585,6 @@ JS;
 	 * @see {http://www.paymentexpress.com/technical_resources/ecommerce_hosted/pxaccess.html#ResultNotification}
 	 */
 	function processDPSHostedResponse(){
-		
 		$pxpay = new PxPay(self::$pxPay_Url, self::$pxPay_Userid, self::$pxPay_Key);
 
 		$enc_hex = $_REQUEST["result"];
@@ -603,7 +602,7 @@ JS;
 		}
 	
 		if($payment) {
-				if(self::$using_transaction) DB::getConn()->transactionStart();
+			if(self::$using_transaction) DB::getConn()->transactionStart();
 			try{
 				$payment->ResponseXML = $rsp->toXml();
 				$success = $rsp->getSuccess();
@@ -613,20 +612,22 @@ JS;
 				} else {
 					$payment->Status="Failure";
 				}
-					$payment->TxnRef = $rsp->getDpsTxnRef();
-					$payment->AuthCode = $rsp->getAuthCode();
-					$payment->DateExpiry = $rsp->getDateExpiry();
-					$payment->CardNumberTruncated = $rsp->getCardNumber();
-					$payment->CardHolderName = $rsp->getCardHolderName();
-					
+				$payment->TxnRef = $rsp->getDpsTxnRef();
+				$payment->AuthCode = $rsp->getAuthCode();
+				$payment->DateExpiry = $rsp->getDateExpiry();
+				$payment->CardNumberTruncated = $rsp->getCardNumber();
+				$payment->CardHolderName = $rsp->getCardHolderName();
+				
 				$payment->Message=$rsp->getResponseText();
 				$payment->write();
-					if(self::$using_transaction) DB::getConn()->transactionEnd();
+				if(self::$using_transaction) DB::getConn()->transactionEnd();
 			}catch(Exception $e){
-					if(self::$using_transaction) DB::getConn()->transactionRollback();
+				if(self::$using_transaction) DB::getConn()->transactionRollback();
 				$payment->handleError($e);
 			}
 			Director::redirect($payment->DPSHostedRedirectURL);
+		} else {
+			Director::redirect(Director::baseURL());
 		}
 	}
 
