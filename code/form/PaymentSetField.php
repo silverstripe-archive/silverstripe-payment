@@ -1,33 +1,9 @@
 <?php
-/**
- * For displaying a set of modifiers on the {@link CheckoutPage} which will inject their details
- * into {@link Order} {@link Modifications}.
- * 
- * @author Frank Mullenger <frankmullenger@gmail.com>
- * @copyright Copyright (c) 2011, Frank Mullenger
- * @package shop
- * @subpackage form
- * @version 1.0
- */
+
 class PaymentSetField extends OptionsetField {
 	
-	/**
-	 * Template for rendering
-	 *
-	 * @var String
-	 */
 	protected $template = "PaymentSetField";	
-	
-	/**
-	 * Creates a new optionset field for order modifers with the naming convention
-	 * Modifiers[ClassName] where ClassName is name of modifier class.
-	 * 
-	 * @param name The field name, needs to be the class name of the class that is going to be the modifier
-	 * @param title The field title
-	 * @param source An map of the dropdown items
-	 * @param value The current value
-	 * @param form The parent form
-	 */
+
 	function __construct($name, $title = "", $source = array(), $value = "", $form = null) {
 
 		parent::__construct($name, $title, $source, $value, $form);
@@ -87,13 +63,6 @@ EOF;
 		return $methodFields->FieldHolder();
 	}
 
-	
-	/**
-	 * Render field with the appropriate template.
-	 * 
-	 * @see FormField::FieldHolder()
-	 * @return String
-	 */
   function FieldHolder() {
 		return $this->renderWith($this->template);
 	}
