@@ -104,12 +104,10 @@ class PayPalExpressCheckoutPayment extends Payment{
 		
 		$paymenturl = $this->getTokenURL($this->Amount->Amount, $this->Amount->Currency, $data);
 		
-		//SS_Log::log(new Exception(print_r(Director::absoluteURL(self::$returnURL,true), true)), SS_Log::NOTICE);
-		
 		$this->Status = "Pending";
 		$this->write();
 		
-		if($paymenturl){
+		if ($paymenturl){
 			Director::redirect($paymenturl); //redirect to payment gateway
 			return new Payment_Processing();
 		}

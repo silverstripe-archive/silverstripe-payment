@@ -264,7 +264,7 @@ class Payment extends DataObject {
 		user_error("Please implement processPayment() on $this->class", E_USER_ERROR);
 	}
 	
-	function getForm($whichTest){
+	function getForm($whichTest) {
 		user_error("Please implement getForm() on $this->class", E_USER_ERROR);
 	}
 	
@@ -281,6 +281,19 @@ class Payment extends DataObject {
 		return DataObject::get_by_id($this->PaidForClass, $this->PaidForID);
 	}	
 }
+
+
+interface Payment_Interface {
+  
+  function processPayment($data, $form);
+  
+  function getPaymentFormFields();
+  
+  function getPaymentFormRequirements();
+  
+}
+
+
 abstract class Payment_Result {
 	
 	protected $value;
