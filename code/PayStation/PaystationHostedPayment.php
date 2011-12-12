@@ -41,6 +41,7 @@ class PaystationHostedPayment extends Payment {
 			new LiteralField('PaystationInfo', $privacyLink),
 			new LiteralField(
 				'PaystationPaymentsList',
+
 				'<div id="VisaCard" class="CreditCard"></div>' .
   			'<div id="MasterCard" class="CreditCard"></div>' .
   			'<div id="AmEx" class="CreditCard"></div>'.

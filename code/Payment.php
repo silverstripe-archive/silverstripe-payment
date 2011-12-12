@@ -142,7 +142,7 @@ class Payment extends DataObject {
 	 * @return FieldSet
 	 */
 	static function combined_form_fields($amount) {
-	  
+
 	  Requirements::css('payment/css/Payment.css');
 
 		// Create the initial form fields, which defines an OptionsetField
@@ -185,6 +185,7 @@ class Payment extends DataObject {
 		} else {
 			user_error('Payment::set_supported_methods() requires an associative array.', E_USER_ERROR);
 		}
+
 		*/
 		
 		// Add the amount and subtotal fields for the payment amount
