@@ -1,27 +1,35 @@
 <?php
 
 class PaystationHostedPayment extends Payment {
+  
+  static $db = array(
+		'TransactionID' => 'Varchar'
+	);
 
 	protected static $privacy_link = 'http://paystation.co.nz/privacy-policy';
 	protected static $logo = 'payment/images/paystation.jpg';
-	protected static $url = 'https://www.paystation.co.nz/dart/darthttp.dll?paystation&pi=%s&ms=%s&am=%s';
+	protected static $url = 'https://www.paystation.co.nz/direct/paystation.dll';
 	protected static $test_mode = false;
-	protected static $merchant_id;
-	protected static $merchant_ref;
-	
 	protected static $paystation_id;
 	protected static $gateway_id;
 	
+	/**
+	 * Site description can be used to differentiate transactions from different websites in Paystation admin.
+	 * 
+	 * @var String
+	 */
+	protected static $site_description;
+	
+	/**
+	 * Merchant reference is optional, but is a great way to tie a transaction in with a customer 
+	 * (this is displayed in Paystation Administration when looking at transaction details). 
+	 * 
+	 * @var String Max length is 64 characters
+	 */
+	protected static $merchant_ref;
+	
 	static function set_test_mode() {
 		self::$test_mode = true;
-	}
-
-	static function set_merchant_id($merchant_id) {
-		self::$merchant_id = $merchant_id;
-	}
-
-	static function set_merchant_ref($merchant_ref) {
-		self::$merchant_ref = $merchant_ref;
 	}
 	
   static function set_paystation_id($id) {
@@ -30,6 +38,14 @@ class PaystationHostedPayment extends Payment {
 	
   static function set_gateway_id($id) {
 		self::$gateway_id = $id;
+	}
+	
+  static function set_site_description($description) {
+		self::$site_description = $description;
+	}
+	
+  static function set_merchant_reference($ref) {
+		self::$merchant_ref = urlencode($ref);
 	}
 	
 	function getPaymentFormFields() {
@@ -55,25 +71,25 @@ class PaystationHostedPayment extends Payment {
 	
 	function processPayment($data, $form) {
 
-	  $amount = $data['Amount'];
-	  
-	  $paystationURL	= "https://www.paystation.co.nz/direct/paystation.dll";
+	  $paystationURL	= self::$url;
     $amount		= $data['Amount'] * 100;
-    $pstn_pi	= self::$paystation_id; //Paystation ID
-    $pstn_gi	= self::$gateway_id; //Gateway ID
-    $site = 'testing'; //site can be used to differentiate transactions from different websites in admin.
-    $pstn_mr = urlencode('from sample code'); //merchant reference is optional, but is a great way to tie a transaction in with a customer (this is displayed in Paystation Administration when looking at transaction details). Max length is 64 char. Make sure you use it!
-    
-    $testMode = true;
-    
+    $pstn_pi	= self::$paystation_id; 
+    $pstn_gi	= self::$gateway_id; 
+    $site = self::$site_description;
+    $pstn_mr = self::$merchant_ref;
+    $testMode = self::$test_mode;
   	$merchantSession	= urlencode($site.'-'.time().'-'.$this->makePaystationSessionID(8,8)); //max length of ms is 64 char 
   	
-    //$url = $paystation."&am=".$amount."&pi=".$paystationid."&ms=".$merchantsession.'&merchant_ref='.$merchant_ref;
-    $paystationParams = "paystation&pstn_pi=".$pstn_pi."&pstn_gi=".$pstn_gi."&pstn_ms=".$merchantSession."&pstn_am=".$amount."&pstn_mr=".$pstn_mr."&pstn_nr=t";
+  	//Create URL to initiate transation with PayStation
+    $paystationParams = "paystation&pstn_pi=".$pstn_pi.
+    										"&pstn_gi=".$pstn_gi.
+    										"&pstn_ms=".$merchantSession.
+    										"&pstn_am=".$amount.
+    										"&pstn_mr=".$pstn_mr.
+    										"&pstn_nr=t";
     
-    if 	($testMode == true){
-    	$paystationParams = $paystationParams."&pstn_tm=t";
-    }
+    if ($testMode) $paystationParams = $paystationParams."&pstn_tm=t";
+    
     
     //Do Transaction Initiation POST
     $initiationResult=$this->directTransaction($paystationURL, $paystationParams);
@@ -81,48 +97,43 @@ class PaystationHostedPayment extends Payment {
     xml_parse_into_struct($p, $initiationResult, $vals, $tags);
     xml_parser_free($p);
     
-
-    //Does this ever get called? long payment process
+    //Analyze the resulting XML from Transaction Initiation POST
   	for ($j=0; $j < count($vals); $j++) {
-    	if (!strcmp($vals[$j]["tag"],"DIGITALORDER") && isset($vals[$j]["value"])){
-    		//get digital order URL
-    		$digitalOrder=$vals[$j]["value"];
-    		
-    		SS_Log::log(new Exception(print_r($digitalOrder, true)), SS_Log::NOTICE);
-    		
+  	  
+  	  //Get URL to redirect to on PayStation site in order to pay for this order
+    	if (strcasecmp($vals[$j]["tag"], "DIGITALORDER") == 0 && isset($vals[$j]["value"])){
+    		$digitalOrder = $vals[$j]["value"];
     	}
-    	if (!strcmp($vals[$j]["tag"],"PAYSTATIONTRANSACTIONID") && isset($vals[$j]["value"])){
-    		//get Paystation Transaction ID for reference
-    		$paystationTransactionID=$vals[$j]["value"];
+    	
+    	//Get Paystation Transaction ID for reference
+    	if (strcasecmp($vals[$j]["tag"], "PAYSTATIONTRANSACTIONID") == 0 && isset($vals[$j]["value"])){
+    		$paystationTransactionID = $vals[$j]["value"];
+    	}
+    	
+    	//Get Paystation Error message
+  	  if (strcasecmp($vals[$j]["tag"], "PAYSTATIONERRORMESSAGE") == 0 && isset($vals[$j]["value"])){
+    		$paystationErrorMessage = $vals[$j]["value"];
     	}
     }
     
+    //If URL to pay for this Order is returned, redirect customer to payment gateway
 	  if (isset($digitalOrder) && $digitalOrder) {
 	    
-	    
+	    $this->TransactionID = (isset($paystationTransactionID)) ? $paystationTransactionID : null;
   	  $this->Status = "Pending";
   		$this->write();
   		
-  		if ($digitalOrder){
-  			Director::redirect($digitalOrder); //redirect to payment gateway
-  			return new Payment_Processing();
-  		}
-
-  		
-    	//header("Location:".$digitalOrder);
-    	//exit();
+			Director::redirect($digitalOrder);
+			return new Payment_Processing();
     } 
     else {
       
-      $this->Message = "PayPal could not be contacted";
+      $this->TransactionID = (isset($paystationTransactionID)) ? $paystationTransactionID : null;
+      $this->Message = (isset($paystationErrorMessage)) ? "PayStation responded with the error: $paystationErrorMessage" : "PayStation could not be contacted";
   		$this->Status = 'Failure';
   		$this->write();
   		
   		return new Payment_Failure($this->Message);
-      
-      
-      //header ("Content-Type:text/xml"); 
-      //echo $initiationResult;
     }
 	}
 	
@@ -196,7 +207,7 @@ class PaystationHostedPayment extends Payment {
   
     return $pass;
   }
-
+  
 }
 
 /**
@@ -211,22 +222,42 @@ class PaystationHostedPayment_Handler extends Controller {
 	}
 	
 	function complete() {
-		if(isset($_REQUEST['ec'])) {
-			if(isset($_REQUEST['ms'])) {
-				if($payment = DataObject::get_by_id('PaystationHostedPayment', $_REQUEST['ms'])) {
-					$payment->Status = $_REQUEST['ec'] == '0' ? 'Success' : 'Failure';
-					if($_REQUEST['ti']) $payment->TxnRef = $_REQUEST['ti'];
-					if($_REQUEST['em']) $payment->Message = $_REQUEST['em'];
-					
-					$payment->write();
-						
-					$payment->redirectToOrder();
-				}
-				else user_error('There is no any Paystation hosted payment which ID is #' . $_REQUEST['ms'], E_USER_ERROR);
-			}
-			else user_error('There is no any Paystation hosted payment ID specified', E_USER_ERROR);
-		}
-		else user_error('There is no any Paystation hosted payment error code specified', E_USER_ERROR);
+	  
+	  //Check for ti - TransactionID
+	  //Get payment from TI
+	  
+	  $request = $this->getRequest();
+	  $transactionID = $request->getVar('ti');
+	  $errorCode = $request->getVar('ec');
+	  $errorMessage = $request->getVar('em');
+	  
+	  if ($transactionID) {
+	    
+	    $payment = DataObject::get('PaystationHostedPayment', 'TransactionID = ' . Convert::raw2sql($transactionID));
+	    
+	    if ($payment) {
+
+	      if ($errorCode == '0') {
+	        $payment->Status = 'Success';
+	        $payment->Message = "PayStation responded with: $errorMessage"; //Error message can be positive e.g: Transaction successful
+	      }
+	      else {
+	        $payment->Status = 'Success';
+	        $payment->Message = "PayStation responded with the error: $errorMessage"; 
+	      }
+	      
+	      $payment->write();
+				$payment->redirectToOrder();
+	    }
+	    else {
+	      //TODO return meaningful error to user
+	      SS_Log::log(new Exception(print_r('cannot find the payment', true)), SS_Log::NOTICE);
+	    }
+	  }
+	  else {
+	    //TODO return meaningful error to user
+	    SS_Log::log(new Exception(print_r('the transaction ID does not exist', true)), SS_Log::NOTICE);
+	  }
 	}
 	
 }

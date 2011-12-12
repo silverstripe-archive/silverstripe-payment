@@ -291,6 +291,11 @@ interface Payment_Interface {
   
   function getPaymentFormRequirements();
   
+  /**
+   * This seems to be dependent on a decorator implmenting it?
+   * Might be a better way to do that, with a hook or something?
+   */
+  //function redirectToOrder();
 }
 
 
