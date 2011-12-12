@@ -6,7 +6,7 @@ class PaystationHostedPayment extends Payment {
 	
 	protected static $privacy_link = 'http://paystation.co.nz/privacy-policy';
 	
-	protected static $logo = 'payment/images/payments/paystation.jpg';
+	protected static $logo = 'payment/images/paystation.jpg';
 	
 	// URLs
 
@@ -41,9 +41,11 @@ class PaystationHostedPayment extends Payment {
 			new LiteralField('PaystationInfo', $privacyLink),
 			new LiteralField(
 				'PaystationPaymentsList',
-				'<img src="payment/images/payments/methods/visa.jpg" alt="Visa"/>' .
-				'<img src="payment/images/payments/methods/mastercard.jpg" alt="MasterCard"/>' .
-				'<img src="payment/images/payments/methods/american-express.gif" alt="American Express"/>'
+				'<div id="VisaCard" class="CreditCard"></div>' .
+  			'<div id="MasterCard" class="CreditCard"></div>' .
+  			'<div id="AmEx" class="CreditCard"></div>'.
+			
+			  '<a href="' . self::$privacy_link . '" target="_blank" rel="nofollow" class="PrivacyPolicyLink" title="PayStation privacy policy">PayStation Privacy Policy</a>'
 			)
 		);
 	}

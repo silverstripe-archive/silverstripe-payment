@@ -1,0 +1,88 @@
+.PaymentSet {
+float: left;
+}
+
+.PaymentSet li {
+float: left;
+width: 90%;
+padding: 10px;
+border-bottom: 1px solid #CFCFCF;
+}
+
+.PaymentSet li:last-child {
+border-bottom: none;
+}
+	
+.PaymentSet input.radio {
+float: left;
+}
+
+.PaymentSet .PaymentFieldLabel {
+float: left;	
+margin-left: 15px;
+margin-top: -3px;
+font-size: 14px;
+}
+
+.PaymentSet .ExtraPaymentFields {
+float: left;
+clear: left;
+width: 600px;
+margin: 10px 0px 5px 25px;
+}
+
+.PaymentSet .CreditCard {
+	background: url(../images/credit-card-icons.jpg);
+  width: 54px;
+  height: 32px; 
+  float: left;
+}
+
+#VisaCard { 
+  background-position: -19px -17px;
+}
+
+#MasterCard { 
+  background-position: -98px -18px;
+}
+
+#AmEx { 
+  background-position: -98px -103px;
+}
+
+#Discover { 
+  background-position: -258px -61px;
+}
+
+#PayPal { 
+  background-position: -178px -18px;
+}
+
+.PrivacyPolicyLink {
+margin-left: 5px;
+margin-top: 3px;
+font-size: 12px;
+font-style: italic;
+color: #666;
+float: left;
+clear: left;
+}
+
+/* 
+ * PayStation Hosted
+ * ===================================================
+ */
+.PaystationHostedPaymentFields {
+padding: 10px;
+background: white;
+}
+
+/* 
+ * PayPal Express Checkout
+ * ===================================================
+ */
+
+.PayPalExpressCheckoutPaymentFields {
+padding: 10px;
+background: white;
+}

@@ -142,19 +142,33 @@ class Payment extends DataObject {
 	 * @return FieldSet
 	 */
 	static function combined_form_fields($amount) {
+	  
+	  Requirements::css('payment/css/Payment.css');
 
 		// Create the initial form fields, which defines an OptionsetField
 		// allowing the user to choose which payment method to use.
 		$fields = new FieldSet(
-			new HeaderField(_t('Payment.PAYMENTTYPE', 'Payment Type'), 3),
-			new OptionsetField(
-				'PaymentMethod',
-				'',
-				self::$supported_methods,
-				array_shift(array_keys(self::$supported_methods))
-			)
+			new HeaderField(_t('Payment.PAYMENTTYPE', 'Payment Type'), 3)
 		);
 		
+		/*
+		$oldPaymentMethodsField = new OptionsetField(
+			'PaymentMethod',
+			'',
+			self::$supported_methods,
+			array_shift(array_keys(self::$supported_methods))
+		);
+		*/
+
+		$paymentMethodsField = new PaymentSetField(
+			'PaymentMethod',
+			'',
+			self::$supported_methods,
+			array_shift(array_keys(self::$supported_methods))
+		);
+		$fields->push($paymentMethodsField);
+		
+		/*
 		// If the user defined an numerically indexed array, throw an error
 		if(ArrayLib::is_associative(self::$supported_methods)) {
 			foreach(self::$supported_methods as $methodClass => $methodTitle) {
@@ -171,6 +185,7 @@ class Payment extends DataObject {
 		} else {
 			user_error('Payment::set_supported_methods() requires an associative array.', E_USER_ERROR);
 		}
+		*/
 		
 		// Add the amount and subtotal fields for the payment amount
 		$fields->push(new ReadonlyField('Amount', _t('Payment.AMOUNT', 'Amount'), $amount));

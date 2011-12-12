@@ -34,7 +34,7 @@ class PayPalExpressCheckoutPayment extends Payment{
 		'TransactionID' => 'Varchar(30)'
 	);
 	
-	protected static $logo = "payment/images/payments/paypal.jpg";
+	protected static $logo = "payment/images/paypal.gif";
 	
 	//PayPal URLs
 	protected static $test_API_Endpoint = "https://api-3t.sandbox.paypal.com/nvp";
@@ -386,30 +386,23 @@ class PayPalExpressCheckoutPayment extends Payment{
 	
 	
 	function getPaymentFormFields() {
-	  
-	  Requirements::css('payment/css/PayPalExpressCheckout.css');
-	  
+
 		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by PayPal"/>';
 		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" rel="nofollow" title="Read PayPal\'s privacy policy">' . $logo . '</a><br />';
 		return new FieldSet(
-			//new LiteralField('PayPalInfo', $privacyLink),
+		
+		  new LiteralField('PaystationInfo', $privacyLink),
+
 			new LiteralField(
 				'PayPalPaymentsList',
 				
-				//TODO: these methods aren't available in all countries
-				'<div id="VisaCard" class="PayPalCC"></div>' .
-  			'<div id="MasterCard" class="PayPalCC"></div>' .
-  			'<div id="AmEx" class="PayPalCC"></div>' .
-  			'<div id="Discover" class="PayPalCC"></div>' .
-  			'<div id="PayPal" class="PayPalCC"></div>' .
-			
-//				'<img src="payment/images/payments/methods/visa.jpg" alt="Visa" class="PaypalCC" />' .
-//				'<img src="payment/images/payments/methods/mastercard.jpg" alt="MasterCard" class="PaypalCC" />' .
-//				'<img src="payment/images/payments/methods/american-express.gif" alt="American Express" class="PaypalCC" />' .
-//				'<img src="payment/images/payments/methods/discover.jpg" alt="Discover" class="PaypalCC" />' .
-//				'<img src="payment/images/payments/methods/paypal.jpg" alt="PayPal" class="PaypalCC" />'.
+				'<div id="VisaCard" class="CreditCard"></div>' .
+  			'<div id="MasterCard" class="CreditCard"></div>' .
+  			'<div id="AmEx" class="CreditCard"></div>' .
+  			'<div id="Discover" class="CreditCard"></div>' .
+  			'<div id="PayPal" class="CreditCard"></div>' .
 
-			  '<a href="' . self::$privacy_link . '" target="_blank" rel="nofollow" class="PayPalPrivacy" title="Read PayPal\'s privacy policy">PayPal Privacy Policy</a>'
+			  '<a href="' . self::$privacy_link . '" target="_blank" rel="nofollow" class="PrivacyPolicyLink" title="Read PayPal\'s privacy policy">PayPal Privacy Policy</a>'
 			)
 		);
 	}
