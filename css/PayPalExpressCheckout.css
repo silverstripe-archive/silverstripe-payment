@@ -1,0 +1,47 @@
+#MethodFields_PayPalExpressCheckoutPayment {
+	/*
+  margin-left: 20px;
+  float: left;
+  margin-bottom: 35px;
+  */
+}
+
+.PaypalCC {
+  margin-right: 3px;
+}
+
+.PayPalCC {
+  background: url(../images/PayPal/credit-card-icons.jpg);
+  width: 54px;
+  height: 32px; 
+  float: left;
+}
+
+#VisaCard { 
+  background-position: -19px -17px;
+}
+
+#MasterCard { 
+  background-position: -98px -18px;
+}
+
+#AmEx { 
+  background-position: -98px -103px;
+}
+
+#Discover { 
+  background-position: -258px -61px;
+}
+
+#PayPal { 
+  background-position: -178px -18px;
+}
+
+.PayPalPrivacy {
+margin-left: 5px;
+font-size: 12px;
+font-style: italic;
+color: #666;
+float: left;
+clear: left;
+}
