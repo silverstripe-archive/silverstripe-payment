@@ -53,6 +53,14 @@ class PaystationHostedPayment extends Payment {
 	 * @var Boolean
 	 */
 	protected static $test_mode = false;
+	
+	/**
+	 * Flag for verifying SSL cert mode
+	 * 
+	 * @see PaystationHostedPayment::directTransaction()
+	 * @var Boolean
+	 */
+	protected static $verify_ssl_mode = true;
 
 	/**
 	 * Link to privacy policy for displaying on a checkout form or similar.
@@ -107,6 +115,16 @@ class PaystationHostedPayment extends Payment {
 	 */
 	static function set_test_mode() {
 		self::$test_mode = true;
+	}
+	
+	/** 
+	 * Set whether SSL verification occurs
+	 * 
+	 * @see PaystationHostedPayment::directTransaction()
+	 * @see PaystationHostedPayment::$verify_ssl_mode
+	 */
+	static function set_verify_ssl_mode($val) {
+		self::$verify_ssl_mode = (Boolean) $val;
 	}
 
 	/**
@@ -246,6 +264,7 @@ class PaystationHostedPayment extends Payment {
 	 * curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 0);
 	 * curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
 	 * 
+	 * @see PaystationHostedPayment::set_verify_ssl_mode()
 	 * @param String $url PayStation URL to POST to
 	 * @param String $params Data to POST
 	 * @return Mixed String|False On success returns string of XML respone from PayStation, failure returns false
@@ -268,7 +287,15 @@ class PaystationHostedPayment extends Payment {
   	curl_setopt($ch, CURLOPT_POST,1);
   	curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
   	curl_setopt($ch, CURLOPT_URL, $url);
-  	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 2);
+  	
+  	if (self::$verify_ssl_mode) {
+  	  curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 2);
+  	}
+  	else {
+  	  curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 0);
+  	  curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
+  	}
+  	
   	curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
   	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   	$result = curl_exec($ch);
