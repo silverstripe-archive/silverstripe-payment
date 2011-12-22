@@ -8,7 +8,7 @@
  * You need to define the installation ID, test mode and callback
  * password in _config.php of your project:
  * WorldpayPayment::set_installation_id(111111);
- * WorldpayPayment::set_testmode(100);
+ * WorldpayPayment::set_test_mode(100);
  * WorldpayPayment::set_callback_password(blahblah);
  * 
  * @package payment
@@ -33,7 +33,7 @@ class WorldpayPayment extends Payment {
 	
 	protected static $test_mode_name;
 	
-	protected static function set_test_mode($name) {
+	static function set_test_mode($name) {
 		self::$test_mode = '100';
 		self::$test_mode_name = $name;
 	}
