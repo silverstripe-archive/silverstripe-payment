@@ -77,7 +77,7 @@ class DPSRecurringPayment extends RecurringPayment{
 	}
 	
 	function recurringAuth($data){
-		DB::getConn()->transactionStart();
+		DB::getConn()->startTransaction();
 		try{
 			$this->TxnType = "Auth";
 			$this->AuthAmount = 1.00;
@@ -114,7 +114,7 @@ class DPSRecurringPayment extends RecurringPayment{
 	}
 	
 	function merchantRecurringAuth($data){
-		DB::getConn()->transactionStart();
+		DB::getConn()->startTransaction();
 		try{
 			$this->AuthAmount = 1.00;
 			$this->write();
@@ -122,7 +122,7 @@ class DPSRecurringPayment extends RecurringPayment{
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareMerchantHostedRecurringAuthInputs($data);
 			$adapter->doPayment($inputs, $this);
-			DB::getConn()->transactionEnd();
+			DB::getConn()->endTransaction();
 		}catch(Exception $e){
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
