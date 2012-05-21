@@ -143,18 +143,32 @@ class Payment extends DataObject {
 	 */
 	static function combined_form_fields($amount) {
 
+	  Requirements::css('payment/css/Payment.css');
+
 		// Create the initial form fields, which defines an OptionsetField
 		// allowing the user to choose which payment method to use.
 		$fields = new FieldSet(
-			new HeaderField(_t('Payment.PAYMENTTYPE', 'Payment Type'), 3),
-			new OptionsetField(
-				'PaymentMethod',
-				'',
-				self::$supported_methods,
-				array_shift(array_keys(self::$supported_methods))
-			)
+			new HeaderField(_t('Payment.PAYMENTTYPE', 'Payment Type'), 3)
 		);
 		
+		/*
+		$oldPaymentMethodsField = new OptionsetField(
+			'PaymentMethod',
+			'',
+			self::$supported_methods,
+			array_shift(array_keys(self::$supported_methods))
+		);
+		*/
+
+		$paymentMethodsField = new PaymentSetField(
+			'PaymentMethod',
+			'',
+			self::$supported_methods,
+			array_shift(array_keys(self::$supported_methods))
+		);
+		$fields->push($paymentMethodsField);
+		
+		/*
 		// If the user defined an numerically indexed array, throw an error
 		if(ArrayLib::is_associative(self::$supported_methods)) {
 			foreach(self::$supported_methods as $methodClass => $methodTitle) {
@@ -171,6 +185,8 @@ class Payment extends DataObject {
 		} else {
 			user_error('Payment::set_supported_methods() requires an associative array.', E_USER_ERROR);
 		}
+
+		*/
 		
 		// Add the amount and subtotal fields for the payment amount
 		$fields->push(new ReadonlyField('Amount', _t('Payment.AMOUNT', 'Amount'), $amount));
@@ -248,7 +264,7 @@ class Payment extends DataObject {
 		user_error("Please implement processPayment() on $this->class", E_USER_ERROR);
 	}
 	
-	function getForm($whichTest){
+	function getForm($whichTest) {
 		user_error("Please implement getForm() on $this->class", E_USER_ERROR);
 	}
 	
@@ -265,6 +281,24 @@ class Payment extends DataObject {
 		return DataObject::get_by_id($this->PaidForClass, $this->PaidForID);
 	}	
 }
+
+
+interface Payment_Interface {
+  
+  function processPayment($data, $form);
+  
+  function getPaymentFormFields();
+  
+  function getPaymentFormRequirements();
+  
+  /**
+   * This seems to be dependent on a decorator implmenting it?
+   * Might be a better way to do that, with a hook or something?
+   */
+  //function redirectToOrder();
+}
+
+
 abstract class Payment_Result {
 	
 	protected $value;

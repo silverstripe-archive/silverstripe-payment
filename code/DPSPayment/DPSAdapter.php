@@ -1,8 +1,5 @@
 <?php
 
-/**
- */
-
 class DPSAdapter extends Controller{
 	protected static $pxPost_Username;
 	protected static $pxPost_Password;
