@@ -599,55 +599,51 @@ JS;
 		}
 	}
 	
+	/**
+	 * Action called by DPS right after a payment operation, being a success or a failure
+	 * Will update the status of the payment accordingly, and redirect to the success/failure url
+	 * where more domain specific operations can be performed
+	 * @see {http://www.paymentexpress.com/technical_resources/ecommerce_hosted/pxaccess.html#ResultNotification}
+	 */
 	function processDPSHostedResponse(){
-		if(preg_match('/^PXHOST/i', $_SERVER['HTTP_USER_AGENT'])){
-			$dpsDirectlyConnecting = 1;
-		}
-	
+		
 		$pxpay = new PxPay(self::$pxPay_Url, self::$pxPay_Userid, self::$pxPay_Key);
 
 		$enc_hex = $_REQUEST["result"];
 
 		$rsp = $pxpay->getResponse($enc_hex);
 
-		if(isset($dpsDirectlyConnecting) && $dpsDirectlyConnecting) {
-			// DPS Service connecting directly
-			$success = $rsp->getSuccess();   # =1 when request succeeds
-			echo ($success =='1') ? "success" : "failure";
-		} else {
-			// Human visitor
-			$paymentID = $rsp->getTxnData1();
-			$SQL_paymentID = (int)$paymentID;
+		$paymentID = $rsp->getTxnData1();
+		$SQL_paymentID = (int)$paymentID;
 
-			if($dpsBillingID = $rsp->getDpsBillingId()){
-				$payment = DataObject::get_by_id('DPSRecurringPayment', $SQL_paymentID);
-				$payment->DPSBillingID = $dpsBillingID;
-			}else{
-				$payment = DataObject::get_by_id("DPSPayment", $SQL_paymentID);
-			}
-		
-			if($payment) {
-				DB::getConn()->transactionStart();
-				try{
-					$payment->ResponseXML = $rsp->toXml();
-					$success = $rsp->getSuccess();
-					if($success =='1'){
-						// @todo Use AmountSettlement for amount setting?
-						$payment->TxnRef = $rsp->getDpsTxnRef();
-						$payment->AuthCode = $rsp->getAuthCode();
-						$payment->Status="Success";
-					} else {
-						$payment->Status="Failure";
-					}
-					$payment->Message=$rsp->getResponseText();
-					$payment->write();
-					DB::getConn()->transactionEnd();
-				}catch(Exception $e){
-					DB::getConn()->transactionRollback();
-					$payment->handleError($e);
+		if($dpsBillingID = $rsp->getDpsBillingId()){
+			$payment = DataObject::get_by_id('DPSRecurringPayment', $SQL_paymentID);
+			$payment->DPSBillingID = $dpsBillingID;
+		}else{
+			$payment = DataObject::get_by_id("DPSPayment", $SQL_paymentID);
+		}
+	
+		if($payment) {
+			DB::getConn()->transactionStart();
+			try{
+				$payment->ResponseXML = $rsp->toXml();
+				$success = $rsp->getSuccess();
+				if($success =='1'){
+					// @todo Use AmountSettlement for amount setting?
+					$payment->TxnRef = $rsp->getDpsTxnRef();
+					$payment->AuthCode = $rsp->getAuthCode();
+					$payment->Status="Success";
+				} else {
+					$payment->Status="Failure";
 				}
-				Director::redirect($payment->DPSHostedRedirectURL);
+				$payment->Message=$rsp->getResponseText();
+				$payment->write();
+				DB::getConn()->transactionEnd();
+			}catch(Exception $e){
+				DB::getConn()->transactionRollback();
+				$payment->handleError($e);
 			}
+			Director::redirect($payment->DPSHostedRedirectURL);
 		}
 	}
 }
