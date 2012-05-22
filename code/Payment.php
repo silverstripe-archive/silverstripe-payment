@@ -7,10 +7,21 @@
  */
 class Payment extends DataObject {
   /**
-   * Construct the underlying payment object given the payment gateway module name
+   * Get the payment gateway class name from the associating module name
+   * 
+   * @param $gatewayName
+   * @return gateway class name
+   * 
+   * TODO: Generalize naming convention
+   *       Take care of merchant hosted and gateway hosted sub classes
    */
-  public function __construct($gatewayName) {
-    
+  public static function gatewayClassName($gatewayname) {
+    $className = $gatewayname . "_Payment";
+    if (class_exists($className)) {
+      return $className;
+    } else {
+      return null;
+    }
   }
   
   /**
@@ -32,7 +43,7 @@ class Payment extends DataObject {
       //find which is the latest one for the recurring payments
       'PaymentDate' => "Date",
   
-      //Usered for store any Exception during this payment Process.
+      //Used for storing any Exception during this payment Process.
       'ExceptionError' => 'Text'
   );
   
