@@ -61,4 +61,56 @@ class Payment_GatewayHosted extends Payment {
   
 }
 
+/* Payment result classes */ 
+
+abstract class Payment_Result {
+
+  protected $value;
+
+  function __construct($value = null) {
+    $this->value = $value;
+  }
+
+  function getValue() {
+    return $this->value;
+  }
+
+  abstract function isSuccess();
+
+  abstract function isProcessing();
+
+}
+class Payment_Success extends Payment_Result {
+
+  function isSuccess() {
+    return true;
+  }
+
+  function isProcessing() {
+    return false;
+  }
+
+}
+class Payment_Processing extends Payment_Result {
+
+  function isSuccess() {
+    return false;
+  }
+
+  function isProcessing() {
+    return true;
+  }
+
+}
+class Payment_Failure extends Payment_Result {
+
+  function isSuccess() {
+    return false;
+  }
+
+  function isProcessing() {
+    return false;
+  }
+}
+
 ?>
