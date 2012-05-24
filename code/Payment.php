@@ -7,6 +7,19 @@
  */
 class Payment extends DataObject {
   /**
+   * The payment form fields that should
+   * be shown on the checkout order form for the
+   * payment type. This is mostly used for merchant-hosted payment
+   */
+  public $formFields;
+  public $requiredFormFields;
+
+  public function __construct() {
+    $this->formFields = new FieldSet();
+    $this->formRequirements = array();
+  }
+  
+  /**
    * Get the payment gateway class name from the associating module name
    * 
    * @param $gatewayName
@@ -54,7 +67,34 @@ class Payment extends DataObject {
 }
 
 class Payment_MerchantHosted extends Payment {
+  protected static $cvn_mode = true;
   
+  public function getCreditCardFields() {
+    $fields = new FieldSet(
+        new TextField('CardHolderName', 'Credit Card Holder Name :'),
+        new CreditCardField('CardNumber', 'Credit Card Number :'),
+        new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
+    );
+    
+    if (self::$cvn_mode) $fields->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
+    return $fields;
+  }
+  
+  public function getFormFields() {
+    // Other business fields
+    
+    // Credit card fields
+    $ccFields = $this->getCreditCardFields();
+    foreach ($ccFields as $ccFields) {
+      $this->field->push($ccField);
+    }
+    
+    return $this->formFields;
+  }
+  
+  public function getFormRequirements() {
+    
+  }
 }
 
 class Payment_GatewayHosted extends Payment {
