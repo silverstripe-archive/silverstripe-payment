@@ -86,7 +86,7 @@ class Payment_MerchantHosted extends Payment {
     // Credit card fields
     $ccFields = $this->getCreditCardFields();
     foreach ($ccFields as $ccFields) {
-      $this->field->push($ccField);
+      $this->formFields->push($ccField);
     }
     
     return $this->formFields;
