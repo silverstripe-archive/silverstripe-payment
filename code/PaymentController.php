@@ -6,6 +6,20 @@
  * @package payment
  */
 class PaymentController extends Controller {
+  
+  static $URLSegment;
+  
+  static function complete_link() {
+    return self::$URLSegment . '/complete';
+  }
+  
+  static function cancel_link($custom) {
+    return self::complete_link() . '?custom=' . $custom;
+  }
+  
+  /**
+   * The payment object to be injected to this controller
+   */
   public $payment;
   
   /**
@@ -54,5 +68,12 @@ class PaymentController extends Controller {
    */
   public function processRequest($data) {
     user_error("Please implement processRequest() on $this->class", E_USER_ERROR);
+  }
+  
+  /**
+   * Process a payment response. 
+   */
+  public function processResponse($response) {
+    
   }
 }

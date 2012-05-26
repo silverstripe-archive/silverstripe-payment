@@ -64,6 +64,35 @@ class Payment extends DataObject {
       'PaidObject' => 'Object',
       'PaidBy' => 'Member',
   );
+  
+  /**
+   * Make payment table transactional.
+   */
+  static $create_table_options = array(
+      'MySQLDatabase' => 'ENGINE=InnoDB'
+  );
+  
+  /**
+   * The currency code used for payments.
+   * @var string
+   */
+  protected static $site_currency = 'USD';
+  
+  /**
+   * Set the currency code that this site uses.
+   * @param string $currency Currency code. e.g. "NZD"
+   */
+  public static function set_site_currency($currency) {
+    self::$site_currency = $currency;
+  }
+  
+  /**
+   * Return the site currency in use.
+   * @return string
+   */
+  public static function site_currency() {
+    return self::$site_currency;
+  }
 }
 
 class Payment_MerchantHosted extends Payment {
