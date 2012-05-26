@@ -16,6 +16,24 @@ class PaymentController extends Controller {
   }
   
   /**
+   * Get the controller's class name from a given gateway module name and config
+   * TODO: Generalize naming convention; make use of _config.php
+   * 
+   * @param $gatewayName
+   * @return Controller class name
+   */
+  public static function controllerClassName() {
+    $paymentClass = Payment::gatewayClassName($gatewayname);
+    $controllerClass = $paymentClass . "_Controller";
+    
+    if (class_exists($controllerClass)) {
+      return $controllerClass;
+    } else {
+      user_error("Controller class is not defined", E_USER_ERROR);
+    } 
+  }
+  
+  /**
    * Process a payment from an order form.  
    * 
    * @param $data, $form

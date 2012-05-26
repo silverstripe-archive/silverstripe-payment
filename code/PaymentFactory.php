@@ -10,12 +10,11 @@ class PaymentFactory {
    * Construct an instance of this object given the name of the desired payment gateway
    */
   public function __construct($gatewayName) {
-    if ($paymentClassName = Payment::gatewayClassName($gatewayname)) {
-      $payment = new $paymentClassName();
-      $paymentController = new PaymentController($payment);
-      $this->paymentProcessor = new PaymentProcessor($paymentController);
-    } else {
-      // Payment class is not yet defined
-    }
+    $paymentClass = Payment::gatewayClassName($gatewayname);
+    $payment = new $paymentClass();
+    $paymentControllerClass = PaymentController::controllerClassName($gatewayName);
+    $paymentController = new $paymentControllerClass();
+    
+    $this->paymentProcessor = new PaymentProcessor($paymentController);
   }
 }

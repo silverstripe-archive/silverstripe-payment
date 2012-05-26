@@ -3,6 +3,6 @@
 /**
  * Object representing a dummy payment gateway
  */
-class DummyPayment extends Payment {
+class Dummy_Payment extends Payment {
   
 }

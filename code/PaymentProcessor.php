@@ -16,17 +16,12 @@ class PaymentProcessor {
   }
   
   /**
-   * Process payment using the injected payment controller
+   * Process payment from order form using the injected payment controller
    * 
-   * @param $data
-   *   The payment data 
+   * @param $data, $form
    * @return PaymentProcessorResult
    */
-  public function processPayment($data) {
-    $processResult = $this->paymentController->processRequest($data);
-    
-    switch($processResult) {
-      
-    }
+  public function processPayment($data, $form) {
+    return $this->paymentController->processPayment($data, $form);
   }
 }

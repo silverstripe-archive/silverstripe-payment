@@ -33,7 +33,7 @@ class Payment extends DataObject {
     if (class_exists($className)) {
       return $className;
     } else {
-      return null;
+      user_error("Payment gateway class is not defined", E_USER_ERROR);
     }
   }
   
