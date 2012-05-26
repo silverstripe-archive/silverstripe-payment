@@ -101,7 +101,7 @@ class Payment_GatewayHosted extends Payment {
   
 }
 
-/* Payment result classes */ 
+/* Payment result classes. TODO: is there a cleaner way? */ 
 
 abstract class Payment_Result {
 

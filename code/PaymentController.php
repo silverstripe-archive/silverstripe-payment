@@ -16,13 +16,25 @@ class PaymentController extends Controller {
   }
   
   /**
-   * Process a payment request
+   * Process a payment from an order form.  
+   * 
+   * @param $data, $form
+   */
+  public function processPayment($data, $form) {
+    $this->payment->Status = 'Pending';
+    $this->payment->write();
+    
+    // Overwrite if further form processing is needed
+    processRequest($data);
+  }
+  
+  /**
+   * Process a payment request. Each gateway must implement this function. 
    * 
    * @param $data
-   *   The payment data to be processed
-   * @return
+   * @return Payment_Result
    */
   public function processRequest($data) {
-    
+    user_error("Please implement processRequest() on $this->class", E_USER_ERROR);
   }
 }
