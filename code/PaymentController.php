@@ -48,7 +48,8 @@ class PaymentController extends Controller {
   }
   
   /**
-   * Process a payment from an order form.  
+   * Process a payment from an order form. 
+   * TODO: If this function becomes unneccesseary, omit it.  
    * 
    * @param $data, $form
    */

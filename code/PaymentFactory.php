@@ -4,17 +4,18 @@
  * Factory class to allow easy initiation of payment objects
  */
 class PaymentFactory {
-  public $paymentProcessor;
-  
   /**
    * Construct an instance of this object given the name of the desired payment gateway
+   * 
+   * @param $gatewayName
+   * @return PaymentProcessor
    */
-  public function __construct($gatewayName) {
+  public static function createProcessor($gatewayName) {
     $paymentClass = Payment::gatewayClassName($gatewayname);
     $payment = new $paymentClass();
     $paymentControllerClass = PaymentController::controllerClassName($gatewayName);
     $paymentController = new $paymentControllerClass();
     
-    $this->paymentProcessor = new PaymentProcessor($paymentController);
+    return new PaymentProcessor($paymentController);
   }
 }

@@ -181,5 +181,3 @@ class Payment_Failure extends Payment_Result {
     return false;
   }
 }
-
-?>
