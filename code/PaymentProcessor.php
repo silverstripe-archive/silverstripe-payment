@@ -18,10 +18,10 @@ class PaymentProcessor {
   /**
    * Process payment from order form using the injected payment controller
    * 
-   * @param $data, $form
+   * @param $data
    * @return PaymentProcessorResult
    */
-  public function processPayment($data, $form) {
+  public function processPayment($data) {
     return $this->paymentController->processPayment($data, $form);
   }
 }

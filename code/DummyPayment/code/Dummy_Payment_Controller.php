@@ -3,7 +3,7 @@
 /**
  * Controller for DummyPayment
  */
-class Dummy_Payment_Controller extends PaymentController {
+class Dummy_Payment_Controller extends Payment_Controller {
   
   static $URLSegment = 'dummy';
   

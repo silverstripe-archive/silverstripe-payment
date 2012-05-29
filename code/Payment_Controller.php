@@ -57,18 +57,18 @@ class Payment_Controller extends Page_Controller {
    * Process a payment from an order form. 
    * TODO: If this function becomes unneccesseary, omit it.  
    * 
-   * @param $data, $form
+   * @param $data
    */
-  public function processPayment($data, $form) {
+  public function processPayment($data) {
+    // Save preliminary data to database
     $this->payment->Status = 'Pending';
     $this->payment->write();
     
-    // Overwrite if further form processing is needed
     processRequest($data);
   }
   
   /**
-   * Process a payment request. Each gateway must implement this function. 
+   * Process a payment request, to be implemented by specific gateways 
    * 
    * @param $data
    * @return Payment_Result
@@ -78,14 +78,14 @@ class Payment_Controller extends Page_Controller {
   }
   
   /**
-   * Process a payment response. 
+   * Process a payment response, to be implemented by specific gateways 
    */
   public function processResponse($response) {
-    
+    user_error("Please implement processRequest() on $this->class", E_USER_ERROR);
   }
   
   /**
-   * Payment completed - handler for $URLSegment/complete
+   * Payment complete handler
    */
   public function complete() {
     $this->payment->Status = 'Completed';
@@ -93,7 +93,7 @@ class Payment_Controller extends Page_Controller {
   }
   
   /**
-   * Payment cancelled - handler for $URLSegment/cancel
+   * Payment cancel handler
    */
   public function cancel() {
     $this->payment->Status = 'Cancelled';
