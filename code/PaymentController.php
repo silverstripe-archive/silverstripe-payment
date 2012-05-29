@@ -5,16 +5,22 @@
  * 
  * @package payment
  */
-class PaymentController extends Controller {
+class Payment_Controller extends Page_Controller {
   
   static $URLSegment;
+  
+  /*
+   * Message to show when payment is completed
+   * TODO: use template
+   */ 
+  public $complete_message = "Payment is completed";
   
   static function complete_link() {
     return self::$URLSegment . '/complete';
   }
   
-  static function cancel_link($custom) {
-    return self::complete_link() . '?custom=' . $custom;
+  static function cancel_link() {
+    return self::$URLSegment . '/cancel';
   }
   
   /**
@@ -76,5 +82,21 @@ class PaymentController extends Controller {
    */
   public function processResponse($response) {
     
+  }
+  
+  /**
+   * Payment completed - handler for $URLSegment/complete
+   */
+  public function complete() {
+    $this->payment->Status = 'Completed';
+    $this->payment->write();
+  }
+  
+  /**
+   * Payment cancelled - handler for $URLSegment/cancel
+   */
+  public function cancel() {
+    $this->payment->Status = 'Cancelled';
+    $this->payment->write();
   }
 }
