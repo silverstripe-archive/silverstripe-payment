@@ -42,8 +42,8 @@ class Payment_Controller extends Page_Controller {
    * @param $gatewayName
    * @return Controller class name
    */
-  public static function controllerClassName() {
-    $paymentClass = Payment::gatewayClassName($gatewayname);
+  public static function controllerClassName($gatewayName) {
+    $paymentClass = Payment::gatewayClassName($gatewayName);
     $controllerClass = $paymentClass . "_Controller";
     
     if (class_exists($controllerClass)) {

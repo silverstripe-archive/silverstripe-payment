@@ -11,10 +11,10 @@ class PaymentFactory {
    * @return PaymentProcessor
    */
   public static function createProcessor($gatewayName) {
-    $paymentClass = Payment::gatewayClassName($gatewayname);
+    $paymentClass = Payment::gatewayClassName($gatewayName);
     $payment = new $paymentClass();
-    $paymentControllerClass = PaymentController::controllerClassName($gatewayName);
-    $paymentController = new $paymentControllerClass();
+    $paymentControllerClass = Payment_Controller::controllerClassName($gatewayName);
+    $paymentController = new $paymentControllerClass($payment);
     
     return new PaymentProcessor($paymentController);
   }
