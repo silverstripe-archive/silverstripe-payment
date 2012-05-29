@@ -22,6 +22,6 @@ class PaymentProcessor {
    * @return PaymentProcessorResult
    */
   public function processPayment($data) {
-    return $this->paymentController->processPayment($data, $form);
+    return $this->paymentController->processPayment($data);
   }
 }
