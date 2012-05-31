@@ -5,23 +5,9 @@
  * 
  * @package payment
  */
-class Payment_Controller extends Page_Controller {
+class Payment_Controller extends Controller {
   
   static $URLSegment;
-  
-  /*
-   * Message to show when payment is completed
-   * TODO: use template
-   */ 
-  public $complete_message = "Payment is completed";
-  
-  static function complete_link() {
-    return self::$URLSegment . '/complete';
-  }
-  
-  static function cancel_link() {
-    return self::$URLSegment . '/cancel';
-  }
   
   /**
    * The payment object to be injected to this controller
@@ -29,10 +15,39 @@ class Payment_Controller extends Page_Controller {
   public $payment;
   
   /**
-   * Inject the corresponding payment object to this controller
+   * Message to show when payment is completed
+   * TODO: use template
+   */ 
+  public $complete_message = "Payment is completed";
+  
+  /**
+   * Return the relative url for completing payment 
    */
-  public function __construct($payment) {
-    $this->payment = $payment;
+  public function complete_link() {
+    // Bypass the inheritance limitation
+    $class = get_class($this);
+    return $class::$URLSegment . '/complete';
+  }
+  
+  /**
+   * Return the relative url for cancelling payment
+   */
+  public function cancel_link() {
+    // Bypass the inheritance limitation
+    $class = get_class($this);
+    return $class::$URLSegment . '/cancel';
+  }
+  
+  /**
+   * Construct a controller with an injected payment object
+   */
+  public static function initWithPayment($payment) {
+    // construct the correct child class
+    $class = get_called_class();
+    $instance = new $class();
+    
+    $instance->payment = $payment;
+    return $instance;
   }
   
   /**
@@ -64,7 +79,7 @@ class Payment_Controller extends Page_Controller {
     $this->payment->Status = 'Pending';
     $this->payment->write();
     
-    processRequest($data);
+    $this->processRequest($data);
   }
   
   /**
@@ -88,8 +103,10 @@ class Payment_Controller extends Page_Controller {
    * Payment complete handler
    */
   public function complete() {
-    $this->payment->Status = 'Completed';
-    $this->payment->write();
+    // Load the payment object from database
+    //$this->payment->Status = 'Completed';
+    //$this->payment->write();
+    print($this->complete_message);
   }
   
   /**

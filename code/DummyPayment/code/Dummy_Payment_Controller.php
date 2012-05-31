@@ -13,6 +13,6 @@ class Dummy_Payment_Controller extends Payment_Controller {
   function processRequest($data) {
     // Redirect to the return url
     // TODO: Allow cancelled and failed payment as well for testing purposes
-    Director::redirect(complete_link());
+    Director::redirect(Director::absoluteBaseURL() . $this->complete_link());
   }
 }

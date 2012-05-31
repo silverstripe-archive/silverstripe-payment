@@ -15,7 +15,9 @@ class Payment extends DataObject {
   public $requiredFormFields;
 
   public function __construct() {
-    $this->formFields = new FieldSet();
+    parent::__construct();
+    
+    $this->formFields = new FieldList();
     $this->formRequirements = array();
   }
   
@@ -44,18 +46,12 @@ class Payment extends DataObject {
    * Pending: Payment awaiting receipt/bank transfer etc
    */
   public static $db = array(
-      'Status' => "Enum('Incomplete,Success,Failure,Pending','Incomplete')",
+      'Status' => "Enum('Incomplete, Success, Failure, Pending')",
       'Amount' => 'Money',
       'Message' => 'Text',
-      'IP' => 'Varchar',
-      'ProxyIP' => 'Varchar',
       'PaidForID' => "Int",
       'PaidForClass' => 'Varchar',
-  
-      //This is used only when the payment is one of the recurring payments, when a scheduler is trying to
-      //find which is the latest one for the recurring payments
-      'PaymentDate' => "Date",
-  
+
       //Used for storing any Exception during this payment Process.
       'ExceptionError' => 'Text'
   );
@@ -93,13 +89,19 @@ class Payment extends DataObject {
   public static function site_currency() {
     return self::$site_currency;
   }
+  
+  function populateDefaults() {
+    parent::populateDefaults();
+  
+    $this->Amount->Currency = Payment::site_currency();
+  }
 }
 
 class Payment_MerchantHosted extends Payment {
   protected static $cvn_mode = true;
   
   public function getCreditCardFields() {
-    $fields = new FieldSet(
+    $fields = new FieldList(
         new TextField('CardHolderName', 'Credit Card Holder Name :'),
         new CreditCardField('CardNumber', 'Credit Card Number :'),
         new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4)

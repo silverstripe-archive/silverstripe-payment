@@ -14,7 +14,7 @@ class PaymentFactory {
     $paymentClass = Payment::gatewayClassName($gatewayName);
     $payment = new $paymentClass();
     $paymentControllerClass = Payment_Controller::controllerClassName($gatewayName);
-    $paymentController = new $paymentControllerClass($payment);
+    $paymentController = $paymentControllerClass::initWithPayment($payment);
     
     return new PaymentProcessor($paymentController);
   }

@@ -3,7 +3,7 @@
 class OrderDemoPage_Controller extends Page_Controller {
 
   function orderForm() {
-    $fields = new FieldSet(
+    $fields = new FieldList(
       new HeaderField("Enter your details", 4),
       new TextField("FirstName", "First Name"),
       new TextField("Surname", "Last Name"),
@@ -14,7 +14,7 @@ class OrderDemoPage_Controller extends Page_Controller {
       new TextField("Country", "Country")
     );
     
-    $actions = new FieldSet(
+    $actions = new FieldList(
       new FormAction('processOrder', 'Place order')
     );
     
@@ -29,7 +29,7 @@ class OrderDemoPage_Controller extends Page_Controller {
     );
     
     $paymentProcessor = PaymentFactory::createProcessor('Dummy');
-    $paymentProcessor->processPayment($paymentData, $form);
+    $paymentProcessor->processPayment($paymentData);
   }
   
   function placeOrder() {

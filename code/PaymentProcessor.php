@@ -22,7 +22,6 @@ class PaymentProcessor {
    * @return PaymentProcessorResult
    */
   public function processPayment($data) {
-    print("tada");
     return $this->paymentController->processPayment($data);
   }
 }
