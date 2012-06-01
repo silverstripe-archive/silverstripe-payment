@@ -123,21 +123,36 @@ class Payment_Controller extends Controller {
   }
   
   /**
+   * Private helper function to update payment status
+   * for the returned payment. This function is called by
+   * compelete() and cancel() 
+   *  
+   * @param unknown_type $paymentID
+   * @param unknown_type $status
+   * 
+   * @return Payment object
+   */
+  private function updatePaymentStatus($request, $status) {
+    $paymentID = $this->getPaymentID($request);
+    if ($payment = Payment::get()->byID($paymentID)) {
+      $payment->Status = $status;
+      $payment->write();
+      return $payment;
+    } else {
+      user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
+    }
+  }
+  
+  /**
    * Payment complete handler. 
    * This function should be persistent accross all payment gateways.
    * Additional processing of payment response can be done in processResponse(). 
    */
   public function complete($request) {
     // Additional processing
-    $this->processResponse($request);    
-    
-    $paymentID = $this->getPaymentID($request);    
-    if ($payment = Payment::get()->byID($paymentID)) {
-      $payment->Status = 'Success';
-      $payment->write();
-    } else {
-      user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
-    }
+    $this->processResponse($request);        
+    // Update payment status    
+    $payment = $this->updatePaymentStatus($request, 'Success');
     
     return $payment->renderWith($payment->class . "_complete");
   }
@@ -148,14 +163,8 @@ class Payment_Controller extends Controller {
   public function cancel($request) {
     // Additional processing
     $this->processResponse($response);
-
-    $paymentID = $this->getPaymentID($request);
-    if ($payment = DataObject::get_by_id('Payment', $paymentID)) {
-      $payment->Status = 'Incomplete';
-      $payment->write();
-    } else {
-      user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
-    }
+    // Update payment status
+    $payment = $this->updatePaymentStatus($request, 'Incomplete');
     
     return $payment->renderWith($payment->class . "_cancel");
   }
