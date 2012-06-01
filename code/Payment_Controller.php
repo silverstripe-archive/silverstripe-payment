@@ -139,7 +139,7 @@ class Payment_Controller extends Controller {
       user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
     }
     
-    print($this->complete_message);
+    return $payment->renderWith($payment->class . "_complete");
   }
   
   /**
@@ -157,6 +157,6 @@ class Payment_Controller extends Controller {
       user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
     }
     
-    // Do something...
+    return $payment->renderWith($payment->class . "_cancel");
   }
 }

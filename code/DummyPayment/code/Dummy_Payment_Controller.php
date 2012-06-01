@@ -22,7 +22,7 @@ class Dummy_Payment_Controller extends Payment_Controller {
   }
   
   public function processResponse($response) {
-    // Nothing to do here
+    // Nothing to do here...
   }
   
   public function getPaymentID($response) {
