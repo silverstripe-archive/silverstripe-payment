@@ -132,8 +132,8 @@ class Payment_Controller extends Controller {
     $this->processResponse($request);    
     
     $paymentID = $this->getPaymentID($request);    
-    if ($payment = DataObject::get_by_id('Payment', $paymentID)) {
-      $payment->Status = 'Complete';
+    if ($payment = Payment::get()->byID($paymentID)) {
+      $payment->Status = 'Success';
       $payment->write();
     } else {
       user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);

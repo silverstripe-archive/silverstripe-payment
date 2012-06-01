@@ -7,21 +7,6 @@
  */
 class Payment extends DataObject {
   /**
-   * The payment form fields that should
-   * be shown on the checkout order form for the
-   * payment type. This is mostly used for merchant-hosted payment
-   */
-  public $formFields;
-  public $requiredFormFields;
-
-  public function __construct() {
-    parent::__construct();
-    
-    $this->formFields = new FieldList();
-    $this->formRequirements = array();
-  }
-  
-  /**
    * Get the payment gateway class name from the associating module name
    * 
    * @param $gatewayName
@@ -46,26 +31,26 @@ class Payment extends DataObject {
    * Pending: Payment awaiting receipt/bank transfer etc
    */
   public static $db = array(
-      'Status' => "Enum('Incomplete, Success, Failure, Pending')",
-      'Amount' => 'Money',
-      'Message' => 'Text',
-      'PaidForID' => "Int",
-      'PaidForClass' => 'Varchar',
+    'Status' => "Enum('Incomplete, Success, Failure, Pending')",
+    'Amount' => 'Money',
+    'Message' => 'Text',
+    'PaidForID' => "Int",
+    'PaidForClass' => 'Varchar',
 
-      //Used for storing any Exception during this payment Process.
-      'ExceptionError' => 'Text'
+    //Used for storing any Exception during this payment Process.
+    'ExceptionError' => 'Text'
   );
   
   public static $has_one = array(
-      'PaidObject' => 'Object',
-      'PaidBy' => 'Member',
+    'PaidObject' => 'Object',
+    'PaidBy' => 'Member',
   );
   
   /**
    * Make payment table transactional.
    */
   static $create_table_options = array(
-      'MySQLDatabase' => 'ENGINE=InnoDB'
+    'MySQLDatabase' => 'ENGINE=InnoDB'
   );
   
   /**
@@ -98,7 +83,20 @@ class Payment extends DataObject {
 }
 
 class Payment_MerchantHosted extends Payment {
+  /**
+   * The payment form fields that should be shown on the checkout order form
+   */
+  public $formFields;
+  public $requiredFormFields;
+  
   protected static $cvn_mode = true;
+  
+  public function __construct() {
+    parent::__construct();
+    
+    $this->formFields = new FieldList();
+    $this->requiredFormFields = array();
+  }
   
   public function getCreditCardFields() {
     $fields = new FieldList(
@@ -107,7 +105,9 @@ class Payment_MerchantHosted extends Payment {
         new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
     );
     
-    if (self::$cvn_mode) $fields->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
+    if (self::$cvn_mode) {
+      $fields->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
+    }
     return $fields;
   }
   
@@ -119,8 +119,6 @@ class Payment_MerchantHosted extends Payment {
     foreach ($ccFields as $ccFields) {
       $this->formFields->push($ccField);
     }
-    
-    return $this->formFields;
   }
   
   public function getFormRequirements() {
