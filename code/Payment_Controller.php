@@ -75,10 +75,25 @@ class Payment_Controller extends Controller {
    * @param $data
    */
   public function processPayment($data) {
+    if (! isset($data['Amount'])) {
+      user_error("Payment amount not set!", E_USER_ERROR);
+    } else {
+      $amount = $data['Amount'];
+    }
+    
+    if (! isset($data['Currency'])) {
+      $currency = $data['Currency'];
+    } else {
+      $currency = $this->payment->site_currency();
+    }
+    
     // Save preliminary data to database
+    $this->payment->Amount->Amount = $amount;
+    $this->payment->Amount->Currency = $currency;
     $this->payment->Status = 'Pending';
     $this->payment->write();
     
+    // Process payment
     $this->processRequest($data);
   }
   
@@ -93,27 +108,55 @@ class Payment_Controller extends Controller {
   }
   
   /**
-   * Process a payment response, to be implemented by specific gateways 
+   * Process a payment response, to be implemented by specific gateways.
+   * This function should return the ID of the payment  
    */
   public function processResponse($response) {
-    user_error("Please implement processRequest() on $this->class", E_USER_ERROR);
+    user_error("Please implement processResponse() on $this->class", E_USER_ERROR);
   }
   
   /**
-   * Payment complete handler
+   * Get the payment ID from the gateway response. To be implemented by specific gateways
    */
-  public function complete() {
-    // Load the payment object from database
-    //$this->payment->Status = 'Completed';
-    //$this->payment->write();
+  public function getPaymentID($response) {
+    user_error("Please implement getPaymentID() on $this->class", E_USER_ERROR);
+  }
+  
+  /**
+   * Payment complete handler. 
+   * This function should be persistent accross all payment gateways.
+   * Additional processing of payment response can be done in processResponse(). 
+   */
+  public function complete($request) {
+    // Additional processing
+    $this->processResponse($request);    
+    
+    $paymentID = $this->getPaymentID($request);    
+    if ($payment = DataObject::get_by_id('Payment', $paymentID)) {
+      $payment->Status = 'Complete';
+      $payment->write();
+    } else {
+      user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
+    }
+    
     print($this->complete_message);
   }
   
   /**
    * Payment cancel handler
    */
-  public function cancel() {
-    $this->payment->Status = 'Cancelled';
-    $this->payment->write();
+  public function cancel($request) {
+    // Additional processing
+    $this->processResponse($response);
+
+    $paymentID = $this->getPaymentID($request);
+    if ($payment = DataObject::get_by_id('Payment', $paymentID)) {
+      $payment->Status = 'Incomplete';
+      $payment->write();
+    } else {
+      user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
+    }
+    
+    // Do something...
   }
 }

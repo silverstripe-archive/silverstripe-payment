@@ -24,8 +24,8 @@ class OrderDemoPage_Controller extends Page_Controller {
   function processOrder($data, $form) {
     // Dummy payment data for testing
     $paymentData = array(
-      'amount' => '10',
-      'currency' => 'USD',
+      'Amount' => '10',
+      'Currency' => 'USD',
     );
     
     $paymentProcessor = PaymentFactory::createProcessor('Dummy');
