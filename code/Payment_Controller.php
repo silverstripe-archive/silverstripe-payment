@@ -15,12 +15,6 @@ class Payment_Controller extends Controller {
   public $payment;
   
   /**
-   * Message to show when payment is completed
-   * TODO: use template
-   */ 
-  public $complete_message = "Payment is completed";
-  
-  /**
    * Return the relative url for completing payment 
    */
   public function complete_link() {
