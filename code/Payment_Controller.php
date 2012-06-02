@@ -156,7 +156,7 @@ class Payment_Controller extends Controller {
    */
   public function cancel($request) {
     // Additional processing
-    $this->processResponse($response);
+    $this->processResponse($request);
     // Update payment status
     $payment = $this->updatePaymentStatus($request, 'Incomplete');
     
