@@ -130,54 +130,173 @@ class Payment_GatewayHosted extends Payment {
   
 }
 
-/* Payment result classes. TODO: is there a cleaner way? */ 
+/**
+ *  Interface for a payment gateway controller
+ */
+interface Payment_Controller_Interface {
 
-abstract class Payment_Result {
-
-  protected $value;
-
-  function __construct($value = null) {
-    $this->value = $value;
-  }
-
-  function getValue() {
-    return $this->value;
-  }
-
-  abstract function isSuccess();
-
-  abstract function isProcessing();
-
+  public function processRequest($data);
+  public function processResponse($response);
 }
-class Payment_Success extends Payment_Result {
 
-  function isSuccess() {
-    return true;
+/**
+ * Abstract class for a number of payment controllers.
+ */
+class Payment_Controller extends Controller implements Payment_Controller_Interface {
+
+  static $URLSegment;
+
+  /**
+   * The payment object to be injected to this controller
+   */
+  public $payment;
+
+  /**
+   * Return the relative url for completing payment
+   */
+  public function complete_link() {
+    // Bypass the inheritance limitation
+    $class = get_class($this);
+    return $class::$URLSegment . '/complete';
   }
 
-  function isProcessing() {
-    return false;
+  /**
+   * Return the relative url for cancelling payment
+   */
+  public function cancel_link() {
+    // Bypass the inheritance limitation
+    $class = get_class($this);
+    return $class::$URLSegment . '/cancel';
   }
 
-}
-class Payment_Processing extends Payment_Result {
+  /**
+   * Construct a controller with an injected payment object
+   */
+  public static function initWithPayment($payment) {
+    // construct the correct child class
+    $class = get_called_class();
+    $instance = new $class();
 
-  function isSuccess() {
-    return false;
+    $instance->payment = $payment;
+    return $instance;
   }
 
-  function isProcessing() {
-    return true;
+  /**
+   * Get the controller's class name from a given gateway module name and config
+   * TODO: Generalize naming convention; make use of _config.php
+   *
+   * @param $gatewayName
+   * @return Controller class name
+   */
+  public static function controllerClassName($gatewayName) {
+    $paymentClass = Payment::gatewayClassName($gatewayName);
+    $controllerClass = $paymentClass . "_Controller";
+
+    if (class_exists($controllerClass)) {
+      return $controllerClass;
+    } else {
+      user_error("Controller class is not defined", E_USER_ERROR);
+    }
   }
 
-}
-class Payment_Failure extends Payment_Result {
+  /**
+   * Process a payment from an order form.
+   * TODO: If this function becomes unneccesseary, omit it.
+   *
+   * @param $data
+   */
+  public function processPayment($data) {
+    if (! isset($data['Amount'])) {
+      user_error("Payment amount not set!", E_USER_ERROR);
+    } else {
+      $amount = $data['Amount'];
+    }
 
-  function isSuccess() {
-    return false;
+    if (! isset($data['Currency'])) {
+      $currency = $data['Currency'];
+    } else {
+      $currency = $this->payment->site_currency();
+    }
+
+    // Save preliminary data to database
+    $this->payment->Amount->Amount = $amount;
+    $this->payment->Amount->Currency = $currency;
+    $this->payment->Status = 'Pending';
+    $this->payment->write();
+
+    // Process payment
+    $this->processRequest($data);
   }
 
-  function isProcessing() {
-    return false;
+  /**
+   * Process a payment request, to be implemented by specific gateways
+   *
+   * @param $data
+   * @return Payment_Result
+   */
+  public function processRequest($data) {
+    user_error("Please implement processRequest() on $this->class", E_USER_ERROR);
+  }
+
+  /**
+   * Process a payment response, to be implemented by specific gateways.
+   * This function should return the ID of the payment
+   */
+  public function processResponse($response) {
+    user_error("Please implement processResponse() on $this->class", E_USER_ERROR);
+  }
+
+  /**
+   * Get the payment ID from the gateway response. To be implemented by specific gateways
+   */
+  public function getPaymentID($response) {
+    user_error("Please implement getPaymentID() on $this->class", E_USER_ERROR);
+  }
+
+  /**
+   * Private helper function to update payment status
+   * for the returned payment. This function is called by
+   * compelete() and cancel()
+   *
+   * @param unknown_type $paymentID
+   * @param unknown_type $status
+   *
+   * @return Payment object
+   */
+  private function updatePaymentStatus($request, $status) {
+    $paymentID = $this->getPaymentID($request);
+    if ($payment = Payment::get()->byID($paymentID)) {
+      $payment->Status = $status;
+      $payment->write();
+      return $payment;
+    } else {
+      user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
+    }
+  }
+
+  /**
+   * Payment complete handler.
+   * This function should be persistent accross all payment gateways.
+   * Additional processing of payment response can be done in processResponse().
+   */
+  public function complete($request) {
+    // Additional processing
+    $this->processResponse($request);
+    // Update payment status
+    $payment = $this->updatePaymentStatus($request, 'Success');
+
+    return $payment->renderWith($payment->class . "_complete");
+  }
+
+  /**
+   * Payment cancel handler
+   */
+  public function cancel($request) {
+    // Additional processing
+    $this->processResponse($request);
+    // Update payment status
+    $payment = $this->updatePaymentStatus($request, 'Incomplete');
+
+    return $payment->renderWith($payment->class . "_cancel");
   }
 }
