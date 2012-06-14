@@ -186,12 +186,11 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   }
 
   /**
-   * Process a payment from an order form.
-   * TODO: If this function becomes unneccesseary, omit it.
+   * Process a payment request. Subclasses must call this parent function when overriding
    *
    * @param $data
    */
-  public function processPayment($data) {
+  public function processRequest($data) {
     if (! isset($data['Amount'])) {
       user_error("Payment amount not set!", E_USER_ERROR);
     } else {
@@ -209,19 +208,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $this->payment->Amount->Currency = $currency;
     $this->payment->Status = 'Pending';
     $this->payment->write();
-
-    // Process payment
-    $this->processRequest($data);
-  }
-
-  /**
-   * Process a payment request, to be implemented by specific gateways
-   *
-   * @param $data
-   * @return Payment_Result
-   */
-  public function processRequest($data) {
-    user_error("Please implement processRequest() on $this->class", E_USER_ERROR);
+    
+    // Send a request to the gateway etc.
   }
 
   /**
@@ -230,12 +218,5 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    */
   public function processResponse($response) {
     user_error("Please implement processResponse() on $this->class", E_USER_ERROR);
-  }
-
-  /**
-   * Get the payment ID from the gateway response. To be implemented by specific gateways
-   */
-  public function getPaymentID($response) {
-    user_error("Please implement getPaymentID() on $this->class", E_USER_ERROR);
   }
 }
