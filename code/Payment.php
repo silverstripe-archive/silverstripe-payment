@@ -75,10 +75,14 @@ class Payment extends DataObject {
     return self::$site_currency;
   }
   
-  function populateDefaults() {
-    parent::populateDefaults();
-  
-    $this->Amount->Currency = Payment::site_currency();
+  /**
+   * Update the status of this payment
+   *
+   * @param $status
+   */
+  public function updatePaymentStatus($status) {
+    $payment->Status = $status;
+    $payment->write();
   }
 }
 
@@ -150,24 +154,6 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The payment object to be injected to this controller
    */
   public $payment;
-
-  /**
-   * Return the relative url for completing payment
-   */
-  public function complete_link() {
-    // Bypass the inheritance limitation
-    $class = get_class($this);
-    return $class::$URLSegment . '/complete';
-  }
-
-  /**
-   * Return the relative url for cancelling payment
-   */
-  public function cancel_link() {
-    // Bypass the inheritance limitation
-    $class = get_class($this);
-    return $class::$URLSegment . '/cancel';
-  }
 
   /**
    * Construct a controller with an injected payment object
@@ -251,52 +237,5 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    */
   public function getPaymentID($response) {
     user_error("Please implement getPaymentID() on $this->class", E_USER_ERROR);
-  }
-
-  /**
-   * Private helper function to update payment status
-   * for the returned payment. This function is called by
-   * compelete() and cancel()
-   *
-   * @param unknown_type $paymentID
-   * @param unknown_type $status
-   *
-   * @return Payment object
-   */
-  private function updatePaymentStatus($request, $status) {
-    $paymentID = $this->getPaymentID($request);
-    if ($payment = Payment::get()->byID($paymentID)) {
-      $payment->Status = $status;
-      $payment->write();
-      return $payment;
-    } else {
-      user_error("Cannot load the corresponding payment of id $paymentID", E_USER_ERROR);
-    }
-  }
-
-  /**
-   * Payment complete handler.
-   * This function should be persistent accross all payment gateways.
-   * Additional processing of payment response can be done in processResponse().
-   */
-  public function complete($request) {
-    // Additional processing
-    $this->processResponse($request);
-    // Update payment status
-    $payment = $this->updatePaymentStatus($request, 'Success');
-
-    return $payment->renderWith($payment->class . "_complete");
-  }
-
-  /**
-   * Payment cancel handler
-   */
-  public function cancel($request) {
-    // Additional processing
-    $this->processResponse($request);
-    // Update payment status
-    $payment = $this->updatePaymentStatus($request, 'Incomplete');
-
-    return $payment->renderWith($payment->class . "_cancel");
   }
 }
