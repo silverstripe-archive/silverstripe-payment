@@ -7,6 +7,28 @@
  */
 class Payment extends DataObject {
   /**
+   * The payment form fields that should be shown on the checkout order form
+   */
+  public $formFields;
+  public $requiredFormFields;
+  
+  public function getFormFields() {
+    if (!$this->formFields) {
+      $this->formFields = new FieldList();
+    }
+    
+    return $this->formFields;
+  }
+  
+  public function getFormRequirements() {
+    if (!$this->requiredFormFields) {
+      $this->requiredFormFields = array();
+    }
+    
+    return $this->requiredFormFields;
+  }
+  
+  /**
    * Get the payment gateway class name from the associating module name
    * 
    * @param $gatewayName
@@ -15,7 +37,7 @@ class Payment extends DataObject {
    * TODO: Generalize naming convention
    *       Take care of merchant hosted and gateway hosted sub classes
    */
-  public static function gatewayClassName($gatewayname) {
+  public static function gateway_class_name($gatewayname) {
     $className = $gatewayname . "_Payment";
     if (class_exists($className)) {
       return $className;
@@ -54,28 +76,6 @@ class Payment extends DataObject {
   );
   
   /**
-   * The currency code used for payments.
-   * @var string
-   */
-  protected static $site_currency = 'USD';
-  
-  /**
-   * Set the currency code that this site uses.
-   * @param string $currency Currency code. e.g. "NZD"
-   */
-  public static function set_site_currency($currency) {
-    self::$site_currency = $currency;
-  }
-  
-  /**
-   * Return the site currency in use.
-   * @return string
-   */
-  public static function site_currency() {
-    return self::$site_currency;
-  }
-  
-  /**
    * Update the status of this payment
    *
    * @param $status
@@ -87,46 +87,30 @@ class Payment extends DataObject {
 }
 
 class Payment_MerchantHosted extends Payment {
-  /**
-   * The payment form fields that should be shown on the checkout order form
-   */
-  public $formFields;
-  public $requiredFormFields;
-  
+
   protected static $cvn_mode = true;
   
   public function __construct() {
     parent::__construct();
     
     $this->formFields = new FieldList();
+    foreach ($ccFields = $this->getCreditCardFields() as $ccField) {
+      $this->formFields->push($ccField);
+    }
     $this->requiredFormFields = array();
   }
   
   public function getCreditCardFields() {
-    $fields = new FieldList(
+    $fields = array(
         new TextField('CardHolderName', 'Credit Card Holder Name :'),
         new CreditCardField('CardNumber', 'Credit Card Number :'),
         new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
     );
     
     if (self::$cvn_mode) {
-      $fields->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
+      array_push($fields, new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
     }
     return $fields;
-  }
-  
-  public function getFormFields() {
-    // Other business fields
-    
-    // Credit card fields
-    $ccFields = $this->getCreditCardFields();
-    foreach ($ccFields as $ccFields) {
-      $this->formFields->push($ccField);
-    }
-  }
-  
-  public function getFormRequirements() {
-    
   }
 }
 
@@ -154,16 +138,22 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The payment object to be injected to this controller
    */
   public $payment;
+  
+  /**
+   * The gateway object to be injected to this controller
+   */
+  public $gateway;
 
   /**
-   * Construct a controller with an injected payment object
+   * Construct a controller instance with injected payment and gateway objects
    */
-  public static function initWithPayment($payment) {
+  public static function init_instance($payment, $gateway) {
     // construct the correct child class
     $class = get_called_class();
     $instance = new $class();
 
     $instance->payment = $payment;
+    $instance->gateway = $gateway;
     return $instance;
   }
 
@@ -174,8 +164,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * @param $gatewayName
    * @return Controller class name
    */
-  public static function controllerClassName($gatewayName) {
-    $paymentClass = Payment::gatewayClassName($gatewayName);
+  public static function controller_class_name($gatewayName) {
+    $paymentClass = Payment::gateway_class_name($gatewayName);
     $controllerClass = $paymentClass . "_Controller";
 
     if (class_exists($controllerClass)) {
@@ -200,7 +190,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     if (! isset($data['Currency'])) {
       $currency = $data['Currency'];
     } else {
-      $currency = $this->payment->site_currency();
+      //$currency = $this->payment->site_currency();
     }
 
     // Save preliminary data to database
@@ -209,7 +199,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $this->payment->Status = 'Pending';
     $this->payment->write();
     
-    // Send a request to the gateway etc.
+    // Send a request to the gateway 
+    $this->gateway->process($data);
   }
 
   /**
@@ -218,5 +209,27 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    */
   public function processResponse($response) {
     user_error("Please implement processResponse() on $this->class", E_USER_ERROR);
+  }
+}
+
+/**
+ * Factory class to allow easy initiation of payment objects
+ */
+class PaymentFactory {
+  /**
+   * Construct an instance of the desired payment controller
+   *
+   * @param $gatewayName
+   * @return PaymentProcessor
+   */
+  public static function createController($gatewayName) {
+    $paymentClass = Payment::payment_class_name($gatewayName);
+    $payment = new $paymentClass();
+    
+    $gatewayClass = Payment_Gateway::gateway_class_name($gatewayName);
+    $gateway = new $gatewayClass();
+    
+    $paymentControllerClass = Payment_Controller::controller_class_name($gatewayName);
+    return $paymentControllerClass::init_instance($payment, $gateway);
   }
 }
