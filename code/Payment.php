@@ -56,15 +56,10 @@ class Payment extends DataObject {
     'Status' => "Enum('Incomplete, Success, Failure, Pending')",
     'Amount' => 'Money',
     'Message' => 'Text',
-    'PaidForID' => "Int",
-    'PaidForClass' => 'Varchar',
-
-    //Used for storing any Exception during this payment Process.
-    'ExceptionError' => 'Text'
   );
   
   public static $has_one = array(
-    'PaidObject' => 'Object',
+    'PaidFor' => 'Object',
     'PaidBy' => 'Member',
   );
   
@@ -86,38 +81,6 @@ class Payment extends DataObject {
   }
 }
 
-class Payment_MerchantHosted extends Payment {
-
-  protected static $cvn_mode = true;
-  
-  public function __construct() {
-    parent::__construct();
-    
-    $this->formFields = new FieldList();
-    foreach ($ccFields = $this->getCreditCardFields() as $ccField) {
-      $this->formFields->push($ccField);
-    }
-    $this->requiredFormFields = array();
-  }
-  
-  public function getCreditCardFields() {
-    $fields = array(
-        new TextField('CardHolderName', 'Credit Card Holder Name :'),
-        new CreditCardField('CardNumber', 'Credit Card Number :'),
-        new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
-    );
-    
-    if (self::$cvn_mode) {
-      array_push($fields, new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
-    }
-    return $fields;
-  }
-}
-
-class Payment_GatewayHosted extends Payment {
-  
-}
-
 /**
  *  Interface for a payment gateway controller
  */
@@ -125,6 +88,7 @@ interface Payment_Controller_Interface {
 
   public function processRequest($data);
   public function processResponse($response);
+  public function getFormFields();
 }
 
 /**
@@ -133,6 +97,20 @@ interface Payment_Controller_Interface {
 class Payment_Controller extends Controller implements Payment_Controller_Interface {
 
   static $URLSegment;
+  
+  /**
+   * Type of the controller, merchant_hosted or gateway_hosted
+   * @var string
+   */
+  protected static $type;
+  
+  public static function set_type($type) {
+    if ($type != 'merchant_hosted' && $type != 'gateway_hosted') {
+      user_error("Undefined controller type", E_USER_ERROR);
+    } else {
+      self::$type = $type;
+    }
+  }
 
   /**
    * The payment object to be injected to this controller
@@ -165,9 +143,18 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * @return Controller class name
    */
   public static function controller_class_name($gatewayName) {
-    $paymentClass = Payment::gateway_class_name($gatewayName);
-    $controllerClass = $paymentClass . "_Controller";
-
+    switch(self::$type) {
+      case 'merchant_hosted':
+        $controllerClass = $gatewayName . "_MerchantHosted_Controller";
+        break;
+      case 'gateway_hosted':
+        $controllerClass = $gatewayName . "_GatewayHosted_Controller";
+        break;
+      default: 
+        $controllerClass = $gatewayName . "_Controller";
+        break;
+    }
+    
     if (class_exists($controllerClass)) {
       return $controllerClass;
     } else {
@@ -209,6 +196,10 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    */
   public function processResponse($response) {
     user_error("Please implement processResponse() on $this->class", E_USER_ERROR);
+  }
+  
+  public function getFormFields() {
+    
   }
 }
 
