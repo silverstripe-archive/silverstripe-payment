@@ -240,8 +240,44 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   /**
    * Get the form fields to be shown at the checkout page
    */
+  public function getFormFields() { 
+    return new FieldList();
+  }
+}
+
+class Payment_Controller_MerchantHosted extends Payment_Controller implements Payment_Controller_Interface {
+
+  public function processRequest($data){
+    parent::processRequest($data);
+  }
+
+  public function processResponse($response){
+    parent::processResponse($response);
+  }
+
   public function getFormFields() {
+    $fieldList = parent::getFormFields();
+    $fieldList->push(new TextField('CardHolderName', 'Credit Card Holder Name :'));
+    $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number :'));
+    $fieldList->push(new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4));
+    $fieldList->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
     
+    return $fieldList;
+  }
+}
+
+class Payment_Controller_GatewayHosted extends Payment_Controller implements Payment_Controller_Interface {
+
+  public function processRequest($data){
+    parent::processRequest($data);
+  }
+
+  public function processResponse($response){
+    parent::processResponse($response);
+  }
+
+  public function getFormFields(){
+    return parent::getFormFields();
   }
 }
 
