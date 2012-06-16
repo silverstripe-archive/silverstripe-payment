@@ -12,6 +12,21 @@ class Payment extends DataObject {
   public $formFields;
   public $requiredFormFields;
   
+  /**
+   * The payment class in use
+   */
+  protected static $payment_class;
+  
+  public static function set_payment_class($class) {
+    if (class_exists($class)) {
+      self::$payment_class = $class;
+    } 
+  }
+  
+  public static function get_payment_class() {
+    return self::$payment_class;
+  }
+  
   public function getFormFields() {
     if (!$this->formFields) {
       $this->formFields = new FieldList();
@@ -37,13 +52,13 @@ class Payment extends DataObject {
    * TODO: Generalize naming convention
    *       Take care of merchant hosted and gateway hosted sub classes
    */
-  public static function gateway_class_name($gatewayname) {
+  public static function payment_class_name($gatewayname) {
     $className = $gatewayname . "_Payment";
     if (class_exists($className)) {
       return $className;
-    } else {
-      user_error("Payment gateway class is not defined", E_USER_ERROR);
-    }
+    } 
+    
+    return null;
   }
   
   /**
@@ -99,18 +114,15 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   static $URLSegment;
   
   /**
+   * The controller class in use
+   */
+  protected static $controller_class;
+  
+  /**
    * Type of the controller, merchant_hosted or gateway_hosted
    * @var string
    */
-  protected static $type;
-  
-  public static function set_type($type) {
-    if ($type != 'merchant_hosted' && $type != 'gateway_hosted') {
-      user_error("Undefined controller type", E_USER_ERROR);
-    } else {
-      self::$type = $type;
-    }
-  }
+  protected static $type = 'gateway_hosted';
 
   /**
    * The payment object to be injected to this controller
@@ -121,17 +133,36 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The gateway object to be injected to this controller
    */
   public $gateway;
+  
+  public static function set_controller_class($class) {
+    if (class_exists($class)) {
+      self::$controller_class = $class;
+    }
+  }
+  
+  public static function get_controller_class() {
+    return self::$controller_class;
+  }
+  
+  public static function set_type($type) {
+    if ($type == 'merchant_hosted' || $type == 'gateway_hosted') {
+      self::$type = $type;
+    } 
+  }
 
   /**
    * Construct a controller instance with injected payment and gateway objects
    */
   public static function init_instance($payment, $gateway) {
-    // construct the correct child class
     $class = get_called_class();
     $instance = new $class();
-
+    self::set_controller_class($class);
+      
     $instance->payment = $payment;
+    Payment::set_payment_class($payment->class);      
     $instance->gateway = $gateway;
+    Payment_Gateway::set_gateway_class($gateway->class);
+      
     return $instance;
   }
 
@@ -143,7 +174,11 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * @return Controller class name
    */
   public static function controller_class_name($gatewayName) {
-    switch(self::$type) {
+    if (! self::$type) {
+      return null;
+    }
+    
+    switch (self::$type) {
       case 'merchant_hosted':
         $controllerClass = $gatewayName . "_MerchantHosted_Controller";
         break;
@@ -158,7 +193,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     if (class_exists($controllerClass)) {
       return $controllerClass;
     } else {
-      user_error("Controller class is not defined", E_USER_ERROR);
+      return null;
     }
   }
 
@@ -187,17 +222,24 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $this->payment->write();
     
     // Send a request to the gateway 
-    $this->gateway->process($data);
+    $result = $this->gateway->process($data);
+    if ($result->isSuccess()) {
+      $this->payment->updatePaymentStatus('Success');
+    } else if (! $result->isSuccess() && ! $result->isProcessing()) {
+      $this->payment->updatePaymentStatus('Failure');
+    }
   }
 
   /**
    * Process a payment response, to be implemented by specific gateways.
-   * This function should return the ID of the payment
    */
   public function processResponse($response) {
     user_error("Please implement processResponse() on $this->class", E_USER_ERROR);
   }
   
+  /**
+   * Get the form fields to be shown at the checkout page
+   */
   public function getFormFields() {
     
   }
@@ -214,13 +256,22 @@ class PaymentFactory {
    * @return PaymentProcessor
    */
   public static function createController($gatewayName) {
-    $paymentClass = Payment::payment_class_name($gatewayName);
-    $payment = new $paymentClass();
+    if ($paymentClass = Payment::payment_class_name($gatewayName)) {
+      $payment = new $paymentClass();
+    } else {
+      user_error("Payment class does not exists.", E_USER_ERROR);
+    }
     
-    $gatewayClass = Payment_Gateway::gateway_class_name($gatewayName);
-    $gateway = new $gatewayClass();
+    if ($gatewayClass = Payment_Gateway::gateway_class_name($gatewayName)) {
+      $gateway = new $gatewayClass();
+    } else {
+      user_error("Gateway class does not exists.", E_USER_ERROR);
+    }
     
-    $paymentControllerClass = Payment_Controller::controller_class_name($gatewayName);
-    return $paymentControllerClass::init_instance($payment, $gateway);
+    if ($controllerClass = Payment_Controller::controller_class_name($gatewayName)) {
+      return $controllerClass::init_instance($payment, $gateway);
+    } else {
+      user_error("Controller class does not exists.", E_USER_ERROR);
+    }
   }
 }

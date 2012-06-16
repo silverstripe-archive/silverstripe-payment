@@ -10,12 +10,25 @@ class Payment_Gateway {
   /**
    * Type of the gateway to be used: dev/live/test
    */
-  protected static $type;
+  protected static $type = 'live';
+  
+  /**
+   * The gateway class in use
+   */
+  protected  static $gateway_class;
+  
+  public static function set_gateway_class($class) {
+    if (class_exists($class)) {
+      self::$gateway_class = $class;
+    }
+  }
+  
+  public static function get_gateway_class() {
+    return self::$gateway_class;
+  }
   
   public static function set_type($type) {
-    if ($type != 'dev' && $type != 'live' && $type != 'test') {
-      user_error("Gateway type undefined", E_USER_ERROR);
-    } else {
+    if ($type == 'dev' || $type == 'live' || $type == 'test') {
       self::$type = $type;
     }
   }
@@ -27,6 +40,10 @@ class Payment_Gateway {
    * @param unknown_type $gatewayName
    */
   public static function gateway_class_name($gatewayName) {
+    if (self::$type) {
+      return null;
+    }
+    
     switch(self::$type) {
       case 'live':
         $gatewayClass = $gatewayName . '_Production_Gateway';
@@ -42,7 +59,7 @@ class Payment_Gateway {
     if (class_exists($gatewayClass)) {
       return $gatewayClass;
     } else {
-      user_error("Gateway class is not defined", E_USER_ERROR);
+      return null;
     }
   }
   
@@ -55,4 +72,57 @@ class Payment_Gateway {
   public function process($data) {
     user_error("Please implement process() on $this->class", E_USER_ERROR);
   } 
+}
+
+/**
+ * Abstract class for gateway results
+ */
+abstract class Gateway_Result {
+
+  protected $value;
+
+  function __construct($value = null) {
+    $this->value = $value;
+  }
+
+  function getValue() {
+    return $this->value;
+  }
+
+  abstract function isSuccess();
+
+  abstract function isProcessing();
+}
+
+class Gateway_Success extends Gateway_Result {
+
+  function isSuccess() {
+    return true;
+  }
+
+  function isProcessing() {
+    return false;
+  }
+}
+
+class Gateway_Processing extends Gateway_Result {
+
+  function isSuccess() {
+    return false;
+  }
+
+  function isProcessing() {
+    return true;
+  }
+}
+
+class Gateway_Failure extends Gateway_Result {
+
+  function isSuccess() {
+    return false;
+  }
+
+  function isProcessing() {
+    return false;
+  }
 }
