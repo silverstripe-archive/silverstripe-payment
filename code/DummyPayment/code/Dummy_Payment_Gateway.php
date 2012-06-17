@@ -1,10 +1,6 @@
 <?php 
 
-/**
- * Dummy Payment Gateway class
- */
-class Dummy_Production_Gateway extends Payment_Gateway {
-  
+class Dummy_Payment_Gateway extends Payment_Gateway {
   protected static $test_mode = 'success';
   
   static function set_test_mode($test_mode) {
@@ -15,7 +11,17 @@ class Dummy_Production_Gateway extends Payment_Gateway {
     }
   }
   
-  public function process() {
+  public function process($data) {
+    parent::process($data);
+  }
+}
+
+/**
+ * Dummy Payment Gateway class
+ */
+class Dummy_Production_Gateway extends Dummy_Payment_Gateway {
+  
+  public function process($data) {
     switch (self::$test_mode) {
       case 'success':
         return new Gateway_Success();
