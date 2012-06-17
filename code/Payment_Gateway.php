@@ -40,7 +40,7 @@ class Payment_Gateway {
    * @param unknown_type $gatewayName
    */
   public static function gateway_class_name($gatewayName) {
-    if (self::$type) {
+    if (! self::$type) {
       return null;
     }
     

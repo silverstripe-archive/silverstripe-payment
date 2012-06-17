@@ -6,11 +6,6 @@
  *  @package payment
  */
 class Payment extends DataObject {
-  /**
-   * The payment form fields that should be shown on the checkout order form
-   */
-  public $formFields;
-  public $requiredFormFields;
   
   /**
    * The payment class in use
@@ -25,14 +20,6 @@ class Payment extends DataObject {
   
   public static function get_payment_class() {
     return self::$payment_class;
-  }
-  
-  public function getFormFields() {
-    if (!$this->formFields) {
-      $this->formFields = new FieldList();
-    }
-    
-    return $this->formFields;
   }
   
   public function getFormRequirements() {
@@ -91,8 +78,8 @@ class Payment extends DataObject {
    * @param $status
    */
   public function updatePaymentStatus($status) {
-    $payment->Status = $status;
-    $payment->write();
+    $this->Status = $status;
+    $this->write();
   }
 }
 
@@ -122,7 +109,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * Type of the controller, merchant_hosted or gateway_hosted
    * @var string
    */
-  protected static $type = 'gateway_hosted';
+  protected static $type;
 
   /**
    * The payment object to be injected to this controller
@@ -159,9 +146,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     self::set_controller_class($class);
       
     $instance->payment = $payment;
-    Payment::set_payment_class($payment->class);      
     $instance->gateway = $gateway;
-    Payment_Gateway::set_gateway_class($gateway->class);
       
     return $instance;
   }
@@ -174,10 +159,6 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * @return Controller class name
    */
   public static function controller_class_name($gatewayName) {
-    if (! self::$type) {
-      return null;
-    }
-    
     switch (self::$type) {
       case 'merchant_hosted':
         $controllerClass = $gatewayName . "_MerchantHosted_Controller";
@@ -201,6 +182,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * Process a payment request. Subclasses must call this parent function when overriding
    *
    * @param $data
+   * @return Payment
    */
   public function processRequest($data) {
     if (! isset($data['Amount'])) {
@@ -209,7 +191,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
       $amount = $data['Amount'];
     }
 
-    if (! isset($data['Currency'])) {
+    if (isset($data['Currency'])) {
       $currency = $data['Currency'];
     } else {
       //$currency = $this->payment->site_currency();
@@ -228,6 +210,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     } else if (! $result->isSuccess() && ! $result->isProcessing()) {
       $this->payment->updatePaymentStatus('Failure');
     }
+    
+    return $this->payment;
   }
 
   /**
@@ -284,7 +268,7 @@ class Payment_Controller_GatewayHosted extends Payment_Controller implements Pay
 /**
  * Factory class to allow easy initiation of payment objects
  */
-class PaymentFactory {
+class Payment_Factory {
   /**
    * Construct an instance of the desired payment controller
    *
