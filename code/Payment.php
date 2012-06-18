@@ -79,7 +79,8 @@ interface Payment_Controller_Interface {
 }
 
 /**
- * Abstract class for a number of payment controllers.
+ * Default class for a number of payment controllers.
+ * 
  */
 class Payment_Controller extends Controller implements Payment_Controller_Interface {
 
@@ -119,6 +120,26 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   }
   
   /**
+   * Factory function to create the desired controller object based on configuration
+   */
+  public static function factory() {
+    // TODO: Check if there's custom configuration in gateway 
+    //       and use subclasses accordingly
+    
+    switch (self::$type) {
+      case 'merchant_hosted':
+        return new Payment_Controller_MerchantHosted();
+        break;
+      case 'gateway_hosted':
+        return new Payment_Controller_GatewayHosted();
+        break;
+      default:
+        return new Payment_Controller();
+        break;
+    }
+  }
+  
+  /**
    * Get the gateway object that will be used by this controller.
    * The gateway class is automatically retrieved based on configuration
    */
@@ -144,33 +165,6 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     }
     
     return $payment;
-  }
-
-  /**
-   * Get the controller's class name from a given gateway module name and config
-   * TODO: Generalize naming convention; make use of _config.php
-   *
-   * @param $gatewayName
-   * @return Controller class name
-   */
-  public static function controller_class_name($gatewayName) {
-    switch (self::$type) {
-      case 'merchant_hosted':
-        $controllerClass = $gatewayName . "_MerchantHosted_Controller";
-        break;
-      case 'gateway_hosted':
-        $controllerClass = $gatewayName . "_GatewayHosted_Controller";
-        break;
-      default: 
-        $controllerClass = $gatewayName . "_Controller";
-        break;
-    }
-    
-    if (class_exists($controllerClass)) {
-      return $controllerClass;
-    } else {
-      return null;
-    }
   }
 
   /**
