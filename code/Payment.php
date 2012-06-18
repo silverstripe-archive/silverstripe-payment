@@ -7,11 +7,6 @@
  */
 class Payment extends DataObject {
   
-  /**
-   * The payment class in use
-   */
-  protected static $payment_class;
-  
   public function getFormRequirements() {
     if (!$this->requiredFormFields) {
       $this->requiredFormFields = array();
@@ -88,16 +83,10 @@ interface Payment_Controller_Interface {
  */
 class Payment_Controller extends Controller implements Payment_Controller_Interface {
 
-  static $URLSegment;
-  
-  public function __construct() {
-  
-    parent::__construct();
-  
-    //Set the dependencies
-    $gateway = $this->getGateway();
-    $payment = $this->getPayment();
-  }
+  /**
+   * The payment method to be used by this controller 
+   */
+  public static $paymentMethod;
   
   /**
    * Type of the controller, merchant_hosted or gateway_hosted
@@ -121,17 +110,40 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     } 
   }
 
+  public function __construct() {
+    parent::__construct();
+  
+    //Set the dependencies
+    $this->gateway = $this->getGateway();
+    $this->payment = $this->getPayment();
+  }
+  
   /**
-   * Construct a controller instance with injected payment and gateway objects
+   * Get the gateway object that will be used by this controller.
+   * The gateway class is automatically retrieved based on configuration
    */
-  public static function init_instance($payment, $gateway) {
-    $class = get_called_class();
-    $instance = new $class();
-      
-    $instance->payment = $payment;
-    $instance->gateway = $gateway;
-      
-    return $instance;
+  private function getGateway() {
+    if ($gatewayClass = Payment_Gateway::gateway_class_name(self::$paymentMethod)) {
+      $gateway = new $gatewayClass();
+    } else {
+      user_error("Gateway class does not exists.", E_USER_ERROR);
+    }
+
+    return $gateway;
+  }
+  
+  /**
+   * Get the payment object that will be used by this controller.
+   * The payment class is automatically retrieved based on configuration
+   */
+  private function getPayment() {
+    if ($paymentClass = Payment::payment_class_name(self::$paymentMethod)) {
+      $payment = new $paymentClass();
+    } else {
+      user_error("Payment class does not exists.", E_USER_ERROR);
+    }
+    
+    return $payment;
   }
 
   /**
