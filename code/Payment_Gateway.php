@@ -8,14 +8,18 @@
 class Payment_Gateway {
   
   /**
+   * The return link after processing payment (for gateway-hosted payment) 
+   */
+  protected  $returnLink;
+  
+  /**
    * Type of the gateway to be used: dev/live/test
    */
   protected static $type = 'live';
   
-  /**
-   * The gateway class in use
-   */
-  protected  static $gateway_class;
+  public function setReturnLink($link) {
+    $this->returnLink = $link;
+  }
   
   public static function set_type($type) {
     if ($type == 'dev' || $type == 'live' || $type == 'test') {
@@ -25,7 +29,6 @@ class Payment_Gateway {
   
   /**
    * Get the class name of the desired gateway.
-   * TODO: Find a better and cleaner way than forcing naming convention
    * 
    * @param unknown_type $gatewayName
    */
@@ -63,8 +66,13 @@ class Payment_Gateway {
     user_error("Please implement process() on $this->class", E_USER_ERROR);
   } 
   
-  public function getResponse($data) {
-    
+  /**
+   * Process the response from the external gateway
+   * 
+   * @return Gateway_Result
+   */
+  public function getResponse($response) {
+    return new Gateway_Failure();
   }
 }
 
