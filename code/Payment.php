@@ -80,7 +80,8 @@ interface Payment_Controller_Interface {
 
 /**
  * Default class for a number of payment controllers.
- * 
+ * This acts as a generic controller for all payment methods.
+ * Override this class if desired to add custom functionalities.
  */
 class Payment_Controller extends Controller implements Payment_Controller_Interface {
 
@@ -192,22 +193,30 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $this->payment->Status = 'Pending';
     $this->payment->write();
     
-    // Send a request to the gateway 
-    $result = $this->gateway->process($data);
-    if ($result->isSuccess()) {
-      $this->payment->updatePaymentStatus('Success');
-    } else if (! $result->isSuccess() && ! $result->isProcessing()) {
-      $this->payment->updatePaymentStatus('Failure');
+    // Set the return link (for gateway-hosted payment)
+    if ($this instanceof Payment_Controller_GatewayHosted) {
+      $this->gateway->setReturnLink(Controller::join_links(self::$url_segment, 'response', $this->payment->ID));
     }
     
-    return $this->payment;
+    // Send a request to the gateway 
+    $this->gateway->process($data);
   }
 
   /**
    * Process a payment response, to be implemented by specific gateways.
    */
-  public function processResponse($response) {
-    user_error("Please implement processResponse() on $this->class", E_USER_ERROR);
+  public function processresponse($response) {
+    // Get the reponse result from gateway
+    $result = $this->gateway->getResponse($response);
+    
+    // Retrieve the payment object
+    $payment = DataObject::get_by_id('Payment',$request->param('ID'));
+    
+    if ($result->isSuccess()) {
+      $payment->updatePaymentStatus('Success');
+    } else if (! $result->isSuccess() && ! $result->isProcessing()) {
+      $payment->updatePaymentStatus('Failure');
+    }
   }
   
   /**
