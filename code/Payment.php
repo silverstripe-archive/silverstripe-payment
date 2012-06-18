@@ -89,12 +89,6 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The payment method to be used by this controller 
    */
   public static $paymentMethod;
-  
-  /**
-   * Type of the controller, merchant_hosted or gateway_hosted
-   * @var string
-   */
-  protected static $type;
 
   /**
    * The payment object to be injected to this controller
@@ -105,12 +99,6 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The gateway object to be injected to this controller
    */
   public $gateway;
-  
-  public static function set_type($type) {
-    if ($type == 'merchant_hosted' || $type == 'gateway_hosted') {
-      self::$type = $type;
-    } 
-  }
 
   public function __construct() {
     parent::__construct();
@@ -118,26 +106,6 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     //Set the dependencies
     $this->gateway = $this->getGateway();
     $this->payment = $this->getPayment();
-  }
-  
-  /**
-   * Factory function to create the desired controller object based on configuration
-   */
-  public static function factory() {
-    // TODO: Check if there's custom configuration in gateway 
-    //       and use subclasses accordingly
-    
-    switch (self::$type) {
-      case 'merchant_hosted':
-        return new Payment_Controller_MerchantHosted();
-        break;
-      case 'gateway_hosted':
-        return new Payment_Controller_GatewayHosted();
-        break;
-      default:
-        return new Payment_Controller();
-        break;
-    }
   }
   
   /**
@@ -223,7 +191,13 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * Get the form fields to be shown at the checkout page
    */
   public function getFormFields() { 
-    return new FieldList();
+    $fieldList = new FieldList();
+
+    $fieldList->push(new HiddenField('PaymentMethod', 'Payment Method', $this->class));
+    $fieldList->push(new NumericField('Amount', 'Amount', '10.00'));
+    $fieldList->push(new TextField('Currency', 'Currency', 'NZD'));
+
+    return $fieldList;
   }
 }
 
