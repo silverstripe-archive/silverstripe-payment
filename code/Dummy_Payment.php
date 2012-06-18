@@ -3,30 +3,38 @@
 /**
  * Object representing a dummy payment gateway
  */
-class Dummy_Payment extends Payment {
-   
-}
+class Dummy_Payment extends Payment { }
 
 /**
- * Controller for DummyPayment
-*/
-class Dummy_Controller extends Payment_Controller {
+ * Imaginary place to visit external gateway
+ */
+class Dummy_ExternalGateway_Controller extends Controller{
 
-  static $URLSegment = 'dummy';
-  
-  public function getFormFields() {
-    $fieldList = new FieldList();
-    $fieldList->push(new NumericField('Amount', 'Amount', '10.00'));
-    $fieldList->push(new TextField('Currency', 'Currency', 'NZD'));
+  function pay($request) {
+    Session::set('returnurl', $request->requesetVar("returnurl"));
+    return array(
+      'Content' => "Fill out this form to make payment",
+      'Form' => $this->PayForm()
+    );
+  }
+
+  function PayForm() {
+    $fields = new FieldList(
+      new TextField("name"),
+      new CreditCardField("creditcard"),
+      new DateField("issued"),
+      new DateField("expiry")
+    );
     
-    return $fieldList;
+    $actions = new FieldList(
+        new FormAction("dopay")
+    );
+    
+    return Form($this, "PayForm", $fields, $actions);
   }
 
-  public function processRequest($data) {
-    return parent::processRequest($data);
+  function dopay() {
+    Director::redirect(Session::get('returnurl')); 
   }
 
-  public function processResponse($response) {
-    // Nothing to do here...
-  }
-}
+} 

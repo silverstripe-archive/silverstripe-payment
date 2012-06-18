@@ -161,10 +161,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $this->payment->Status = 'Pending';
     $this->payment->write();
     
-    // Set the return link (for gateway-hosted payment)
-    if ($this instanceof Payment_Controller_GatewayHosted) {
-      $this->gateway->setReturnLink(Controller::join_links(self::$url_segment, 'response', $this->payment->ID));
-    }
+    // Set the return link for external gateway
+    $this->gateway->setReturnURL(Controller::join_links(self::$url_segment, 'response', $this->payment->ID));
     
     // Send a request to the gateway 
     $this->gateway->process($data);
@@ -180,10 +178,35 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     // Retrieve the payment object
     $payment = DataObject::get_by_id('Payment',$request->param('ID'));
     
-    if ($result->isSuccess()) {
-      $payment->updatePaymentStatus('Success');
-    } else if (! $result->isSuccess() && ! $result->isProcessing()) {
-      $payment->updatePaymentStatus('Failure');
+    switch ($result->getStatus()) {
+      case Gateway_Result::SUCCESS:
+        $payment->updatePaymentStatus('Success');
+        break;
+      case Gateway_Result::FAILURE;
+        $payment->updatePaymentStatus('Failure');
+        break;
+      case Gateway_Result::INCOMPLETE;
+        $payment->updatePaymentStatus('Incomplete');
+        break;
+      default:
+        break;
+    }
+    
+    // Render a default page
+    return $this->renderPostProcess();
+  }
+  
+  /**
+   * Render a page for showing payment status after finish processing
+   */
+  public function renderPostProcess() {
+    if ($this->payment) {
+      return $this->customise(array(
+        "Content" => 'Payment #' . $this->payment->ID . ' status:' . $this->payment->Status,
+        "Form" => '',
+      ))->renderWith("Page");
+    } else {
+      return null;
     }
   }
   

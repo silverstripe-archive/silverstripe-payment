@@ -1,37 +1,30 @@
 <?php 
 
-class Dummy_Payment_Gateway extends Payment_Gateway {
-  protected static $test_mode = 'success';
+class Dummy_Gateway extends Payment_Gateway {
   
-  static function set_test_mode($test_mode) {
-    if ($test_mode == 'success' || $test_mode == 'failure') {
-      self::$test_mode = $test_mode;
-    } else {
-      user_error('Test mode not supported', E_USER_ERROR);
-    }
+  public function process($data) { 
+    Session::set('amount', $data['Amount']);
+    Controller::redirect($this->returnURL);
   }
   
-  public function process($data) {
-    parent::process($data);
+  public function getResponse($response) {
+    $amount = Session::get('amount');
+    $cents = round($amount - intval($amount), 2);
+    switch ($cents) {
+      case 0.01:
+        return new Gateway_Result(Gateway_Result::SUCCESS);
+        break;
+      case 0.02:
+        return new Gateway_Result(Gateway_Result::FAILURE);
+        break;
+      case 0.03:
+        return new Gateway_Result(Gateway_Result::INCOMPLETE);
+        break;
+      default:
+        return new Gateway_Result();
+        break;
+    }
   }
 }
 
-/**
- * Dummy Payment Gateway class
- */
-class Dummy_Production_Gateway extends Dummy_Payment_Gateway {
-  
-  public function process($data) {
-    switch (self::$test_mode) {
-      case 'success':
-        return new Gateway_Success();
-        break;
-      case 'failure':
-        return new Gateway_Failure();
-        break;
-      default:
-        return new Gateway_Processing();
-        break;
-    }
-  }
-}
+class Dummy_Production_Gateway extends Dummy_Gateway { }

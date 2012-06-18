@@ -8,17 +8,17 @@
 class Payment_Gateway {
   
   /**
-   * The return link after processing payment (for gateway-hosted payment) 
+   * The link to return to after processing payment  
    */
-  protected  $returnLink;
+  protected  $returnURL;
   
   /**
    * Type of the gateway to be used: dev/live/test
    */
   protected static $type = 'live';
   
-  public function setReturnLink($link) {
-    $this->returnLink = $link;
+  public function setReturnURL($url) {
+    $this->returnURL = $link;
   }
   
   public static function set_type($type) {
@@ -72,59 +72,30 @@ class Payment_Gateway {
    * @return Gateway_Result
    */
   public function getResponse($response) {
-    return new Gateway_Failure();
+    return new Gateway_Result(Gateway_Result::FAILURE);
   }
 }
 
 /**
- * Abstract class for gateway results
+ * Class for gateway results
  */
-abstract class Gateway_Result {
+class Gateway_Result {
+  
+  const SUCCESS = 'Success';
+  const FAILURE = 'Failure';
+  const INCOMPLETE = 'Incomplete';
+  
+  protected $status;
 
-  protected $value;
-
-  function __construct($value = null) {
-    $this->value = $value;
+  function __construct($status = null) {
+    if ($status == self::SUCCESS || $status == self::FAILURE || $status == self::INCOMPLETE) {
+      $this->status = $status;
+    } else {
+      user_error("Invalid result status", E_USER_ERROR);
+    }
   }
 
-  function getValue() {
-    return $this->value;
-  }
-
-  abstract function isSuccess();
-
-  abstract function isProcessing();
-}
-
-class Gateway_Success extends Gateway_Result {
-
-  function isSuccess() {
-    return true;
-  }
-
-  function isProcessing() {
-    return false;
-  }
-}
-
-class Gateway_Processing extends Gateway_Result {
-
-  function isSuccess() {
-    return false;
-  }
-
-  function isProcessing() {
-    return true;
-  }
-}
-
-class Gateway_Failure extends Gateway_Result {
-
-  function isSuccess() {
-    return false;
-  }
-
-  function isProcessing() {
-    return false;
+  function getStatus() {
+    return $this->status;
   }
 }
