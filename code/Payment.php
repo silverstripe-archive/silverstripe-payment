@@ -259,34 +259,3 @@ class Payment_Controller_GatewayHosted extends Payment_Controller implements Pay
     return parent::getFormFields();
   }
 }
-
-/**
- * Factory class to allow easy initiation of payment objects
- */
-class Payment_Factory {
-  /**
-   * Construct an instance of the desired payment controller
-   *
-   * @param $gatewayName
-   * @return PaymentProcessor
-   */
-  public static function createController($gatewayName) {
-    if ($paymentClass = Payment::payment_class_name($gatewayName)) {
-      $payment = new $paymentClass();
-    } else {
-      user_error("Payment class does not exists.", E_USER_ERROR);
-    }
-    
-    if ($gatewayClass = Payment_Gateway::gateway_class_name($gatewayName)) {
-      $gateway = new $gatewayClass();
-    } else {
-      user_error("Gateway class does not exists.", E_USER_ERROR);
-    }
-    
-    if ($controllerClass = Payment_Controller::controller_class_name($gatewayName)) {
-      return $controllerClass::init_instance($payment, $gateway);
-    } else {
-      user_error("Controller class does not exists.", E_USER_ERROR);
-    }
-  }
-}
