@@ -17,16 +17,6 @@ class Payment_Gateway {
    */
   protected  static $gateway_class;
   
-  public static function set_gateway_class($class) {
-    if (class_exists($class)) {
-      self::$gateway_class = $class;
-    }
-  }
-  
-  public static function get_gateway_class() {
-    return self::$gateway_class;
-  }
-  
   public static function set_type($type) {
     if ($type == 'dev' || $type == 'live' || $type == 'test') {
       self::$type = $type;
@@ -72,6 +62,10 @@ class Payment_Gateway {
   public function process($data) {
     user_error("Please implement process() on $this->class", E_USER_ERROR);
   } 
+  
+  public function getResponse($data) {
+    
+  }
 }
 
 /**

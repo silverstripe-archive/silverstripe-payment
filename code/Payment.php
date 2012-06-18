@@ -12,16 +12,6 @@ class Payment extends DataObject {
    */
   protected static $payment_class;
   
-  public static function set_payment_class($class) {
-    if (class_exists($class)) {
-      self::$payment_class = $class;
-    } 
-  }
-  
-  public static function get_payment_class() {
-    return self::$payment_class;
-  }
-  
   public function getFormRequirements() {
     if (!$this->requiredFormFields) {
       $this->requiredFormFields = array();
@@ -100,10 +90,14 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
 
   static $URLSegment;
   
-  /**
-   * The controller class in use
-   */
-  protected static $controller_class;
+  public function __construct() {
+  
+    parent::__construct();
+  
+    //Set the dependencies
+    $gateway = $this->getGateway();
+    $payment = $this->getPayment();
+  }
   
   /**
    * Type of the controller, merchant_hosted or gateway_hosted
@@ -121,16 +115,6 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    */
   public $gateway;
   
-  public static function set_controller_class($class) {
-    if (class_exists($class)) {
-      self::$controller_class = $class;
-    }
-  }
-  
-  public static function get_controller_class() {
-    return self::$controller_class;
-  }
-  
   public static function set_type($type) {
     if ($type == 'merchant_hosted' || $type == 'gateway_hosted') {
       self::$type = $type;
@@ -143,7 +127,6 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   public static function init_instance($payment, $gateway) {
     $class = get_called_class();
     $instance = new $class();
-    self::set_controller_class($class);
       
     $instance->payment = $payment;
     $instance->gateway = $gateway;
