@@ -18,7 +18,7 @@ class Payment_Gateway {
   protected static $type = 'live';
   
   public function setReturnURL($url) {
-    $this->returnURL = $link;
+    $this->returnURL = $url;
   }
   
   public static function set_type($type) {

@@ -36,5 +36,4 @@ class Dummy_ExternalGateway_Controller extends Controller{
   function dopay() {
     Director::redirect(Session::get('returnurl')); 
   }
-
 } 

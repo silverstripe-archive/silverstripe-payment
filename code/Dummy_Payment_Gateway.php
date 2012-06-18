@@ -4,7 +4,7 @@ class Dummy_Gateway extends Payment_Gateway {
   
   public function process($data) { 
     Session::set('amount', $data['Amount']);
-    Controller::redirect($this->returnURL);
+    Director::redirect($this->returnURL);
   }
   
   public function getResponse($response) {

@@ -88,7 +88,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   /**
    * The payment method to be used by this controller 
    */
-  public static $paymentMethod;
+  public static $paymentMethod = 'Dummy';
 
   /**
    * The payment object to be injected to this controller
@@ -162,7 +162,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $this->payment->write();
     
     // Set the return link for external gateway
-    $this->gateway->setReturnURL(Controller::join_links(self::$url_segment, 'response', $this->payment->ID));
+    $this->gateway->setReturnURL(Controller::join_links($this->$URLSegment, 'response', $this->payment->ID));
     
     // Send a request to the gateway 
     $this->gateway->process($data);
@@ -217,7 +217,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $fieldList = new FieldList();
 
     $fieldList->push(new HiddenField('PaymentMethod', 'Payment Method', $this->class));
-    $fieldList->push(new NumericField('Amount', 'Amount', '10.00'));
+    $fieldList->push(new NumericField('Amount', 'Amount', ''));
     $fieldList->push(new TextField('Currency', 'Currency', 'NZD'));
 
     return $fieldList;
