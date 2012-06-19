@@ -6,6 +6,13 @@
  *  @package payment
  */
 class Payment extends DataObject {
+  /**
+   * Constants for payment statuses
+   */
+  const SUCCESS = 'Success';
+  const FAILURE = 'Success';
+  const INCOMPLETE = 'Success';
+  const PENDING = 'Pending';
   
   public function getFormRequirements() {
     if (!$this->requiredFormFields) {
@@ -22,7 +29,7 @@ class Payment extends DataObject {
    * Pending: Payment awaiting receipt/bank transfer etc
    */
   public static $db = array(
-    'Status' => "Enum('Incomplete, Success, Failure, Pending')",
+    'Status' => "Enum('Incomplete. Success, Failure, Pending')",
     'Amount' => 'Money',
     'Message' => 'Text',
   );
@@ -45,8 +52,13 @@ class Payment extends DataObject {
    * @param String $status
    */
   public function updatePaymentStatus($status) {
-    $this->Status = $status;
-    $this->write();
+    if ($status == self::SUCCESS || $status == self::FAILURE || 
+        $status == self::INCOMPLETE || $status == self::PENDING) {
+      $this->Status = $status;
+      $this->write();
+    } else {
+      user_error("Invalid payment status", E_USER_ERROR);
+    }
   }
 }
 
@@ -166,7 +178,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     // Save preliminary data to database
     $this->payment->Amount->Amount = $data['Amount'];
     $this->payment->Amount->Currency = $data['Currency'];
-    $this->payment->Status = 'Pending';
+    $this->payment->Status = Payment::PENDING;
     $this->payment->write();
     
     // Set the return link for external gateway
@@ -188,13 +200,13 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     
     switch ($result->getStatus()) {
       case Gateway_Result::SUCCESS:
-        $payment->updatePaymentStatus('Success');
+        $payment->updatePaymentStatus(Payment::SUCCESS);
         break;
       case Gateway_Result::FAILURE;
-        $payment->updatePaymentStatus('Failure');
+        $payment->updatePaymentStatus(Payment::FAILURE);
         break;
       case Gateway_Result::INCOMPLETE;
-        $payment->updatePaymentStatus('Incomplete');
+        $payment->updatePaymentStatus(Payment::INCOMPLETE);
         break;
       default:
         break;
