@@ -72,7 +72,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * 
    * TODO: Use array of supported methods
    */
-  public static $paymentMethod = 'Dummy';
+  public static $paymentMethod = 'Payment';
 
   /**
    * The payment object to be injected to this controller
