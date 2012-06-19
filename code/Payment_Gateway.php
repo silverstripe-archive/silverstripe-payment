@@ -14,6 +14,8 @@ class Payment_Gateway {
   
   /**
    * Type of the gateway to be used: dev/live/test
+   * 
+   * TODO: Replace this static variable with config option
    */
   protected static $type = 'live';
   
@@ -24,35 +26,6 @@ class Payment_Gateway {
   public static function set_type($type) {
     if ($type == 'dev' || $type == 'live' || $type == 'test') {
       self::$type = $type;
-    }
-  }
-  
-  /**
-   * Get the class name of the desired gateway.
-   * 
-   * @param unknown_type $gatewayName
-   */
-  public static function gateway_class_name($gatewayName) {
-    if (! self::$type) {
-      return null;
-    }
-    
-    switch(self::$type) {
-      case 'live':
-        $gatewayClass = $gatewayName . '_Production_Gateway';
-        break;
-      case 'dev':
-        $gatewayClass = $gatewayName . '_Sandbox_Gateway';
-        break;
-      case 'test':
-        $gatewayClass = $gatewayName . '_Mock_Gateway';
-        break;
-    }
-    
-    if (class_exists($gatewayClass)) {
-      return $gatewayClass;
-    } else {
-      return null;
     }
   }
   

@@ -16,24 +16,6 @@ class Payment extends DataObject {
   }
   
   /**
-   * Get the payment gateway class name from the associating module name
-   * 
-   * @param $gatewayName
-   * @return gateway class name
-   * 
-   * TODO: Generalize naming convention
-   *       Take care of merchant hosted and gateway hosted sub classes
-   */
-  public static function payment_class_name($gatewayname) {
-    $className = $gatewayname . "_Payment";
-    if (class_exists($className)) {
-      return $className;
-    } 
-    
-    return null;
-  }
-  
-  /**
    * Incomplete (default): Payment created but nothing confirmed as successful
    * Success: Payment successful
    * Failure: Payment failed during process
@@ -87,6 +69,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
 
   /**
    * The payment method to be used by this controller 
+   * 
+   * TODO: Use array of supported methods
    */
   public static $paymentMethod = 'Dummy';
 
@@ -113,27 +97,36 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The gateway class is automatically retrieved based on configuration
    */
   private function getGateway() {
-    if ($gatewayClass = Payment_Gateway::gateway_class_name(self::$paymentMethod)) {
-      $gateway = new $gatewayClass();
+    switch(Payment_Gateway::$type) {
+      case 'live':
+        $gatewayClass = self::$paymentMethod . '_Production_Gateway';
+        break;
+      case 'dev':
+        $gatewayClass = self::$paymentMethod . '_Sandbox_Gateway';
+        break;
+      case 'test':
+        $gatewayClass = self::$paymentMethod . '_Mock_Gateway';
+        break;
+    }
+    
+    if (class_exists($gatewayClass)) {
+      return new $gatewayClass();
     } else {
       user_error("Gateway class does not exists.", E_USER_ERROR);
     }
-
-    return $gateway;
   }
   
   /**
    * Get the payment object that will be used by this controller.
-   * The payment class is automatically retrieved based on configuration
+   * The payment class is automatically retrieved based on naming convention.
    */
   private function getPayment() {
-    if ($paymentClass = Payment::payment_class_name(self::$paymentMethod)) {
-      $payment = new $paymentClass();
+    $paymentClass = self::$paymentMethod . "_Payment";
+    if (class_exists($paymentClass)) {
+      return new $paymentClass();
     } else {
       user_error("Payment class does not exists.", E_USER_ERROR);
     }
-    
-    return $payment;
   }
 
   /**
