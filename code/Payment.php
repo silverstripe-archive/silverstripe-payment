@@ -42,7 +42,7 @@ class Payment extends DataObject {
   /**
    * Update the status of this payment
    *
-   * @param $status
+   * @param String $status
    */
   public function updatePaymentStatus($status) {
     $this->Status = $status;
@@ -68,11 +68,17 @@ interface Payment_Controller_Interface {
 class Payment_Controller extends Controller implements Payment_Controller_Interface {
 
   /**
-   * The payment method to be used by this controller 
-   * 
-   * TODO: Use array of supported methods
+   * Static array of payment methods supported on this site. 
+   * Array format: 'ControllerClassName' => 'MethodName'
    */
-  public static $paymentMethod = 'Payment';
+  protected static $supported_methods = array(
+    'Payment_Controller' => 'Payment'    
+  );
+  
+  /**
+   * The method name of this controller
+   */
+  private $methodName;
 
   /**
    * The payment object to be injected to this controller
@@ -83,11 +89,32 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The gateway object to be injected to this controller
    */
   public $gateway;
+  
+  /**
+   * Set the supported methods
+   * 
+   * @param array $methodMap
+   */
+  public static function set_supported_methods($methodMap) {
+    // Make sure the method map is an associative array
+    if(ArrayLib::is_associative($methodMap)) {
+      self::$supported_methods = $methodMap;
+    } else {
+      user_error('Payment::set_supported_methods() requires an associative array.', E_USER_ERROR);
+    }
+  }
 
   public function __construct() {
     parent::__construct();
-  
-    //Set the dependencies
+    
+    // Set the method name so that we can apply naming convention
+    if (isset(self::$supported_methods[$this->class])) {
+      $this->methodName = self::$supported_methods[$this->class];
+    } else {
+      user_error("Payment method not supported by this site.", E_USER_ERROR);
+    }
+    
+    // Set the dependencies
     $this->gateway = $this->getGateway();
     $this->payment = $this->getPayment();
   }
@@ -99,13 +126,13 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   private function getGateway() {
     switch(Payment_Gateway::$type) {
       case 'live':
-        $gatewayClass = self::$paymentMethod . '_Production_Gateway';
+        $gatewayClass = $this->methodName . '_Production_Gateway';
         break;
       case 'dev':
-        $gatewayClass = self::$paymentMethod . '_Sandbox_Gateway';
+        $gatewayClass = $this->methodName . '_Sandbox_Gateway';
         break;
       case 'test':
-        $gatewayClass = self::$paymentMethod . '_Mock_Gateway';
+        $gatewayClass = $this->methodName . '_Mock_Gateway';
         break;
     }
     
@@ -121,7 +148,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The payment class is automatically retrieved based on naming convention.
    */
   private function getPayment() {
-    $paymentClass = self::$paymentMethod . "_Payment";
+    $paymentClass = $this->methodName . "_Payment";
     if (class_exists($paymentClass)) {
       return new $paymentClass();
     } else {
@@ -130,27 +157,15 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   }
 
   /**
-   * Process a payment request. Subclasses must call this parent function when overriding
+   * Process a payment request. 
    *
    * @param $data
    * @return Payment
    */
-  public function processRequest($data) {
-    if (! isset($data['Amount'])) {
-      user_error("Payment amount not set!", E_USER_ERROR);
-    } else {
-      $amount = $data['Amount'];
-    }
-
-    if (isset($data['Currency'])) {
-      $currency = $data['Currency'];
-    } else {
-      //$currency = $this->payment->site_currency();
-    }
-
+  public function processRequest($form, $data) {
     // Save preliminary data to database
-    $this->payment->Amount->Amount = $amount;
-    $this->payment->Amount->Currency = $currency;
+    $this->payment->Amount->Amount = $data['Amount'];
+    $this->payment->Amount->Currency = $data['Currency'];
     $this->payment->Status = 'Pending';
     $this->payment->write();
     
@@ -162,7 +177,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   }
 
   /**
-   * Process a payment response, to be implemented by specific gateways.
+   * Process a payment response.
    */
   public function processresponse($response) {
     // Get the reponse result from gateway
@@ -190,7 +205,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   }
   
   /**
-   * Render a page for showing payment status after finish processing
+   * Render a page for showing payment status after finish processing.
+   * Can be overriden if desired.
    */
   public function renderPostProcess() {
     if ($this->payment) {
@@ -213,6 +229,23 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $fieldList->push(new NumericField('Amount', 'Amount', ''));
     $fieldList->push(new TextField('Currency', 'Currency', 'NZD'));
 
+    return $fieldList;
+  }
+  
+  /**
+   * Return a list of combined form fields from all supported payment methods
+   * 
+   * @return FieldList
+   */
+  public static function get_combined_form_fields() {
+    $fieldList = new FieldList();
+    
+    foreach (self::$supported_methods as $controllerClass => $methodName) {
+      foreach (singleton($controllerClass)->getFormFields() as $field) {
+        $fieldList->push($field);
+      }
+    }
+    
     return $fieldList;
   }
 }
