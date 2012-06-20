@@ -27,9 +27,10 @@ class Payment extends DataObject {
    * Success: Payment successful
    * Failure: Payment failed during process
    * Pending: Payment awaiting receipt/bank transfer etc
+   * Incomplete: Payment cancelled
    */
   public static $db = array(
-    'Status' => "Enum('Incomplete. Success, Failure, Pending')",
+    'Status' => "Enum('Incomplete, Success, Failure, Pending')",
     'Amount' => 'Money',
     'Message' => 'Text',
   );

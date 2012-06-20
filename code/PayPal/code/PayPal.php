@@ -56,18 +56,38 @@ class PayPal_Gateway extends Payment_Gateway {
     
     // Post the data to PayPal server
     $response = $this->postPaymentData($postData);
+    
     // TODO: if return url is set for ExpressCheckout, no need to do manual redirection
+    Session::set('PayPalResponse', $response);
     Director::redirect($this->returnURL);
   }
 }
 
-class PayPal_Gateway_Production extends PayPal_Gateway {
+class PayPal_Gateway_Direct extends PayPal_Gateway {
+  
+}
+
+class PayPal_Gateway_Direct_Production extends PayPal_Gateway_Direct {
   
   protected $gatewayURL = 'https://api-3t.paypal.com/nvp';
 }
 
-class PayPal_Gateway_Dev extends PayPal_Gateway {
+class PayPal_Gateway_Direct_Dev extends PayPal_Gateway_Direct {
   
+  protected $gatewayURL = 'https://api-3t.sandbox.paypal.com/nvp';
+}
+
+class PayPal_Gateway_Express extends PayPal_Gateway {
+
+}
+
+class PayPal_Gateway_Express_Production extends PayPal_Gateway_Express {
+
+  protected $gatewayURL = 'https://api-3t.paypal.com/nvp';
+}
+
+class PayPal_Gateway_Express_Dev extends PayPal_Gateway_Express {
+
   protected $gatewayURL = 'https://api-3t.sandbox.paypal.com/nvp';
 }
 
