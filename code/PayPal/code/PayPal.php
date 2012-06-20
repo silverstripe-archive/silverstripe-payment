@@ -13,12 +13,12 @@ class PayPal_Gateway extends Payment_Gateway {
   protected static $signature;
   
   /**
-   * The payment action: 'DoDirectPayment', 'SetExpressCheckout', etc
+   * The payment action: 'Sale', 'Authorization', etc
    * TODO: Replace static with yaml config
    * 
    * @var String
    */
-  protected static $action;
+  protected static $action = 'Sale';
   
   /**
    * The PayPal method to be passed from PayPal_Controller
