@@ -135,7 +135,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * Get the gateway object that will be used by this controller.
    * The gateway class is automatically retrieved based on configuration
    */
-  private function getGateway() {
+  protected function getGateway() {
     switch(Payment_Gateway::$type) {
       case 'live':
         $gatewayClass = $this->methodName . '_Production_Gateway';
@@ -159,7 +159,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * Get the payment object that will be used by this controller.
    * The payment class is automatically retrieved based on naming convention.
    */
-  private function getPayment() {
+  protected function getPayment() {
     $paymentClass = $this->methodName . "_Payment";
     if (class_exists($paymentClass)) {
       return new $paymentClass();
@@ -304,6 +304,10 @@ class Payment_Controller_GatewayHosted extends Payment_Controller implements Pay
 * @package payment
 */
 class Payment_Gateway {
+  /**
+   * The gateway url
+   */
+  protected $gatewayURL;
 
   /**
    * The link to return to after processing payment
@@ -344,6 +348,24 @@ class Payment_Gateway {
    */
   public function getResponse($response) {
     return new Gateway_Result(Gateway_Result::FAILURE);
+  }
+  
+  /**
+   * Post a set of payment data to a remote server 
+   * 
+   * @param array $data
+   * @param String $endpoint. If not set, assume $gatewayURL
+   * 
+   * @return RestfulService_Response
+   * TODO: May consider subclasssing this to make it more suitable for our case
+   */
+  public function postPaymentData($data, $endpoint = null) {
+    if (! $endpoint) {
+      $endpoint = $this->gatewayURL;
+    }
+    
+    $service = new RestfulService($endpoint);
+    return $service->request(null, 'POST', $data);
   }
 }
 
