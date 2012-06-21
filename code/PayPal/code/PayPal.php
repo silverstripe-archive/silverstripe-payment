@@ -63,30 +63,30 @@ class PayPal_Gateway extends Payment_Gateway {
   }
 }
 
-class PayPal_Gateway_Direct extends PayPal_Gateway {
+class PayPalDirect_Gateway extends PayPal_Gateway {
   
 }
 
-class PayPal_Gateway_Direct_Production extends PayPal_Gateway_Direct {
+class PayPalDirect_Gateway_Production extends PayPalDirect_Gateway {
   
   protected $gatewayURL = 'https://api-3t.paypal.com/nvp';
 }
 
-class PayPal_Gateway_Direct_Dev extends PayPal_Gateway_Direct {
+class PayPalDirect_Gateway_Dev extends PayPalDirect_Gateway {
   
   protected $gatewayURL = 'https://api-3t.sandbox.paypal.com/nvp';
 }
 
-class PayPal_Gateway_Express extends PayPal_Gateway {
+class PayPalExpress_Gateway extends PayPal_Gateway {
 
 }
 
-class PayPal_Gateway_Express_Production extends PayPal_Gateway_Express {
+class PayPalExpress_Gateway_Production extends PayPalExpress_Gateway {
 
   protected $gatewayURL = 'https://api-3t.paypal.com/nvp';
 }
 
-class PayPal_Gateway_Express_Dev extends PayPal_Gateway_Express {
+class PayPalExpress_Gateway_Dev extends PayPalExpress_Gateway {
 
   protected $gatewayURL = 'https://api-3t.sandbox.paypal.com/nvp';
 }
