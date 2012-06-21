@@ -68,7 +68,7 @@ class Payment extends DataObject {
  */
 interface Payment_Controller_Interface {
 
-  public function processRequest($data);
+  public function processRequest($form, $data);
   public function processResponse($response);
   public function getFormFields();
 }
@@ -77,17 +77,18 @@ interface Payment_Controller_Interface {
  * Default class for a number of payment controllers.
  * This acts as a generic controller for all payment methods.
  * Override this class if desired to add custom functionalities.
+ * 
+ * Configuration format for Payment_Controller:
+ * Payment_Controller:
+ *   supported_methods:
+ *     {controller name}:
+ *       {method name}
+ *   gateway_classes:
+ *     {environment}:
+ *       {gateway class name}
+ * 
  */
 class Payment_Controller extends Controller implements Payment_Controller_Interface {
-
-  /**
-   * Static array of payment methods supported on this site. 
-   * Array format: 'ControllerClassName' => 'MethodName'
-   */
-  protected static $supported_methods = array(
-    'Payment_Controller' => 'Payment'    
-  );
-  
   /**
    * The method name of this controller
    */
@@ -104,25 +105,19 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   public $gateway;
   
   /**
-   * Set the supported methods
-   * 
-   * @param array $methodMap
+   * Get the supported methods set by the yaml configuraion
    */
-  public static function set_supported_methods($methodMap) {
-    // Make sure the method map is an associative array
-    if(ArrayLib::is_associative($methodMap)) {
-      self::$supported_methods = $methodMap;
-    } else {
-      user_error('Payment::set_supported_methods() requires an associative array.', E_USER_ERROR);
-    }
+  public static function get_supported_methods() {
+    return Config::inst()->get('Payment_Controller', 'supported_methods');
   }
 
   public function __construct() {
     parent::__construct();
     
     // Set the method name so that we can apply naming convention
-    if (isset(self::$supported_methods[$this->class])) {
-      $this->methodName = self::$supported_methods[$this->class];
+    $supported_methods = self::get_supported_methods();
+    if (isset($supported_methods[$this->class])) {
+      $this->methodName = $supported_methods[$this->class];
     } else {
       user_error("Payment method not supported by this site.", E_USER_ERROR);
     }
@@ -137,16 +132,26 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The gateway class is automatically retrieved based on configuration
    */
   protected function getGateway() {
-    switch(Payment_Gateway::$type) {
-      case 'live':
-        $gatewayClass = $this->methodName . '_Production_Gateway';
-        break;
-      case 'dev':
-        $gatewayClass = $this->methodName . '_Sandbox_Gateway';
-        break;
-      case 'test':
-        $gatewayClass = $this->methodName . '_Mock_Gateway';
-        break;
+    // Get the gateway environment setting
+    $environment = Config::inst()->get('Payment_Gateway', 'environment');
+    
+    // Get the custom class configuration if applicable.  
+    // If not, apply naming convention.
+    $classConfig = Config::inst()->get($this->class, 'gateway_classes');
+    if (isset($classConfig[$environment])) {
+      $gatewayClass = $classConfig[$environment];
+    } else {
+      switch($environment) {
+        case 'live':
+          $gatewayClass = $this->methodName . '_Production_Gateway';
+          break;
+        case 'dev':
+          $gatewayClass = $this->methodName . '_Sandbox_Gateway';
+          break;
+        case 'test':
+          $gatewayClass = $this->methodName . '_Mock_Gateway';
+          break;
+      }
     }
     
     if (class_exists($gatewayClass)) {
@@ -265,8 +270,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
 
 class Payment_Controller_MerchantHosted extends Payment_Controller implements Payment_Controller_Interface {
 
-  public function processRequest($data){
-    parent::processRequest($data);
+  public function processRequest($form, $data){
+    parent::processRequest($form, $data);
   }
 
   public function processResponse($response){
@@ -286,8 +291,8 @@ class Payment_Controller_MerchantHosted extends Payment_Controller implements Pa
 
 class Payment_Controller_GatewayHosted extends Payment_Controller implements Payment_Controller_Interface {
 
-  public function processRequest($data){
-    parent::processRequest($data);
+  public function processRequest($form, $data){
+    parent::processRequest($form, $data);
   }
 
   public function processResponse($response){
@@ -316,20 +321,14 @@ class Payment_Gateway {
   protected  $returnURL;
 
   /**
-   * Type of the gateway to be used: dev/live/test
-   *
-   * TODO: Replace this static variable with config option
+   * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
    */
-  protected static $type = 'live';
+  public static function get_type() {
+    return Config::inst()->get('Payment_Gateway', 'type');
+  }
 
   public function setReturnURL($url) {
     $this->returnURL = $url;
-  }
-
-  public static function set_type($type) {
-    if ($type == 'dev' || $type == 'live' || $type == 'test') {
-      self::$type = $type;
-    }
   }
 
   /**

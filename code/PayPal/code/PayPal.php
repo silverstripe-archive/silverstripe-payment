@@ -1,25 +1,21 @@
 <?php
+/**
+ * Configuration guide for PayPal payment:
+ * In Payment settings:
+ *   supported_methods:
+ *     PayPalDirect:
+ *       PayPal_Controller
+ * or
+ *     PayPalExpress:
+ *       PayPal_Controller
+ *     
+ */
 
 class PayPal_Payment extends Payment {
   
 }
 
 class PayPal_Gateway extends Payment_Gateway {
-  /**
-   * PayPal authentication info
-   */
-  protected static $user;
-  protected static $password;
-  protected static $signature;
-  
-  /**
-   * The payment action: 'Sale', 'Authorization', etc
-   * TODO: Replace static with yaml config
-   * 
-   * @var String
-   */
-  protected static $action = 'Sale';
-  
   /**
    * The PayPal method to be passed from PayPal_Controller
    * 
@@ -31,14 +27,21 @@ class PayPal_Gateway extends Payment_Gateway {
     $this->method = $method;
   }
   
-  public static function set_authentication($user, $password, $signature) {
-    self::$user = $user;
-    self::$password = $password;
-    self::$signature = $signature;
+  /**
+   * Get the authentication information (username, password, api signature)
+   * 
+   * @return array 
+   */
+  public static function get_authentication() {
+    $config = Config::inst()->get('PayPal_Gateway', self::get_type());
+    return $config['authentication'];
   }
   
-  public static function set_action($action) {
-    self::$action = $action;
+  /**
+   * The payment action: 'Sale', 'Authorization', etc from yaml config
+   */
+  public static function get_action() {
+    return Config::inst()->get('PayPal_Gateway', 'action');
   }
   
   public function process($data) {

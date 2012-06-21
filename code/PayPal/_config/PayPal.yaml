@@ -1,0 +1,26 @@
+name: PayPal
+---
+
+PayPal_Gateway:
+  live:
+    'url':
+      'https://api-3t.paypal.com/nvp'
+    authentication:
+      'username':
+        ''
+      'password':
+        ''
+      'signature':
+        ''
+  test:
+    'url':
+      'https://api-3t.sandbox.paypal.com/nvp'
+    authentication:
+      'username':
+        ''
+      'password':
+        ''
+      'signature':
+        ''
+  action:
+    'Sale'
