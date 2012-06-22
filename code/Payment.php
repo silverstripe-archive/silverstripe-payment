@@ -70,7 +70,7 @@ interface Payment_Controller_Interface {
 
   public function processRequest($form, $data);
   public function processResponse($response);
-  public function getFormFields();
+  public function getCustomFormFields();
 }
 
 /**
@@ -205,13 +205,13 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $payment = DataObject::get_by_id('Payment',$request->param('ID'));
     
     switch ($result->getStatus()) {
-      case Gateway_Result::SUCCESS:
+      case Payment_Gateway_Result::SUCCESS:
         $payment->updatePaymentStatus(Payment::SUCCESS);
         break;
-      case Gateway_Result::FAILURE;
+      case Payment_Gateway_Result::FAILURE;
         $payment->updatePaymentStatus(Payment::FAILURE);
         break;
-      case Gateway_Result::INCOMPLETE;
+      case Payment_Gateway_Result::INCOMPLETE;
         $payment->updatePaymentStatus(Payment::INCOMPLETE);
         break;
       default:
@@ -238,16 +238,27 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   }
   
   /**
-   * Get the form fields to be shown at the checkout page
+   * Get the default form fields to be shown at the checkout page
+   * 
+   * return FieldList
    */
-  public function getFormFields() { 
+  public function getDefaultFormFields() { 
     $fieldList = new FieldList();
 
-    $fieldList->push(new HiddenField('PaymentMethod', 'Payment Method', $this->class));
     $fieldList->push(new NumericField('Amount', 'Amount', ''));
     $fieldList->push(new TextField('Currency', 'Currency', 'NZD'));
 
     return $fieldList;
+  }
+  
+  /**
+   * Get the custom form fields. Custom controllers use this function
+   * to add the form fields specifically to gateways.
+   * 
+   * return FieldList
+   */
+  public function getCustomFormFields() {
+    return new FieldList();
   }
   
   /**
@@ -258,9 +269,17 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   public static function get_combined_form_fields() {
     $fieldList = new FieldList();
     
+    // Add the default form fields
+    foreach (singleton('Payment_Controller')->getDefaultFormFields() as $field) {
+      $fieldList->push($field);
+    }
+    
+    // Custom form fields for each gateway
     foreach (self::$supported_methods as $controllerClass => $methodName) {
-      foreach (singleton($controllerClass)->getFormFields() as $field) {
-        $fieldList->push($field);
+      if ($controllerClass != 'Payment_Controller') {
+        foreach (singleton($controllerClass)->getCustomFormFields() as $field) {
+          $fieldList->push($field);
+        }
       }
     }
     
@@ -270,16 +289,16 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
 
 class Payment_Controller_MerchantHosted extends Payment_Controller implements Payment_Controller_Interface {
 
-  public function processRequest($form, $data){
+  public function processRequest($form, $data) {
     parent::processRequest($form, $data);
   }
 
-  public function processResponse($response){
+  public function processResponse($response) {
     parent::processResponse($response);
   }
 
-  public function getFormFields() {
-    $fieldList = parent::getFormFields();
+  public function getCustomFormFields() {
+    $fieldList = parent::getCustomFormFields();
     $fieldList->push(new TextField('CardHolderName', 'Credit Card Holder Name :'));
     $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number :'));
     $fieldList->push(new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4));
@@ -291,16 +310,16 @@ class Payment_Controller_MerchantHosted extends Payment_Controller implements Pa
 
 class Payment_Controller_GatewayHosted extends Payment_Controller implements Payment_Controller_Interface {
 
-  public function processRequest($form, $data){
+  public function processRequest($form, $data) {
     parent::processRequest($form, $data);
   }
 
-  public function processResponse($response){
+  public function processResponse($response) {
     parent::processResponse($response);
   }
 
-  public function getFormFields(){
-    return parent::getFormFields();
+  public function getCustomFormFields() {
+    return parent::getCustomFormFields();
   }
 }
 
@@ -344,10 +363,10 @@ class Payment_Gateway {
   /**
    * Process the response from the external gateway
    *
-   * @return Gateway_Result
+   * @return Payment_Gateway_Result
    */
   public function getResponse($response) {
-    return new Gateway_Result(Gateway_Result::FAILURE);
+    return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
   }
   
   /**
@@ -372,7 +391,7 @@ class Payment_Gateway {
 /**
  * Class for gateway results
  */
-class Gateway_Result {
+class Payment_Gateway_Result {
 
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
