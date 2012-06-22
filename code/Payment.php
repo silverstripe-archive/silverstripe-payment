@@ -81,8 +81,8 @@ interface Payment_Controller_Interface {
  * Configuration format for Payment_Controller:
  * Payment_Controller:
  *   supported_methods:
- *     {controller name}:
- *       {method name}
+ *     {method name}:
+ *       {controller name}
  *   gateway_classes:
  *     {environment}:
  *       {gateway class name}
@@ -114,17 +114,20 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   public function __construct() {
     parent::__construct();
     
-    // Set the method name so that we can apply naming convention
-    $supported_methods = self::get_supported_methods();
-    if (isset($supported_methods[$this->class])) {
-      $this->methodName = $supported_methods[$this->class];
-    } else {
-      user_error("Payment method not supported by this site.", E_USER_ERROR);
-    }
-    
     // Set the dependencies
     $this->gateway = $this->getGateway();
     $this->payment = $this->getPayment();
+  }
+  
+  /**
+   * Set the method name of this controller. 
+   * This must be called after initializing a controller instance.
+   * If not a generic method name 'Payment' will be used.
+   * 
+   * @param String $method
+   */
+  public function setMethodName($method) {
+    $this->methodName = $method;
   }
   
   /**
@@ -132,6 +135,10 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The gateway class is automatically retrieved based on configuration
    */
   protected function getGateway() {
+    if (! $this->methodName) {
+      $this->methodName = 'Payment';
+    }
+    
     // Get the gateway environment setting
     $environment = Config::inst()->get('Payment_Gateway', 'environment');
     
@@ -166,6 +173,10 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The payment class is automatically retrieved based on naming convention.
    */
   protected function getPayment() {
+    if (! $this->methodName) {
+      $this->methodName = 'Payment';
+    }
+    
     $paymentClass = $this->methodName . "_Payment";
     if (class_exists($paymentClass)) {
       return new $paymentClass();

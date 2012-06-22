@@ -3,7 +3,10 @@ name: Payment
   
 Payment_Controller:
   supported_methods:
-    'Dummy_Controller':
-      'Dummy'
-    'PayPal_Controller':
-      'PayPalDirect'
+    'Dummy':
+      'Dummy_Controller'
+    'PayPalDirect':
+      'PayPal_Controller'
+  gateway_classes:
+    'live': 
+      'Payment_Gateway'
