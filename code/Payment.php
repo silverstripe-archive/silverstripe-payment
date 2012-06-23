@@ -10,8 +10,8 @@ class Payment extends DataObject {
    * Constants for payment statuses
    */
   const SUCCESS = 'Success';
-  const FAILURE = 'Success';
-  const INCOMPLETE = 'Success';
+  const FAILURE = 'Failure';
+  const INCOMPLETE = 'Incomplete';
   const PENDING = 'Pending';
   
   public function getFormRequirements() {
@@ -135,8 +135,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The gateway class is automatically retrieved based on configuration
    */
   protected function getGateway() {
-    if (! $this->methodName) {
-      $this->methodName = 'Payment';
+    if (! $this->methodName || $this->methodName == 'Payment') {
+      return new Payment_Gateway();
     }
     
     // Get the gateway environment setting
@@ -173,11 +173,11 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The payment class is automatically retrieved based on naming convention.
    */
   protected function getPayment() {
-    if (! $this->methodName) {
-      $this->methodName = 'Payment';
+    if (! $this->methodName || $this->methodName == 'Payment') {
+      return new Payment();
     }
     
-    $paymentClass = $this->methodName . "_Payment";
+    $paymentClass = $this->methodName;
     if (class_exists($paymentClass)) {
       return new $paymentClass();
     } else {
@@ -286,9 +286,11 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     }
     
     // Custom form fields for each gateway
-    foreach (self::$supported_methods as $controllerClass => $methodName) {
+    foreach (self::get_supported_methods() as $methodName => $controllerClass) {
       if ($controllerClass != 'Payment_Controller') {
-        foreach (singleton($controllerClass)->getCustomFormFields() as $field) {
+        $controller = singleton($controllerClass);
+        $controller->setMethodName($methodName);
+        foreach ($controller->getCustomFormFields() as $field) {
           $fieldList->push($field);
         }
       }

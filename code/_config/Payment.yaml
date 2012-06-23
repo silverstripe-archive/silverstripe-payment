@@ -4,9 +4,9 @@ name: Payment
 Payment_Controller:
   supported_methods:
     'Dummy':
-      'Dummy_Controller'
+      'Payment_Controller'
     'PayPalDirect':
-      'PayPal_Controller'
+      'Payment_Controller'
   gateway_classes:
     'live': 
       'Payment_Gateway'

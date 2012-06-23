@@ -11,7 +11,7 @@
  *     
  */
 
-class PayPal_Payment extends Payment {
+class PayPal extends Payment {
   
 }
 
@@ -21,10 +21,20 @@ class PayPal_Gateway extends Payment_Gateway {
    * 
    * @var String
    */
-  protected $method;
+  protected $paypalMethod;
   
-  public function setMethod($method) {
-    $this->method = $method;
+  /**
+   * Get the PayPal configuration 
+   */
+  public static function get_config() {
+    return Config::inst()->get('PayPal_Gateway', self::get_type());
+  }
+  
+  /**
+   * Get the PayPal URL (Live or Sandbox)
+   */
+  public static function get_url() {
+    return $config['url'];
   }
   
   /**
@@ -33,15 +43,24 @@ class PayPal_Gateway extends Payment_Gateway {
    * @return array 
    */
   public static function get_authentication() {
-    $config = Config::inst()->get('PayPal_Gateway', self::get_type());
     return $config['authentication'];
   }
   
   /**
-   * The payment action: 'Sale', 'Authorization', etc from yaml config
+   * Get the payment action: 'Sale', 'Authorization', etc from yaml config
    */
   public static function get_action() {
     return Config::inst()->get('PayPal_Gateway', 'action');
+  }
+  
+  public function __construct() {
+    parent::__construct();
+  
+    $this->gatewayURL = self::get_url();
+  }
+  
+  public function setPayPalMethod($method) {
+    $this->paypalMethod = $method;
   }
   
   public function process($data) {
@@ -67,56 +86,17 @@ class PayPal_Gateway extends Payment_Gateway {
 }
 
 class PayPalDirect_Gateway extends PayPal_Gateway {
-  
+  protected $paypalMethod = 'DoDirectPayment';
 }
 
-class PayPalDirect_Gateway_Production extends PayPalDirect_Gateway {
-  
-  protected $gatewayURL = 'https://api-3t.paypal.com/nvp';
-}
+class PayPalDirect_Gateway_Production extends PayPalDirect_Gateway { }
 
-class PayPalDirect_Gateway_Dev extends PayPalDirect_Gateway {
-  
-  protected $gatewayURL = 'https://api-3t.sandbox.paypal.com/nvp';
-}
+class PayPalDirect_Gateway_Dev extends PayPalDirect_Gateway { }
 
 class PayPalExpress_Gateway extends PayPal_Gateway {
-
+  protected $paypalMethod = 'SetExpressCheckout';
 }
 
-class PayPalExpress_Gateway_Production extends PayPalExpress_Gateway {
+class PayPalExpress_Gateway_Production extends PayPalExpress_Gateway { }
 
-  protected $gatewayURL = 'https://api-3t.paypal.com/nvp';
-}
-
-class PayPalExpress_Gateway_Dev extends PayPalExpress_Gateway {
-
-  protected $gatewayURL = 'https://api-3t.sandbox.paypal.com/nvp';
-}
-
-class PayPal_Controller extends Payment_Controlelr {
-  /**
-   * The PayPal method in use: 'DoDirectPayment', 'SetExpressCheckout', etc
-   *
-   * @var String
-   */
-  protected $method;
-  
-  protected function getGateway() {
-    $gateway = parent::getGateway();
-    $gateway->setMethod($this->method);
-  
-    return $gateway;
-  }
-}
-
-class PayPal_DirectPayment_Controller extends Payment_Controller_MerchantHosted {
-  
-  protected $method = 'DoDirectPayment'; 
-}
-
-class PayPal_ExpressPayment_Controller extends Payment_Controller_GatewayHosted {
-
-  protected $method = 'SetExpressCheckout';
-}
-
+class PayPalExpress_Gateway_Dev extends PayPalExpress_Gateway { }

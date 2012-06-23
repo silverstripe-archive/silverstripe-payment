@@ -3,7 +3,7 @@
 /**
  * Object representing a dummy payment gateway
  */
-class Dummy_Payment extends Payment { }
+class Dummy extends Payment { }
 
 /**
  * Imaginary place to visit external gateway
