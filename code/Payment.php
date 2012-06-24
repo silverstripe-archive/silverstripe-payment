@@ -110,6 +110,24 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   public static function get_supported_methods() {
     return Config::inst()->get('Payment_Controller', 'supported_methods');
   }
+  
+  /**
+   * Factory function to create payment controller object
+   *
+   * @param String $methodName
+   */
+  public static function factory($methodName) {
+    $supported_methods = self::get_supported_methods();
+    if (isset($supported_methods[$methodName])) {
+      $controllerClass = $supported_methods[$methodName];
+      $controller = new $controllerClass();
+      $controller->setMethodName($methodName);
+      
+      return $controller;
+    } else {
+      user_error("No controller is defined for the method $methodName");
+    }
+  }
 
   public function __construct() {
     parent::__construct();
@@ -281,12 +299,9 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     
     // Custom form fields for each gateway
     foreach (self::get_supported_methods() as $methodName => $controllerClass) {
-      if ($controllerClass != 'Payment_Controller') {
-        $controller = singleton($controllerClass);
-        $controller->setMethodName($methodName);
-        foreach ($controller->getCustomFormFields() as $field) {
-          $fieldList->push($field);
-        }
+      $controller = self::factory($methodName);
+      foreach ($controller->getCustomFormFields() as $field) {
+        $fieldList->push($field);
       }
     }
     

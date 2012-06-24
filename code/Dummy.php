@@ -41,12 +41,7 @@ class Dummy_ExternalGateway_Controller extends Controller{
 class Dummy_Gateway extends Payment_Gateway {
 
   public function process($data) {
-    Session::set('amount', $data['Amount']);
-    Director::redirect($this->returnURL);
-  }
-
-  public function getResponse($response) {
-    $amount = Session::get('amount');
+    $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
     switch ($cents) {
       case 0.01:
@@ -62,6 +57,10 @@ class Dummy_Gateway extends Payment_Gateway {
         return new Gateway_Result();
         break;
     }
+  }
+
+  public function getResponse($response) {
+    return $response;
   }
 }
 
