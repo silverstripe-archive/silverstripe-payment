@@ -64,16 +64,6 @@ class Payment extends DataObject {
 }
 
 /**
- *  Interface for a payment gateway controller
- */
-interface Payment_Controller_Interface {
-
-  public function processRequest($form, $data);
-  public function processresponse($response);
-  public function getCustomFormFields();
-}
-
-/**
  * Default class for a number of payment controllers.
  * This acts as a generic controller for all payment methods.
  * Override this class if desired to add custom functionalities.
@@ -158,7 +148,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     }
     
     // Get the gateway environment setting
-    $environment = Config::inst()->get('Payment_Gateway', 'environment');
+    $environment = Payment_Gateway::get_environment();
     
     // Get the custom class configuration if applicable.  
     // If not, apply naming convention.
@@ -360,7 +350,7 @@ class Payment_Controller_GatewayHosted extends Payment_Controller implements Pay
 *
 * @package payment
 */
-class Payment_Gateway {
+abstract class Payment_Gateway {
   /**
    * The gateway url
    */
@@ -374,8 +364,8 @@ class Payment_Gateway {
   /**
    * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
    */
-  public static function get_type() {
-    return Config::inst()->get('Payment_Gateway', 'type');
+  public static function get_environment() {
+    return Config::inst()->get('Payment_Gateway', 'environment');
   }
 
   public function setReturnURL($url) {
@@ -388,18 +378,14 @@ class Payment_Gateway {
    *
    * @param $data
    */
-  public function process($data) {
-    user_error("Please implement process() on $this->class", E_USER_ERROR);
-  }
+  abstract public function process($data);
 
   /**
    * Process the response from the external gateway
    *
    * @return Payment_Gateway_Result
    */
-  public function getResponse($response) {
-    return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
-  }
+  abstract public function getResponse($response);
   
   /**
    * Post a set of payment data to a remote server 

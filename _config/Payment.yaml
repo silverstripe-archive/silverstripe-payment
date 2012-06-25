@@ -1,0 +1,16 @@
+name: Payment
+---
+  
+Payment_Controller:
+  supported_methods:
+    'Dummy':
+      'Payment_Controller_MerchantHosted'
+    'PayPalDirect':
+      'Payment_Controller_MerchantHosted'
+  gateway_classes:
+    'live': 
+      'Payment_Gateway'
+
+Payment_Gateway:
+  environment:
+    'live'      
