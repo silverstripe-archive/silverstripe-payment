@@ -7,9 +7,6 @@ Payment_Controller:
       'Payment_Controller_MerchantHosted'
     'PayPalDirect':
       'Payment_Controller_MerchantHosted'
-  gateway_classes:
-    'live': 
-      'Payment_Gateway'
 
 Payment_Gateway:
   environment:

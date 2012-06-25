@@ -43,18 +43,19 @@ class Dummy_Gateway extends Payment_Gateway {
   public function process($data) {
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
+    
     switch ($cents) {
+      case 0.00:
+        return new Payment_Gateway_Result(Payment_Gateway_Result::SUCCESS);
+        break;
       case 0.01:
-        return new Gateway_Result(Gateway_Result::SUCCESS);
+        return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
         break;
       case 0.02:
-        return new Gateway_Result(Gateway_Result::FAILURE);
-        break;
-      case 0.03:
-        return new Gateway_Result(Gateway_Result::INCOMPLETE);
+        return new Payment_Gateway_Result(Payment_Gateway_Result::INCOMPLETE);
         break;
       default:
-        return new Gateway_Result();
+        return new Payment_Gateway_Result();
         break;
     }
   }

@@ -78,7 +78,7 @@ class Payment extends DataObject {
  *       {gateway class name}
  * 
  */
-class Payment_Controller extends Controller implements Payment_Controller_Interface {
+class Payment_Controller extends Controller {
   /**
    * The method name of this controller
    */
@@ -113,18 +113,14 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
       $controller = new $controllerClass();
       $controller->setMethodName($methodName);
       
+      // Set the dependencies
+      $controller->gateway = $controller->getGateway();
+      $controller->payment = $controller->getPayment();
+      
       return $controller;
     } else {
       user_error("No controller is defined for the method $methodName");
     }
-  }
-
-  public function __construct() {
-    parent::__construct();
-    
-    // Set the dependencies
-    $this->gateway = $this->getGateway();
-    $this->payment = $this->getPayment();
   }
   
   /**
@@ -143,8 +139,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The gateway class is automatically retrieved based on configuration
    */
   protected function getGateway() {
-    if (! $this->methodName || $this->methodName == 'Payment') {
-      return new Payment_Gateway();
+    if (! $this->methodName) {
+      return null;
     }
     
     // Get the gateway environment setting
@@ -181,8 +177,8 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
    * The payment class is automatically retrieved based on naming convention.
    */
   protected function getPayment() {
-    if (! $this->methodName || $this->methodName == 'Payment') {
-      return new Payment();
+    if (! $this->methodName) {
+      return null;
     }
     
     $paymentClass = $this->methodName;
@@ -215,7 +211,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     $result = $this->gateway->getResponse($response);
     
     // Retrieve the payment object
-    $payment = DataObject::get_by_id('Payment',$request->param('ID'));
+    $payment = $this->getPaymentObject($response);
     
     switch ($result->getStatus()) {
       case Payment_Gateway_Result::SUCCESS:
@@ -234,6 +230,11 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
     // Render a default page
     return $this->renderPostProcess();
   }
+  
+  /**
+   * Helper function to get the payment object from the gateway response
+   */
+  public function getPaymentObject($response) { }
   
   /**
    * Render a page for showing payment status after finish processing.
@@ -299,7 +300,7 @@ class Payment_Controller extends Controller implements Payment_Controller_Interf
   }
 }
 
-class Payment_Controller_MerchantHosted extends Payment_Controller implements Payment_Controller_Interface {
+class Payment_Controller_MerchantHosted extends Payment_Controller {
 
   public function processRequest($form, $data) {
     parent::processRequest($form, $data);
@@ -310,7 +311,11 @@ class Payment_Controller_MerchantHosted extends Payment_Controller implements Pa
   }
 
   public function processresponse($response) {
-    parent::processResponse($response);
+    return parent::processResponse($response);
+  }
+  
+  public function getPaymentObject($response) {
+    return $this->payment;
   }
 
   public function getCustomFormFields() {
@@ -324,7 +329,7 @@ class Payment_Controller_MerchantHosted extends Payment_Controller implements Pa
   }
 }
 
-class Payment_Controller_GatewayHosted extends Payment_Controller implements Payment_Controller_Interface {
+class Payment_Controller_GatewayHosted extends Payment_Controller {
 
   public function processRequest($form, $data) {
     parent::processRequest($form, $data);
@@ -337,95 +342,14 @@ class Payment_Controller_GatewayHosted extends Payment_Controller implements Pay
   }
 
   public function processresponse($response) {
-    parent::processresponse($response);
+    return parent::processresponse($response);
+  }
+  
+  public function getPaymentObject($response) {
+    return DataObject::get_by_id('Payment',$request->param('ID'));
   }
 
   public function getCustomFormFields() {
     return parent::getCustomFormFields();
-  }
-}
-
-/**
- * Abstract class for a number of payment gateways
-*
-* @package payment
-*/
-abstract class Payment_Gateway {
-  /**
-   * The gateway url
-   */
-  protected $gatewayURL;
-
-  /**
-   * The link to return to after processing payment
-   */
-  protected  $returnURL;
-
-  /**
-   * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
-   */
-  public static function get_environment() {
-    return Config::inst()->get('Payment_Gateway', 'environment');
-  }
-
-  public function setReturnURL($url) {
-    $this->returnURL = $url;
-  }
-
-  /**
-   * Send a request to the gateway to process the payment.
-   * To be implemented by individual gateway
-   *
-   * @param $data
-   */
-  abstract public function process($data);
-
-  /**
-   * Process the response from the external gateway
-   *
-   * @return Payment_Gateway_Result
-   */
-  abstract public function getResponse($response);
-  
-  /**
-   * Post a set of payment data to a remote server 
-   * 
-   * @param array $data
-   * @param String $endpoint. If not set, assume $gatewayURL
-   * 
-   * @return RestfulService_Response
-   * TODO: May consider subclasssing this to make it more suitable for our case
-   */
-  public function postPaymentData($data, $endpoint = null) {
-    if (! $endpoint) {
-      $endpoint = $this->gatewayURL;
-    }
-    
-    $service = new RestfulService($endpoint);
-    return $service->request(null, 'POST', $data);
-  }
-}
-
-/**
- * Class for gateway results
- */
-class Payment_Gateway_Result {
-
-  const SUCCESS = 'Success';
-  const FAILURE = 'Failure';
-  const INCOMPLETE = 'Incomplete';
-
-  protected $status;
-
-  function __construct($status = null) {
-    if ($status == self::SUCCESS || $status == self::FAILURE || $status == self::INCOMPLETE) {
-      $this->status = $status;
-    } else {
-      user_error("Invalid result status", E_USER_ERROR);
-    }
-  }
-
-  function getStatus() {
-    return $this->status;
   }
 }

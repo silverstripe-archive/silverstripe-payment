@@ -11,9 +11,11 @@
  *     
  */
 
-class PayPal extends Payment {
-  
-}
+class PayPal extends Payment { }
+
+class PayPalDirect extends PayPal { }
+
+class PayPalExpress extends PayPal { }
 
 class PayPal_Gateway extends Payment_Gateway {
   /**
@@ -61,8 +63,6 @@ class PayPal_Gateway extends Payment_Gateway {
   }
   
   public function __construct() {
-    parent::__construct();
-  
     $this->gatewayURL = self::get_url();
   }
   
@@ -82,6 +82,10 @@ class PayPal_Gateway extends Payment_Gateway {
     $this->postData['USER'] = $authentication['user'];
     $this->postData['PWD'] = $authentication['password'];
     $this->postData['SIGNATURE'] = $authentication['signature'];
+  }
+  
+  public function getResponse($response) { 
+    // To be overriden by subclasses
   }
 }
 
@@ -106,9 +110,9 @@ class PayPalDirect_Gateway extends PayPal_Gateway {
   }
 }
 
-class PayPalDirect_Gateway_Production extends PayPalDirect_Gateway { }
+class PayPalDirect_Production_Gateway extends PayPalDirect_Gateway { }
 
-class PayPalDirect_Gateway_Dev extends PayPalDirect_Gateway { }
+class PayPalDirect_Dev_Gateway extends PayPalDirect_Gateway { }
 
 class PayPalExpress_Gateway extends PayPal_Gateway {
   protected $paypalMethod = 'SetExpressCheckout';
@@ -128,6 +132,6 @@ class PayPalExpress_Gateway extends PayPal_Gateway {
   }
 }
 
-class PayPalExpress_Gateway_Production extends PayPalExpress_Gateway { }
+class PayPalExpress_Production_Gateway extends PayPalExpress_Gateway { }
 
-class PayPalExpress_Gateway_Dev extends PayPalExpress_Gateway { }
+class PayPalExpress_Dev_Gateway extends PayPalExpress_Gateway { }
