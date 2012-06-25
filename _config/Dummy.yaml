@@ -1,0 +1,5 @@
+Name: PaymentTest
+---
+Director:
+  rules:
+    'dummy/external/$Action/$ID': 'DummyExternalGateway_Controller'

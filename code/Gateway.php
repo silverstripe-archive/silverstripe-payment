@@ -9,12 +9,12 @@ abstract class Payment_Gateway {
   /**
    * The gateway url
    */
-  protected $gatewayURL;
+  public $gatewayURL;
 
   /**
    * The link to return to after processing payment
    */
-  protected  $returnURL;
+  protected $returnURL;
 
   /**
    * Get the gateway type set by the yaml config ('live', 'dev', 'mock')

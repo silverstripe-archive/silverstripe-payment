@@ -3,8 +3,10 @@ name: Payment
   
 Payment_Controller:
   supported_methods:
-    'Dummy':
+    'DummyMerchantHosted':
       'Payment_Controller_MerchantHosted'
+    'DummyGatewayHosted':
+      'Payment_Controller_GatewayHosted'
     'PayPalDirect':
       'Payment_Controller_MerchantHosted'
 

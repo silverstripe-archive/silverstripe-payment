@@ -307,7 +307,7 @@ class Payment_Controller_MerchantHosted extends Payment_Controller {
     
     // Call processResponse directly since there's no need to set return link
     $response = $this->gateway->process($data);
-    $this->processresponse($response);
+    return $this->processresponse($response);
   }
 
   public function processresponse($response) {
@@ -334,8 +334,8 @@ class Payment_Controller_GatewayHosted extends Payment_Controller {
   public function processRequest($form, $data) {
     parent::processRequest($form, $data);
     
-    // Set the return link for external gateway
-    $this->gateway->setReturnURL(Controller::join_links($this->$URLSegment, 'response', $this->payment->ID));
+    // Set the return link 
+    $this->gateway->setReturnURL(Controller::join_links($this->$URLSegment, 'processresponse', $this->payment->ID));
     
     // Send a request to the gateway 
     $this->gateway->process($data);
@@ -346,7 +346,7 @@ class Payment_Controller_GatewayHosted extends Payment_Controller {
   }
   
   public function getPaymentObject($response) {
-    return DataObject::get_by_id('Payment',$request->param('ID'));
+    return DataObject::get_by_id('Payment', $request->param('ID'));
   }
 
   public function getCustomFormFields() {

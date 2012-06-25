@@ -3,42 +3,11 @@
 /**
  * Object representing a dummy payment gateway
  */
-class Dummy extends Payment { }
+class DummyMerchantHosted extends Payment { }
 
-/**
- * Imaginary place to visit external gateway
- */
-class Dummy_ExternalGateway_Controller extends Controller{
+class DummyGatewayHosted extends Payment { }
 
-  function pay($request) {
-    Session::set('returnurl', $request->requesetVar("returnurl"));
-    return array(
-      'Content' => "Fill out this form to make payment",
-      'Form' => $this->PayForm()
-    );
-  }
-
-  function PayForm() {
-    $fields = new FieldList(
-      new TextField("name"),
-      new CreditCardField("creditcard"),
-      new DateField("issued"),
-      new DateField("expiry")
-    );
-    
-    $actions = new FieldList(
-        new FormAction("dopay")
-    );
-    
-    return Form($this, "PayForm", $fields, $actions);
-  }
-
-  function dopay() {
-    Director::redirect(Session::get('returnurl')); 
-  }
-} 
-
-class Dummy_Gateway extends Payment_Gateway {
+class DummyMerchantHosted_Gateway extends Payment_Gateway {
 
   public function process($data) {
     $amount = $data['Amount'];
@@ -65,4 +34,40 @@ class Dummy_Gateway extends Payment_Gateway {
   }
 }
 
-class Dummy_Production_Gateway extends Dummy_Gateway { }
+class DummyMerchantHosted_Production_Gateway extends DummyMerchantHosted_Gateway { }
+
+class DummyGatewayHosted_Gateway extends Payment_Gateway {
+  
+  public function __construct() {
+    $this->gatewayURL = Director::baseURL() . 'dummy/external/pay';
+  }
+
+  public function process($data) {
+    $postData = array(
+      'Amount' => $data['Amount'],
+      'Currency' => $data['Currency'],
+      'ReturnURL' => $this->returnURL    
+    ); 
+    
+    Session::set('paymentData', $postData);
+    Controller::redirect($this->gatewayURL);
+  }
+
+  public function getResponse($response) {
+    switch (Session::get('result')) {
+      case Payment_Gateway_Result::SUCCESS:
+        return new Payment_Gateway_Result(Payment_Gateway_Result::SUCCESS);
+        break;
+      case Payment_Gateway_Result::FAILURE:
+        return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
+        break;
+      case Payment_Gateway_Result::INCOMPLETE:
+        return Payment_Gateway_Result(Payment_Gateway_Result::INCOMPLETE);
+      default:
+        return new Payment_Gateway_Result();
+        break;
+    }
+  }
+}
+
+class DummyGatewayHosted_Production_Gateway extends DummyGatewayHosted_Gateway { }
