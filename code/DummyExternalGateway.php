@@ -6,22 +6,21 @@
 class DummyExternalGateway_Controller extends Controller{
 
   function pay($request) {
-    return array(
-        'Content' => "Fill out this form to make payment",
-        'Form' => $this->PayForm()
-    );
+    return $this->customise(array(
+      'Content' => "<h1>Fill out this form to make payment</h1>",
+      'Form' => $this->PayForm()
+    ))->renderWith('Page');
   }
 
   function PayForm() {
     $fields = new FieldList(
-        new TextField("name"),
-        new CreditCardField("creditcard"),
-        new DateField("issued"),
-        new DateField("expiry")
+      new TextField('CardHolderName', 'Card Holder Name'),
+      new CreditCardField('CardNumber', 'Card Number'),
+      new DateField('DateExpiry', 'Expiration date')
     );
 
     $actions = new FieldList(
-        new FormAction("dopay")
+      new FormAction("dopay")
     );
 
     return new Form($this, "PayForm", $fields, $actions);

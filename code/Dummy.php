@@ -34,7 +34,7 @@ class DummyMerchantHosted_Gateway extends Payment_Gateway {
   }
 }
 
-class DummyMerchantHosted_Production_Gateway extends DummyMerchantHosted_Gateway { }
+class DummyMerchantHosted_Gateway_Production extends DummyMerchantHosted_Gateway { }
 
 class DummyGatewayHosted_Gateway extends Payment_Gateway {
   
@@ -50,7 +50,7 @@ class DummyGatewayHosted_Gateway extends Payment_Gateway {
     ); 
     
     Session::set('paymentData', $postData);
-    Controller::redirect($this->gatewayURL);
+    Controller::curr()->redirect($this->gatewayURL);
   }
 
   public function getResponse($response) {
@@ -70,4 +70,4 @@ class DummyGatewayHosted_Gateway extends Payment_Gateway {
   }
 }
 
-class DummyGatewayHosted_Production_Gateway extends DummyGatewayHosted_Gateway { }
+class DummyGatewayHosted_Gateway_Production extends DummyGatewayHosted_Gateway { }
