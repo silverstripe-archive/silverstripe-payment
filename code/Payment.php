@@ -154,13 +154,13 @@ class Payment_Controller extends Controller {
     } else {
       switch($environment) {
         case 'live':
-          $gatewayClass = $this->methodName . '_Production_Gateway';
+          $gatewayClass = $this->methodName . '_Gateway_Production';
           break;
         case 'dev':
           $gatewayClass = $this->methodName . '_Sandbox_Gateway';
           break;
         case 'test':
-          $gatewayClass = $this->methodName . '_Mock_Gateway';
+          $gatewayClass = $this->methodName . '_Gateway_Mock';
           break;
       }
     }

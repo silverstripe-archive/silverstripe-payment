@@ -110,9 +110,9 @@ class PayPalDirect_Gateway extends PayPal_Gateway {
   }
 }
 
-class PayPalDirect_Production_Gateway extends PayPalDirect_Gateway { }
+class PayPalDirect_Gateway_Production extends PayPalDirect_Gateway { }
 
-class PayPalDirect_Dev_Gateway extends PayPalDirect_Gateway { }
+class PayPalDirect_Gateway_Dev extends PayPalDirect_Gateway { }
 
 class PayPalExpress_Gateway extends PayPal_Gateway {
   protected $paypalMethod = 'SetExpressCheckout';
@@ -132,6 +132,6 @@ class PayPalExpress_Gateway extends PayPal_Gateway {
   }
 }
 
-class PayPalExpress_Production_Gateway extends PayPalExpress_Gateway { }
+class PayPalExpress_Gateway_Production extends PayPalExpress_Gateway { }
 
-class PayPalExpress_Dev_Gateway extends PayPalExpress_Gateway { }
+class PayPalExpress_Gateway_Dev extends PayPalExpress_Gateway { }
