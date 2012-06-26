@@ -155,8 +155,12 @@ class PayPalExpress_Gateway extends PayPal_Gateway {
     // Add return url
     $this->postData['RETURNURL'] = $this->returnURL;
     
-    // Post the data to PayPal server
-    return $this->postPaymentData($this->postData);
+    // Post the data to PayPal server to get the token
+    $response = $this->parseResponse($this->postPaymentData($this->postData));
+    $token = $response['TOKEN'];
+    
+    // Redirect to PayPal to process the payment
+    Controller::curr()->redirect(self::get_url() . "?cmd=_express-checkout&token=$token");
   }
   
   public function getResponse($response) {

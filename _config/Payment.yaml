@@ -9,6 +9,8 @@ Payment_Controller:
       'Payment_Controller_GatewayHosted'
     'PayPalDirect':
       'Payment_Controller_MerchantHosted'
+    'PayPalExpress':
+      'Payment_Controller_GatewayHosted'
 
 Payment_Gateway:
   environment:
