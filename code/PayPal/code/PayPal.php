@@ -81,7 +81,7 @@ class PayPal_Gateway extends Payment_Gateway {
     $authentication = self::get_authentication();
     
     // Prepare the payment data in PayPal's format
-    // TODO: Check if credit card data and return url is set
+    $this->postData['METHOD'] = $this->paypalMethod;
     $this->postData['PAYMENTACTION'] = self::get_action();
     $this->postData['AMT'] = $data['Amount'];
     $this->postData['CURRENCY'] = $data['Currency'];
