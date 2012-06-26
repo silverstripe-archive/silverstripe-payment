@@ -49,6 +49,7 @@ class DummyGatewayHosted_Gateway extends Payment_Gateway {
       'ReturnURL' => $this->returnURL    
     ); 
     
+    // TODO: Use curl and GET instead of Session
     Session::set('paymentData', $postData);
     Controller::curr()->redirect($this->gatewayURL);
   }

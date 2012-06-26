@@ -82,7 +82,7 @@ class Payment_Controller extends Controller {
   /**
    * The method name of this controller
    */
-  private $methodName;
+  protected $methodName;
 
   /**
    * The payment object to be injected to this controller
@@ -210,18 +210,20 @@ class Payment_Controller extends Controller {
     // Get the reponse result from gateway
     $result = $this->gateway->getResponse($response);
     
-    // Retrieve the payment object
-    $payment = $this->getPaymentObject($response);
+    // Retrieve the payment object if none is referenced at this point
+    if (! $this->payment) {
+      $this->payment = $this->getPaymentObject($response);
+    }
     
     switch ($result->getStatus()) {
       case Payment_Gateway_Result::SUCCESS:
-        $payment->updatePaymentStatus(Payment::SUCCESS);
+        $this->payment->updatePaymentStatus(Payment::SUCCESS);
         break;
       case Payment_Gateway_Result::FAILURE;
-        $payment->updatePaymentStatus(Payment::FAILURE);
+        $this->payment->updatePaymentStatus(Payment::FAILURE);
         break;
       case Payment_Gateway_Result::INCOMPLETE;
-        $payment->updatePaymentStatus(Payment::INCOMPLETE);
+        $this->payment->updatePaymentStatus(Payment::INCOMPLETE);
         break;
       default:
         break;
@@ -335,18 +337,22 @@ class Payment_Controller_GatewayHosted extends Payment_Controller {
     parent::processRequest($form, $data);
     
     // Set the return link 
-    $this->gateway->setReturnURL(Controller::join_links($this->$URLSegment, 'processresponse', $this->payment->ID));
+    $this->gateway->setReturnURL(Controller::join_links($this->$URLSegment, 'payment', $this->methodName, 'processresponse', $this->payment->ID));
     
     // Send a request to the gateway 
     $this->gateway->process($data);
   }
 
   public function processresponse($response) {
+    // Reconstruct the gateway object 
+    $this->setMethodName($response->param('MethodName'));
+    $this->gateway = $this->getGateway();    
+    
     return parent::processresponse($response);
   }
   
   public function getPaymentObject($response) {
-    return DataObject::get_by_id('Payment', $request->param('ID'));
+    return DataObject::get_by_id('Payment', $response->param('ID'));
   }
 
   public function getCustomFormFields() {

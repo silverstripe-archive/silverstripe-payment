@@ -3,3 +3,4 @@ Name: PaymentTest
 Director:
   rules:
     'dummy/external/$Action/$ID': 'DummyExternalGateway_Controller'
+    'payment/$MethodName/$Action/$ID': 'Payment_Controller_GatewayHosted'    

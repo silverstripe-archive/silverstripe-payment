@@ -27,25 +27,28 @@ class DummyExternalGateway_Controller extends Controller{
   }
 
   function dopay() {
-    $data = Session::get('paymentData');
-    $amount = $data['Amount'];
-    $cents = round($amount - intval($amount), 2);
+    if ($data = Session::get('paymentData')) {
+      $amount = $data['Amount'];
+      $cents = round($amount - intval($amount), 2);
     
-    switch ($cents) {
-      case 0.00:
-        Session::set('result', Payment_Gateway_Result::SUCCESS);
-        break;
-      case 0.01:
-        Session::set('result', Payment_Gateway_Result::FAILURE);
-        break;
-      case 0.02:
-        Session::set('result', Payment_Gateway_Result::INCOMPLETE);
-        break;
-      default:
-        Session::set('result', Payment_Gateway_Result::FAILURE);
-        break;
+      switch ($cents) {
+        case 0.00:
+          Session::set('result', Payment_Gateway_Result::SUCCESS);
+          break;
+        case 0.01:
+          Session::set('result', Payment_Gateway_Result::FAILURE);
+          break;
+        case 0.02:
+          Session::set('result', Payment_Gateway_Result::INCOMPLETE);
+          break;
+        default:
+          Session::set('result', Payment_Gateway_Result::FAILURE);
+          break;
+      }
+      
+      Controller::redirect($data['ReturnURL']);
+    } else {
+      user_error("No user data is set for this transaction", E_USER_ERROR);
     }
-    
-    Controller::redirect($data['returnURL']);
   }
 }

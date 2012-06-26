@@ -13,3 +13,7 @@ Payment_Controller:
 Payment_Gateway:
   environment:
     'live'      
+
+Director:
+  rules:
+    'payment/$MethodName/$Action/$ID': 'Payment_Controller_GatewayHosted'
