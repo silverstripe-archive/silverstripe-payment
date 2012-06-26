@@ -91,6 +91,17 @@ class PayPal_Gateway extends Payment_Gateway {
     $this->postData['SIGNATURE'] = $authentication['signature'];
   }
   
+  /**
+   * Parse the raw data and response from gateway
+   *
+   * @param unknown_type $response
+   * @return the parsed array
+   */
+  public function parseResponse($response) {
+    parse_str($response->getBody(), $responseArr);
+    return $responseArr;
+  }
+  
   public function getResponse($response) { 
     // To be overriden by subclasses
   }
@@ -111,17 +122,6 @@ class PayPalDirect_Gateway extends PayPal_Gateway {
     
     // Post the data to PayPal server
     return $this->postPaymentData($this->postData);
-  }
-  
-  /**
-   * Parse the raw data and response from gateway
-   * 
-   * @param unknown_type $response
-   * @return the parsed array
-   */
-  public function parseResponse($response) {
-    parse_str($response->getBody(), $responseArr);
-    return $responseArr;
   }
   
   public function getResponse($response) {
