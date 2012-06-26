@@ -18,6 +18,11 @@ class PayPalDirect extends PayPal { }
 class PayPalExpress extends PayPal { }
 
 class PayPal_Gateway extends Payment_Gateway {
+  
+  const SUCCESS_CODE = 'Success';
+  const SUCCESS_WARNING = 'SuccessWithWarning';
+  const FAILURE_CODE = 'Failure';
+  
   /**
    * The PayPal method to be passed from PayPal_Controller
    * 
@@ -36,13 +41,14 @@ class PayPal_Gateway extends Payment_Gateway {
    * Get the PayPal configuration 
    */
   public static function get_config() {
-    return Config::inst()->get('PayPal_Gateway', self::get_type());
+    return Config::inst()->get('PayPal_Gateway', self::get_environment());
   }
   
   /**
    * Get the PayPal URL (Live or Sandbox)
    */
   public static function get_url() {
+    $config = self::get_config();
     return $config['url'];
   }
   
@@ -52,6 +58,7 @@ class PayPal_Gateway extends Payment_Gateway {
    * @return array 
    */
   public static function get_authentication() {
+    $config = self::get_config();
     return $config['authentication'];
   }
   
@@ -75,7 +82,7 @@ class PayPal_Gateway extends Payment_Gateway {
     
     // Prepare the payment data in PayPal's format
     // TODO: Check if credit card data and return url is set
-    $this->postData['PAYMENTACTION'] = self::$action;
+    $this->postData['PAYMENTACTION'] = self::get_action();
     $this->postData['AMT'] = $data['Amount'];
     $this->postData['CURRENCY'] = $data['Currency'];
     $this->postData['IP'] = $_SERVER['REMOTE_ADDR'];
@@ -99,14 +106,39 @@ class PayPalDirect_Gateway extends PayPal_Gateway {
     $this->postData['ACCT'] = $data['CardNumber'];
     $this->postData['EXPDATE'] = $data['DateExpiry'];
     $this->postData['CVV2'] = $data['Cvc2'];
+    
     // And billing information as well
     
     // Post the data to PayPal server
     return $this->postPaymentData($this->postData);
   }
   
+  /**
+   * Parse the raw data and response from gateway
+   * 
+   * @param unknown_type $response
+   * @return the parsed array
+   */
+  public function parseResponse($response) {
+    parse_str($response->getBody(), $responseArr);
+    return $responseArr;
+  }
+  
   public function getResponse($response) {
+    $responseArr = $this->parseResponse($response);
     
+    switch ($responseArr['ACK']) {
+      case self::SUCCESS_CODE:
+      case self::SUCCESS_WARNING:
+        return new Payment_Gateway_Result(Payment_Gateway_Result::SUCCESS);
+        break;
+      case self::FAILURE_CODE:
+        return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
+        break;
+      default:
+        return new Payment_Gateway_Result();
+        break;
+    }
   }
 }
 

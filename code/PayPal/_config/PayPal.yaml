@@ -17,10 +17,10 @@ PayPal_Gateway:
       'https://api-3t.sandbox.paypal.com/nvp'
     authentication:
       'username':
-        ''
+        'sdk-three_api1.sdk.com'
       'password':
-        ''
+        'QFZCWN5HZM8VBG7Q'
       'signature':
-        ''
+        'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
   action:
     'Sale'

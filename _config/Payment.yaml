@@ -12,7 +12,7 @@ Payment_Controller:
 
 Payment_Gateway:
   environment:
-    'live'      
+    'test'      
 
 Director:
   rules:
