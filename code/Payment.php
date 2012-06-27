@@ -157,7 +157,7 @@ class Payment_Controller extends Controller {
           $gatewayClass = $this->methodName . '_Gateway_Production';
           break;
         case 'dev':
-          $gatewayClass = $this->methodName . '_Sandbox_Gateway';
+          $gatewayClass = $this->methodName . '_Gateway_Dev';
           break;
         case 'test':
           $gatewayClass = $this->methodName . '_Gateway_Mock';

@@ -14,7 +14,7 @@ Payment_Controller:
 
 Payment_Gateway:
   environment:
-    'test'      
+    'dev'      
 
 Director:
   rules:

@@ -12,7 +12,7 @@ PayPal_Gateway:
         ''
       'signature':
         ''
-  test:
+  dev:
     'url':
       'https://api-3t.sandbox.paypal.com/nvp'
     authentication:
