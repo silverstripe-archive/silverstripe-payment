@@ -337,7 +337,13 @@ class Payment_Controller_GatewayHosted extends Payment_Controller {
     parent::processRequest($form, $data);
     
     // Set the return link 
-    $this->gateway->setReturnURL(Controller::join_links($this->$URLSegment, 'payment', $this->methodName, 'processresponse', $this->payment->ID));
+    $returnURL = Director::absoluteURL(Controller::join_links(
+                                        $this->$URLSegment, 
+                                        'payment', 
+                                        $this->methodName, 
+                                        'processresponse', 
+                                        $this->payment->ID));
+    $this->gateway->setReturnURL($returnURL);
     
     // Send a request to the gateway 
     $this->gateway->process($data);
