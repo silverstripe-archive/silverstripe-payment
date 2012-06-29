@@ -1,10 +1,6 @@
 name: Payment
 ---
   
-Payment_Controller:
-  factory: ''
-  supported_methods: ''
-
 Payment_Gateway:
   environment:
     'dev'      
