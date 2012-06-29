@@ -95,11 +95,29 @@ class Payment_Controller extends Controller {
   public $gateway;
   
   /**
-   * Get the supported methods set by the yaml configuraion
+   * Get the supported methods array set by the yaml configuraion
    */
   public static function get_supported_methods() {
     return Config::inst()->get('Payment_Controller', 'supported_methods');
   }
+  
+  /**
+   * Get the factory config for a particular payment method
+   * 
+   * @param String methodName
+   */
+  public static function get_factory_config($methodName) {
+    $factoryConfig = Config::inst()->get('Payment_Controller', 'factory');
+    if (isset($factoryConfig[$methodName])) {
+      return $factoryConfig[$methodName];
+    } else {
+      return null;
+    }
+  }
+  
+  /**
+   * Get the controller class for a particular gateway
+   */
   
   /**
    * Factory function to create payment controller object
@@ -108,8 +126,14 @@ class Payment_Controller extends Controller {
    */
   public static function factory($methodName) {
     $supported_methods = self::get_supported_methods();
-    if (isset($supported_methods[$methodName])) {
-      $controllerClass = $supported_methods[$methodName];
+    
+    if (! in_array($methodName, $supported_methods)) {
+      user_error("The method $methodName is not supported."); 
+    }
+    
+    $methodConfig = self::get_factory_config($methodName);
+    if (isset($methodConfig['controller'])) {
+      $controllerClass = $methodConfig['controller'];
       $controller = new $controllerClass();
       $controller->setMethodName($methodName);
       
@@ -148,9 +172,10 @@ class Payment_Controller extends Controller {
     
     // Get the custom class configuration if applicable.  
     // If not, apply naming convention.
-    $classConfig = Config::inst()->get($this->class, 'gateway_classes');
-    if (isset($classConfig[$environment])) {
-      $gatewayClass = $classConfig[$environment];
+    $methodConfig = self::get_factory_config($this->methodName);
+    $gatewayClassConfig = $methodConfig['gateway_classes'];
+    if (isset($gatewayClassConfig[$environment])) {
+      $gatewayClass = $gatewayClassConfig[$environment];
     } else {
       switch($environment) {
         case 'live':
@@ -181,7 +206,15 @@ class Payment_Controller extends Controller {
       return null;
     }
     
-    $paymentClass = $this->methodName;
+    // Get the custom payment class configuration.
+    // If not applicable, apply naming convention
+    $methodConfig = self::get_factory_config($this->methodName);
+    if (isset($methodConfig['model'])) {
+      $paymentClass = $methodConfig['model'];
+    } else {
+      $paymentClass = $this->methodName;
+    }
+    
     if (class_exists($paymentClass)) {
       return new $paymentClass();
     } else {
@@ -291,7 +324,7 @@ class Payment_Controller extends Controller {
     }
     
     // Custom form fields for each gateway
-    foreach (self::get_supported_methods() as $methodName => $controllerClass) {
+    foreach (self::get_supported_methods() as $methodName) {
       $controller = self::factory($methodName);
       foreach ($controller->getCustomFormFields() as $field) {
         $fieldList->push($field);

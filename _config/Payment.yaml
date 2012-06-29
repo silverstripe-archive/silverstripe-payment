@@ -2,15 +2,8 @@ name: Payment
 ---
   
 Payment_Controller:
-  supported_methods:
-    'DummyMerchantHosted':
-      'Payment_Controller_MerchantHosted'
-    'DummyGatewayHosted':
-      'Payment_Controller_GatewayHosted'
-    'PayPalDirect':
-      'Payment_Controller_MerchantHosted'
-    'PayPalExpress':
-      'Payment_Controller_GatewayHosted'
+  factory: ''
+  supported_methods: ''
 
 Payment_Gateway:
   environment:
