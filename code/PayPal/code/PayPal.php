@@ -31,6 +31,12 @@ class PayPal_Gateway extends Payment_Gateway {
   protected $postData;
   
   /**
+   * The PayPal base redirection URL to process payment 
+   */
+  static $payPalRedirectURL = 'https://www.paypal.com/webscr';
+  static $payPalSandboxRedirectURL = 'https://www.sandbox.paypal.com/webscr';
+  
+  /**
    * Get the PayPal configuration 
    */
   public static function get_config() {
@@ -43,6 +49,22 @@ class PayPal_Gateway extends Payment_Gateway {
   public static function get_url() {
     $config = self::get_config();
     return $config['url'];
+  }
+  
+  /**
+   * Get the PayPal redirect URL (Live or Sandbox)
+   */
+  public static function get_paypal_redirect_url() {
+    switch (self::get_environment()) {
+      case 'live':
+        return self::$payPalRedirectURL;
+        break;
+      case 'dev':
+        return self::$payPalSandboxRedirectURL;
+        break;
+      default:
+        return null;
+    }
   }
   
   /**
@@ -74,17 +96,17 @@ class PayPal_Gateway extends Payment_Gateway {
     $authentication = self::get_authentication();
     
     $this->postData = array();
-    $this->postData['USER'] = urlencode($authentication['username']);
-    $this->postData['PWD'] = urlencode($authentication['password']);
-    $this->postData['SIGNATURE'] = urlencode($authentication['signature']);
-    $this->postData['VERSION'] = urlencode('51.0');
+    $this->postData['USER'] = $authentication['username'];
+    $this->postData['PWD'] = $authentication['password'];
+    $this->postData['SIGNATURE'] = $authentication['signature'];
+    $this->postData['VERSION'] = '51.0';
   }
   
   public function process($data) {
     $this->preparePayPalPost();
-    $this->postData['PAYMENTACTION'] = urlencode(self::get_action());
-    $this->postData['AMT'] = urlencode($data['Amount']);
-    $this->postData['CURRENCY'] = urlencode($data['Currency']);
+    $this->postData['PAYMENTACTION'] = self::get_action();
+    $this->postData['AMT'] = $data['Amount'];
+    $this->postData['CURRENCY'] = $data['Currency'];
   }
   
   /**
@@ -100,6 +122,17 @@ class PayPal_Gateway extends Payment_Gateway {
   
   public function getResponse($response) { 
     // To be overriden by subclasses
+  }
+  
+  /**
+   * Override to add buiding query string manually. 
+   * TODO: May consider doing this by default if other gateways work similarly
+   * 
+   * @see Payment_Gateway::postPaymentData()
+   */
+  public function postPaymentData($data) {
+    $httpQuery = http_build_query($data);
+    return parent::postPaymentData($httpQuery);
   }
 }
 
@@ -155,8 +188,8 @@ class PayPalExpress_Gateway extends PayPal_Gateway {
     
     $this->postData['METHOD'] = 'SetExpressCheckout';
     // Add return and cancel urls
-    $this->postData['RETURNURL'] = urlencode($this->returnURL);
-    $this->postData['CANCELURL'] = urlencode(Director::absoluteBaseURL());
+    $this->postData['RETURNURL'] = $this->returnURL;
+    $this->postData['CANCELURL'] = Director::absoluteBaseURL();
     
     // Post the data to PayPal server to get the token
     $response = $this->parseResponse($this->postPaymentData($this->postData));
@@ -164,7 +197,7 @@ class PayPalExpress_Gateway extends PayPal_Gateway {
     if ($token = $response['TOKEN']) {    
       $this->token = $token;
       // If Authorization successful, redirect to PayPal to complete the payment
-      Controller::curr()->redirect(self::get_url() . "?cmd=_express-checkout&token=$token");
+      Controller::curr()->redirect(self::get_paypal_redirect_url() . "?cmd=_express-checkout&token=$token");
     } else {
       // Otherwise, do something...
     }
@@ -174,7 +207,7 @@ class PayPalExpress_Gateway extends PayPal_Gateway {
     // Get the payer information
     $this->preparePayPalPost();
     $this->postData['METHOD'] = 'GetExpressCheckoutDetails';
-    $this->postData['TOKEN'] = urlencode($this->token);
+    $this->postData['TOKEN'] = $this->token;
     $response = $this->parseResponse($this->postPaymentData($this->data));
     
     // If successful, complete the payment
@@ -183,9 +216,9 @@ class PayPalExpress_Gateway extends PayPal_Gateway {
       
       $this->preparePayPalPost();
       $this->postData['METHOD'] = 'DoExpressCheckoutPayment';
-      $this->postData['PAYERID'] = urlencode($payerID);
-      $this->postData['PAYMENTREQUEST_0_PAYMENTACTION'] = urlencode(self::get_action());
-      $this->postData['TOKEN'] = urlencode($this->token);
+      $this->postData['PAYERID'] = $payerID;
+      $this->postData['PAYMENTREQUEST_0_PAYMENTACTION'] = (self::get_action());
+      $this->postData['TOKEN'] = ($this->token);
       $response = $this->parseResponse($this->postPaymentData($this->data));
       
       switch ($responseArr['ACK']) {
