@@ -12,6 +12,7 @@ Payment_Controller:
         live: 'DummyMerchantHosted_Gateway'
         dev: 'DummyMerchantHosted_Gateway'
       controller: 'Payment_Controller_MerchantHosted'
+      model: 'Payment'
     
     DummyGatewayHosted:
       title: 'Dummy Gateway (Hosted)'
@@ -19,3 +20,4 @@ Payment_Controller:
         live: 'DummyGatewayHosted_Gateway'
         dev: 'DummyGatewayHosted_Gateway'
       controller: 'Payment_Controller_GatewayHosted'
+      model: 'Payment'
