@@ -6,31 +6,25 @@ Payment_Controller:
     PayPalDirect:
       title: 'PayPal Direct Payment'
       controller: 'Payment_Controller_MerchantHosted'
+      gateway_classes:
+        live: PayPalDirect_Gateway
+        dev: PayPalDirect_Gateway
+      model: 'PayPal'
       
     PayPalExpress:
       title: 'PayPal Express Checkout'
       controller: 'Payment_Controller_GatewayHosted'
+      gateway_classes: 
+        live: PayPalExpress_Gateway
+        dev: PayPalExpress_Gateway
+      model: 'PayPal'
 
 PayPal_Gateway:
   live:
     url:
       'https://api-3t.paypal.com/nvp'
-    authentication:
-      username:
-        ''
-      password:
-        ''
-      signature:
-        ''
   dev:
     url:
       'https://api-3t.sandbox.paypal.com/nvp'
-    authentication:
-      username:
-        ''
-      password:
-        ''
-      signature:
-        ''
   action:
     'Sale'

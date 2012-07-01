@@ -13,10 +13,6 @@
 
 class PayPal extends Payment { }
 
-class PayPalDirect extends PayPal { }
-
-class PayPalExpress extends PayPal { }
-
 class PayPal_Gateway extends Payment_Gateway {
   
   const SUCCESS_CODE = 'Success';
@@ -171,10 +167,6 @@ class PayPalDirect_Gateway extends PayPal_Gateway {
   }
 }
 
-class PayPalDirect_Gateway_Production extends PayPalDirect_Gateway { }
-
-class PayPalDirect_Gateway_Dev extends PayPalDirect_Gateway { }
-
 class PayPalExpress_Gateway extends PayPal_Gateway {
   /**
    * The PayPal token for this transaction
@@ -236,7 +228,3 @@ class PayPalExpress_Gateway extends PayPal_Gateway {
     } 
   }
 }
-
-class PayPalExpress_Gateway_Production extends PayPalExpress_Gateway { }
-
-class PayPalExpress_Gateway_Dev extends PayPalExpress_Gateway { }

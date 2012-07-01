@@ -37,23 +37,6 @@ class DummyMerchantHostedTest extends SapphireTest {
     $incompleteResult = $controller->processRequest(null, $incompleteData);
     $this->assertEquals($controller->payment->Status, Payment::INCOMPLETE);
   }  
-  
-  function testMalformedPaymentData() {
-    $data1 = array(
-      'Amount' => '10'  
-    );
-    
-    $data2 = array(
-      'Currency' => 'USD'  
-    );
-    
-    $data3 = array();
-    
-    $controller = Payment_Controller::factory('DummyMerchantHosted');
-    $result1 = $controller->processRequest(null, $data1);
-    $result2 = $controller->processRequest(null, $data2);
-    $result3 = $controller->processRequest(null, $data3);
-  }
 }
 
 class DummyGatewayHostedTest extends FunctionalTest {
