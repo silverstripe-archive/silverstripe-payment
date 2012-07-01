@@ -1,12 +1,8 @@
 <?php
 
 /**
- * Object representing a dummy payment gateway
+ * Test class for merchant-hosted payment
  */
-class DummyMerchantHosted extends Payment { }
-
-class DummyGatewayHosted extends Payment { }
-
 class DummyMerchantHosted_Gateway extends Payment_Gateway {
 
   public function process($data) {
@@ -34,13 +30,9 @@ class DummyMerchantHosted_Gateway extends Payment_Gateway {
   }
 }
 
-class DummyMerchantHosted_Gateway_Production extends DummyMerchantHosted_Gateway { }
-
 /**
- * TODO: Improve config system so that this is not needed
+ * Test class for gateway-hosted payment
  */
-class DummyMerchantHosted_Gateway_Dev extends DummyMerchantHosted_Gateway { }
-
 class DummyGatewayHosted_Gateway extends Payment_Gateway {
   
   public function __construct() {
@@ -75,7 +67,3 @@ class DummyGatewayHosted_Gateway extends Payment_Gateway {
     }
   }
 }
-
-class DummyGatewayHosted_Gateway_Production extends DummyGatewayHosted_Gateway { }
-
-class DummyGatewayHosted_Gateway_Dev extends DummyGatewayHosted_Gateway { }
