@@ -10,7 +10,7 @@ class DummyMerchantHostedTest extends SapphireTest {
     $this->assertEquals(get_class($controller->payment), 'Payment');
   }
   
-  function testProcessPayment() {
+  function testprocessRequest() {
     $successData = array(
       'Amount' => '10',
       'Currency' => 'USD'   
@@ -27,16 +27,33 @@ class DummyMerchantHostedTest extends SapphireTest {
     );
     
     $controller = Payment_Controller::factory('DummyMerchantHosted');
-    $successResult = $controller->processPayment($successData);
-    $failureResult = $controller->processPayment($failureData);
-    $incompleteResult = $controller->processPayment($incompleteData);
     
-    $this->assertEquals($successResult, new Payment_Gateway_Result(Payment_Gateway_Result::SUCCESS));
-    $this->assertEquals($failureResult, new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE));
-    $this->assertEquals($incompleteResult, new Payment_Gateway_Result(Payment_Gateway_Result::INCOMPLETE));
+    $controller->processRequest(null, $successData);
+    $this->assertEquals($controller->payment->Status, Payment::SUCCESS);
     
-    // TODO: Assert correct model
+    $failureResult = $controller->processRequest(null, $failureData);
+    $this->assertEquals($controller->payment->Status, Payment::FAILURE);
+    
+    $incompleteResult = $controller->processRequest(null, $incompleteData);
+    $this->assertEquals($controller->payment->Status, Payment::INCOMPLETE);
   }  
+  
+  function testMalformedPaymentData() {
+    $data1 = array(
+      'Amount' => '10'  
+    );
+    
+    $data2 = array(
+      'Currency' => 'USD'  
+    );
+    
+    $data3 = array();
+    
+    $controller = Payment_Controller::factory('DummyMerchantHosted');
+    $result1 = $controller->processRequest(null, $data1);
+    $result2 = $controller->processRequest(null, $data2);
+    $result3 = $controller->processRequest(null, $data3);
+  }
 }
 
 class DummyGatewayHostedTest extends FunctionalTest {

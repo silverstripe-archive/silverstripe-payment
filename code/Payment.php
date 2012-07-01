@@ -98,7 +98,16 @@ class Payment_Controller extends Controller {
    * Get the supported methods array set by the yaml configuraion
    */
   public static function get_supported_methods() {
-    return Config::inst()->get('Payment_Controller', 'supported_methods');
+    $supported_methods = Config::inst()->get('Payment_Controller', 'supported_methods');
+    
+    // Check if all methods are defined in factory
+    foreach ($supported_methods as $method) {
+      if (! self::get_factory_config($method)) {
+        user_error("Method $method not defined in factory", E_USER_ERROR);
+      } 
+    }
+    
+    return $supported_methods;
   }
   
   /**
