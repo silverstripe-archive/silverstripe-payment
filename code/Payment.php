@@ -33,6 +33,7 @@ class Payment extends DataObject {
     'Status' => "Enum('Incomplete, Success, Failure, Pending')",
     'Amount' => 'Money',
     'Message' => 'Text',
+    'Method' => 'Text'
   );
   
   public static $has_one = array(

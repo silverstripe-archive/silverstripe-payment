@@ -69,6 +69,7 @@ class PaymentProcessor extends Controller {
     $this->payment->Amount->Amount = $data['Amount'];
     $this->payment->Amount->Currency = $data['Currency'];
     $this->payment->Status = Payment::PENDING;
+    $this->payment->Method = $this->methodName;
     $this->payment->write();
   }
 
