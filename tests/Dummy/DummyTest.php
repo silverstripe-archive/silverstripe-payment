@@ -4,8 +4,8 @@ class DummyMerchantHostedTest extends SapphireTest {
   
   /* Black-box testing */
   function testClassConfig() {
-    $controller = Payment_Controller::factory('DummyMerchantHosted');
-    $this->assertEquals(get_class($controller), 'Payment_Controller_MerchantHosted');
+    $controller = PaymentProcessor::factory('DummyMerchantHosted');
+    $this->assertEquals(get_class($controller), 'PaymentProcessor_MerchantHosted');
     $this->assertEquals(get_class($controller->gateway), 'DummyMerchantHosted_Gateway');
     $this->assertEquals(get_class($controller->payment), 'Payment');
   }
@@ -26,7 +26,7 @@ class DummyMerchantHostedTest extends SapphireTest {
       'Currency' => 'USD'  
     );
     
-    $controller = Payment_Controller::factory('DummyMerchantHosted');
+    $controller = PaymentProcessor::factory('DummyMerchantHosted');
     
     $controller->processRequest(null, $successData);
     $this->assertEquals($controller->payment->Status, Payment::SUCCESS);
@@ -43,8 +43,8 @@ class DummyGatewayHostedTest extends FunctionalTest {
   
   /* Black-box testing */
   function testClassConfig() {
-    $controller = Payment_Controller::factory('DummyGatewayHosted');
-    $this->assertEquals(get_class($controller), 'Payment_Controller_GatewayHosted');
+    $controller = PaymentProcessor::factory('DummyGatewayHosted');
+    $this->assertEquals(get_class($controller), 'PaymentProcessor_GatewayHosted');
     $this->assertEquals(get_class($controller->gateway), 'DummyGatewayHosted_Gateway');
     $this->assertEquals(get_class($controller->payment), 'Payment');
   }

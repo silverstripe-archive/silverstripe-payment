@@ -13,7 +13,7 @@
 
 class PayPal extends Payment { }
 
-class PayPal_Gateway extends Payment_Gateway {
+class PayPal_Gateway extends PaymentGateway {
   
   const SUCCESS_CODE = 'Success';
   const SUCCESS_WARNING = 'SuccessWithWarning';
@@ -124,107 +124,10 @@ class PayPal_Gateway extends Payment_Gateway {
    * Override to add buiding query string manually. 
    * TODO: May consider doing this by default if other gateways work similarly
    * 
-   * @see Payment_Gateway::postPaymentData()
+   * @see PaymentGateway::postPaymentData()
    */
   public function postPaymentData($data) {
     $httpQuery = http_build_query($data);
     return parent::postPaymentData($httpQuery);
-  }
-}
-
-class PayPalDirect_Gateway extends PayPal_Gateway {
-
-  public function process($data) {
-    parent::process($data);
-    
-    $this->postData['METHOD'] = 'DoDirectPayment';
-    // Add credit card data. May have to parse the data to fit PayPal's format
-    $this->postData['ACCT'] = $data['CardNumber'];
-    $this->postData['EXPDATE'] = $data['DateExpiry'];
-    $this->postData['CVV2'] = $data['Cvc2'];
-    
-    // And billing information as well
-    
-    // Post the data to PayPal server
-    return $this->postPaymentData($this->postData);
-  }
-  
-  public function getResponse($response) {
-    $responseArr = $this->parseResponse($response);
-    
-    switch ($responseArr['ACK']) {
-      case self::SUCCESS_CODE:
-      case self::SUCCESS_WARNING:
-        return new Payment_Gateway_Result(Payment_Gateway_Result::SUCCESS);
-        break;
-      case self::FAILURE_CODE:
-        return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
-        break;
-      default:
-        return new Payment_Gateway_Result();
-        break;
-    }
-  }
-}
-
-class PayPalExpress_Gateway extends PayPal_Gateway {
-  /**
-   * The PayPal token for this transaction
-   * 
-   * @var String
-   */
-  private $token;
-  
-  public function process($data) {
-    parent::process($data);
-    
-    $this->postData['METHOD'] = 'SetExpressCheckout';
-    // Add return and cancel urls
-    $this->postData['RETURNURL'] = $this->returnURL;
-    $this->postData['CANCELURL'] = Director::absoluteBaseURL();
-    
-    // Post the data to PayPal server to get the token
-    $response = $this->parseResponse($this->postPaymentData($this->postData));
-    
-    if ($token = $response['TOKEN']) {    
-      $this->token = $token;
-      // If Authorization successful, redirect to PayPal to complete the payment
-      Controller::curr()->redirect(self::get_paypal_redirect_url() . "?cmd=_express-checkout&token=$token");
-    } else {
-      // Otherwise, do something...
-    }
-  }
-  
-  public function getResponse($response) {
-    // Get the payer information
-    $this->preparePayPalPost();
-    $this->postData['METHOD'] = 'GetExpressCheckoutDetails';
-    $this->postData['TOKEN'] = $this->token;
-    $response = $this->parseResponse($this->postPaymentData($this->data));
-    
-    // If successful, complete the payment
-    if ($response['ACK'] == self::SUCCESS_CODE || $response['ACK'] == self::SUCCESS_WARNING) {
-      $payerID = $response['PAYERID'];
-      
-      $this->preparePayPalPost();
-      $this->postData['METHOD'] = 'DoExpressCheckoutPayment';
-      $this->postData['PAYERID'] = $payerID;
-      $this->postData['PAYMENTREQUEST_0_PAYMENTACTION'] = (self::get_action());
-      $this->postData['TOKEN'] = ($this->token);
-      $response = $this->parseResponse($this->postPaymentData($this->data));
-      
-      switch ($responseArr['ACK']) {
-        case self::SUCCESS_CODE:
-        case self::SUCCESS_WARNING:
-          return new Payment_Gateway_Result(Payment_Gateway_Result::SUCCESS);
-          break;
-        case self::FAILURE_CODE:
-          return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
-          break;
-        default:
-          return new Payment_Gateway_Result();
-          break;
-      }
-    } 
   }
 }

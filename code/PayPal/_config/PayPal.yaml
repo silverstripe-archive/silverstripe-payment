@@ -1,11 +1,11 @@
 name: PayPal
 ---
 
-Payment_Controller:
+PaymentProcessor:
   factory:
     PayPalDirect:
       title: 'PayPal Direct Payment'
-      controller: 'Payment_Controller_MerchantHosted'
+      controller: 'PaymentProcessor_MerchantHosted'
       gateway_classes:
         live: PayPalDirect_Gateway
         dev: PayPalDirect_Gateway
@@ -13,7 +13,7 @@ Payment_Controller:
       
     PayPalExpress:
       title: 'PayPal Express Checkout'
-      controller: 'Payment_Controller_GatewayHosted'
+      controller: 'PaymentProcessor_GatewayHosted'
       gateway_classes: 
         live: PayPalExpress_Gateway
         dev: PayPalExpress_Gateway

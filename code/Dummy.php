@@ -3,7 +3,7 @@
 /**
  * Test class for merchant-hosted payment
  */
-class DummyMerchantHosted_Gateway extends Payment_Gateway {
+class DummyMerchantHosted_Gateway extends PaymentGateway {
 
   public function process($data) {
     $amount = $data['Amount'];
@@ -11,16 +11,16 @@ class DummyMerchantHosted_Gateway extends Payment_Gateway {
     
     switch ($cents) {
       case 0.00:
-        return new Payment_Gateway_Result(Payment_Gateway_Result::SUCCESS);
+        return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
         break;
       case 0.01:
-        return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
+        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE);
         break;
       case 0.02:
-        return new Payment_Gateway_Result(Payment_Gateway_Result::INCOMPLETE);
+        return new PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE);
         break;
       default:
-        return new Payment_Gateway_Result();
+        return new PaymentGateway_Result();
         break;
     }
   }
@@ -33,7 +33,7 @@ class DummyMerchantHosted_Gateway extends Payment_Gateway {
 /**
  * Test class for gateway-hosted payment
  */
-class DummyGatewayHosted_Gateway extends Payment_Gateway {
+class DummyGatewayHosted_Gateway extends PaymentGateway {
   
   public function __construct() {
     $this->gatewayURL = Director::baseURL() . 'dummy/external/pay';
@@ -53,16 +53,16 @@ class DummyGatewayHosted_Gateway extends Payment_Gateway {
 
   public function getResponse($response) {
     switch (Session::get('result')) {
-      case Payment_Gateway_Result::SUCCESS:
-        return new Payment_Gateway_Result(Payment_Gateway_Result::SUCCESS);
+      case PaymentGateway_Result::SUCCESS:
+        return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
         break;
-      case Payment_Gateway_Result::FAILURE:
-        return new Payment_Gateway_Result(Payment_Gateway_Result::FAILURE);
+      case PaymentGateway_Result::FAILURE:
+        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE);
         break;
-      case Payment_Gateway_Result::INCOMPLETE:
-        return Payment_Gateway_Result(Payment_Gateway_Result::INCOMPLETE);
+      case PaymentGateway_Result::INCOMPLETE:
+        return PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE);
       default:
-        return new Payment_Gateway_Result();
+        return new PaymentGateway_Result();
         break;
     }
   }
@@ -101,16 +101,16 @@ class DummyExternalGateway_Controller extends Controller{
 
       switch ($cents) {
         case 0.00:
-          Session::set('result', Payment_Gateway_Result::SUCCESS);
+          Session::set('result', PaymentGateway_Result::SUCCESS);
           break;
         case 0.01:
-          Session::set('result', Payment_Gateway_Result::FAILURE);
+          Session::set('result', PaymentGateway_Result::FAILURE);
           break;
         case 0.02:
-          Session::set('result', Payment_Gateway_Result::INCOMPLETE);
+          Session::set('result', PaymentGateway_Result::INCOMPLETE);
           break;
         default:
-          Session::set('result', Payment_Gateway_Result::FAILURE);
+          Session::set('result', PaymentGateway_Result::FAILURE);
           break;
       }
 

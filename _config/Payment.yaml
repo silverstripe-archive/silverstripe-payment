@@ -1,10 +1,10 @@
 name: Payment
 ---
   
-Payment_Gateway:
+PaymentGateway:
   environment:
     'dev'      
 
 Director:
   rules:
-    'payment/$MethodName/$Action/$ID': 'Payment_Controller_GatewayHosted'
+    'payment/$MethodName/$Action/$ID': 'PaymentProcessor_GatewayHosted'

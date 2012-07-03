@@ -5,7 +5,7 @@
  *
  * @package payment
  */
-abstract class Payment_Gateway {
+abstract class PaymentGateway {
   /**
    * The gateway url
    */
@@ -20,7 +20,7 @@ abstract class Payment_Gateway {
    * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
    */
   public static function get_environment() {
-    return Config::inst()->get('Payment_Gateway', 'environment');
+    return Config::inst()->get('PaymentGateway', 'environment');
   }
 
   public function setReturnURL($url) {
@@ -38,7 +38,7 @@ abstract class Payment_Gateway {
   /**
    * Process the response from the external gateway
    *
-   * @return Payment_Gateway_Result
+   * @return PaymentGateway_Result
    */
   abstract public function getResponse($response);
 
@@ -64,7 +64,7 @@ abstract class Payment_Gateway {
 /**
  * Class for gateway results
  */
-class Payment_Gateway_Result {
+class PaymentGateway_Result {
 
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
