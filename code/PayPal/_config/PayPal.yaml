@@ -7,19 +7,19 @@ PaymentProcessor:
       title: 'PayPal Direct Payment'
       controller: 'PaymentProcessor_MerchantHosted'
       gateway_classes:
-        live: PayPalDirect_Gateway
-        dev: PayPalDirect_Gateway
+        live: PayPalDirectGateway
+        dev: PayPalDirectGateway
       model: 'PayPal'
       
     PayPalExpress:
       title: 'PayPal Express Checkout'
-      controller: 'PaymentProcessor_GatewayHosted'
+      controller: 'PaymentProcessorGatewayHosted'
       gateway_classes: 
-        live: PayPalExpress_Gateway
-        dev: PayPalExpress_Gateway
+        live: PayPalExpressGateway
+        dev: PayPalExpressGateway
       model: 'PayPal'
 
-PayPal_Gateway:
+PayPalGateway:
   live:
     url:
       'https://api-3t.paypal.com/nvp'

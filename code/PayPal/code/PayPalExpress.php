@@ -3,7 +3,7 @@
 /**
  * Implementation of PayPalExpressCheckout
  */
-class PayPalExpress_Gateway extends PayPal_Gateway {
+class PayPalExpressGateway extends PayPalGateway {
   /**
    * The PayPal token for this transaction
    *

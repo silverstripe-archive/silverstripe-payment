@@ -3,7 +3,7 @@
 /**
  * Implementation of PayPalDirectPayment
  */
-class PayPalDirect_Gateway extends PayPal_Gateway {
+class PayPalDirectGateway extends PayPalGateway {
 
   public function process($data) {
     parent::process($data);

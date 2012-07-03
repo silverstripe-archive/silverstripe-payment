@@ -13,7 +13,7 @@
 
 class PayPal extends Payment { }
 
-class PayPal_Gateway extends PaymentGateway {
+class PayPalGateway extends PaymentGateway {
   
   const SUCCESS_CODE = 'Success';
   const SUCCESS_WARNING = 'SuccessWithWarning';
@@ -36,7 +36,7 @@ class PayPal_Gateway extends PaymentGateway {
    * Get the PayPal configuration 
    */
   public static function get_config() {
-    return Config::inst()->get('PayPal_Gateway', self::get_environment());
+    return Config::inst()->get('PayPalGateway', self::get_environment());
   }
   
   /**
@@ -77,7 +77,7 @@ class PayPal_Gateway extends PaymentGateway {
    * Get the payment action: 'Sale', 'Authorization', etc from yaml config
    */
   public static function get_action() {
-    return Config::inst()->get('PayPal_Gateway', 'action');
+    return Config::inst()->get('PayPalGateway', 'action');
   }
   
   public function __construct() {

@@ -125,13 +125,13 @@ class PaymentProcessor extends Controller {
     } else {
       switch($environment) {
         case 'live':
-          $gatewayClass = $this->methodName . '_Gateway_Production';
+          $gatewayClass = $this->methodName . 'Gateway_Production';
           break;
         case 'dev':
-          $gatewayClass = $this->methodName . '_Gateway_Dev';
+          $gatewayClass = $this->methodName . 'Gateway_Dev';
           break;
         case 'test':
-          $gatewayClass = $this->methodName . '_Gateway_Mock';
+          $gatewayClass = $this->methodName . 'Gateway_Mock';
           break;
       }
     }

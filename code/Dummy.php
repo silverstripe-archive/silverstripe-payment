@@ -3,7 +3,7 @@
 /**
  * Test class for merchant-hosted payment
  */
-class DummyMerchantHosted_Gateway extends PaymentGateway {
+class DummyMerchantHostedGateway extends PaymentGateway {
 
   public function process($data) {
     $amount = $data['Amount'];
@@ -33,7 +33,7 @@ class DummyMerchantHosted_Gateway extends PaymentGateway {
 /**
  * Test class for gateway-hosted payment
  */
-class DummyGatewayHosted_Gateway extends PaymentGateway {
+class DummyGatewayHostedGateway extends PaymentGateway {
   
   public function __construct() {
     $this->gatewayURL = Director::baseURL() . 'dummy/external/pay';
