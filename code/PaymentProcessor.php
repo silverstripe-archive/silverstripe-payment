@@ -32,6 +32,12 @@ class PaymentProcessor extends Controller {
   public $gateway;
 
   /**
+   * If this is set to some url value, the processor will redirect 
+   * to the url after a payment finishes processing.
+   */
+  public $postProcessRedirect;
+  
+  /**
    * Get the supported methods array set by the yaml configuraion
    */
   public static function get_supported_methods() {
@@ -98,9 +104,15 @@ class PaymentProcessor extends Controller {
       default:
         break;
     }
-
-    // Render a default page
-    return $this->renderPostProcess();
+    
+    if ($this->postProcessRedirect) {
+      // Put the payment ID in a session
+      Session::set('PaymentID', $this->payment->ID);
+      Controller::curr()->redirect($this->postProcessRedirect);
+    } else {
+      // Render a default page
+      return $this->renderPostProcess();
+    }
   }
 
   /**
