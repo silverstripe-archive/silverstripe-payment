@@ -39,58 +39,12 @@ class PaymentProcessor extends Controller {
 
     // Check if all methods are defined in factory
     foreach ($supported_methods as $method) {
-      if (! self::get_factory_config($method)) {
+      if (! PaymentFactory::get_factory_config($method)) {
         user_error("Method $method not defined in factory", E_USER_ERROR);
       }
     }
 
     return $supported_methods;
-  }
-
-  /**
-   * Get the factory config for a particular payment method
-   *
-   * @param String methodName
-   */
-  public static function get_factory_config($methodName) {
-    $factoryConfig = Config::inst()->get('PaymentProcessor', 'factory');
-    if (isset($factoryConfig[$methodName])) {
-      return $factoryConfig[$methodName];
-    } else {
-      return null;
-    }
-  }
-
-  /**
-   * Get the controller class for a particular gateway
-   */
-
-  /**
-   * Factory function to create payment controller object
-   *
-   * @param String $methodName
-   */
-  public static function factory($methodName) {
-    $supported_methods = self::get_supported_methods();
-
-    if (! in_array($methodName, $supported_methods)) {
-      user_error("The method $methodName is not supported.");
-    }
-
-    $methodConfig = self::get_factory_config($methodName);
-    if (isset($methodConfig['controller'])) {
-      $controllerClass = $methodConfig['controller'];
-      $controller = new $controllerClass();
-      $controller->setMethodName($methodName);
-
-      // Set the dependencies
-      $controller->gateway = $controller->getGateway();
-      $controller->payment = $controller->getPayment();
-
-      return $controller;
-    } else {
-      user_error("No controller is defined for the method $methodName");
-    }
   }
 
   /**
@@ -102,70 +56,6 @@ class PaymentProcessor extends Controller {
    */
   public function setMethodName($method) {
     $this->methodName = $method;
-  }
-
-  /**
-   * Get the gateway object that will be used by this controller.
-   * The gateway class is automatically retrieved based on configuration
-   */
-  protected function getGateway() {
-    if (! $this->methodName) {
-      return null;
-    }
-
-    // Get the gateway environment setting
-    $environment = PaymentGateway::get_environment();
-
-    // Get the custom class configuration if applicable.
-    // If not, apply naming convention.
-    $methodConfig = self::get_factory_config($this->methodName);
-    $gatewayClassConfig = $methodConfig['gateway_classes'];
-    if (isset($gatewayClassConfig[$environment])) {
-      $gatewayClass = $gatewayClassConfig[$environment];
-    } else {
-      switch($environment) {
-        case 'live':
-          $gatewayClass = $this->methodName . 'Gateway_Production';
-          break;
-        case 'dev':
-          $gatewayClass = $this->methodName . 'Gateway_Dev';
-          break;
-        case 'test':
-          $gatewayClass = $this->methodName . 'Gateway_Mock';
-          break;
-      }
-    }
-
-    if (class_exists($gatewayClass)) {
-      return new $gatewayClass();
-    } else {
-      user_error("$gatewayClass class does not exists.", E_USER_ERROR);
-    }
-  }
-
-  /**
-   * Get the payment object that will be used by this controller.
-   * The payment class is automatically retrieved based on naming convention.
-   */
-  protected function getPayment() {
-    if (! $this->methodName) {
-      return null;
-    }
-
-    // Get the custom payment class configuration.
-    // If not applicable, apply naming convention
-    $methodConfig = self::get_factory_config($this->methodName);
-    if (isset($methodConfig['model'])) {
-      $paymentClass = $methodConfig['model'];
-    } else {
-      $paymentClass = $this->methodName;
-    }
-
-    if (class_exists($paymentClass)) {
-      return new $paymentClass();
-    } else {
-      user_error("$paymentClass class does not exists.", E_USER_ERROR);
-    }
   }
 
   /**
@@ -272,7 +162,7 @@ class PaymentProcessor extends Controller {
 
     // Custom form fields for each gateway
     foreach (self::get_supported_methods() as $methodName) {
-      $controller = self::factory($methodName);
+      $controller = PaymentFactory::factory($methodName);
       foreach ($controller->getCustomFormFields() as $field) {
         $fieldList->push($field);
       }

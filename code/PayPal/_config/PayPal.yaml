@@ -1,23 +1,22 @@
 name: PayPal
 ---
 
-PaymentProcessor:
-  factory:
-    PayPalDirect:
-      title: 'PayPal Direct Payment'
-      controller: 'PaymentProcessor_MerchantHosted'
-      gateway_classes:
-        live: PayPalDirectGateway
-        dev: PayPalDirectGateway
-      model: 'PayPal'
+PaymentFactory:
+  PayPalDirect:
+    title: 'PayPal Direct Payment'
+    controller: 'PaymentProcessor_MerchantHosted'
+    gateway_classes:
+      live: PayPalDirectGateway
+      dev: PayPalDirectGateway
+    model: 'PayPal'
       
-    PayPalExpress:
-      title: 'PayPal Express Checkout'
-      controller: 'PaymentProcessorGatewayHosted'
-      gateway_classes: 
-        live: PayPalExpressGateway
-        dev: PayPalExpressGateway
-      model: 'PayPal'
+  PayPalExpress:
+    title: 'PayPal Express Checkout'
+    controller: 'PaymentProcessor_GatewayHosted'
+    gateway_classes: 
+      live: PayPalExpressGateway
+      dev: PayPalExpressGateway
+    model: 'PayPal'
 
 PayPalGateway:
   live:

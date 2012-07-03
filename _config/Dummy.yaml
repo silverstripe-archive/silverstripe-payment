@@ -4,20 +4,19 @@ Director:
   rules:
     'dummy/external/$Action/$ID': 'DummyExternalGateway_Controller'
 
-PaymentProcessor:
-  factory:
-    DummyMerchantHosted:
-      title: 'Dummy Gateway (Merchant)'
-      gateway_classes: 
-        live: 'DummyMerchantHostedGateway'
-        dev: 'DummyMerchantHostedGateway'
-      controller: 'PaymentProcessor_MerchantHosted'
-      model: 'Payment'
+PaymentFactory:
+  DummyMerchantHosted:
+    title: 'Dummy Gateway (Merchant)'
+    gateway_classes: 
+      live: 'DummyMerchantHostedGateway'
+      dev: 'DummyMerchantHostedGateway'
+    controller: 'PaymentProcessor_MerchantHosted'
+    model: 'Payment'
     
-    DummyGatewayHosted:
-      title: 'Dummy Gateway (Hosted)'
-      gateway_classes:
-        live: 'DummyGatewayHostedGateway'
-        dev: 'DummyGatewayHostedGateway'
-      controller: 'PaymentProcessor_GatewayHosted'
-      model: 'Payment'
+  DummyGatewayHosted:
+    title: 'Dummy Gateway (Hosted)'
+    gateway_classes:
+      live: 'DummyGatewayHostedGateway'
+      dev: 'DummyGatewayHostedGateway'
+    controller: 'PaymentProcessor_GatewayHosted'
+    model: 'Payment'
