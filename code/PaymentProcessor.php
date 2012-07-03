@@ -208,11 +208,11 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     parent::processRequest($data);
 
     // Set the return link
+    // TODO: Allow custom return url
     $returnURL = Director::absoluteURL(Controller::join_links(
         $this->link(),
-        'payment',
-        $this->methodName,
         'processresponse',
+        $this->methodName,
         $this->payment->ID));
     $this->gateway->setReturnURL($returnURL);
 
@@ -222,14 +222,14 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 
   public function processresponse($response) {
     // Reconstruct the gateway object
-    $this->setMethodName($response->param('MethodName'));
-    $this->gateway = $this->getGateway();
+    $this->setMethodName($response->param('ID'));
+    $this->gateway = PaymentFactory::get_gateway($this->methodName);
 
     return parent::processresponse($response);
   }
 
   public function getPaymentObject($response) {
-    return DataObject::get_by_id('Payment', $response->param('ID'));
+    return DataObject::get_by_id('Payment', $response->param('OtherID'));
   }
 
   public function getCustomFormFields() {
