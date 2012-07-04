@@ -126,7 +126,7 @@ class PayPalGateway extends PaymentGateway {
    * 
    * @see PaymentGateway::postPaymentData()
    */
-  public function postPaymentData($data) {
+  public function postPaymentData($data, $endpoint = null) {
     $httpQuery = http_build_query($data);
     return parent::postPaymentData($httpQuery);
   }

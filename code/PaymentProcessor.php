@@ -90,7 +90,11 @@ class PaymentProcessor extends Controller {
     if (! $this->payment) {
       $this->payment = $this->getPaymentObject($response);
     }
-
+    
+    // Save gateway message
+    $this->payment->Message = $result->getMessage();
+    
+    // Save payment status
     switch ($result->getStatus()) {
       case PaymentGateway_Result::SUCCESS:
         $this->payment->updatePaymentStatus(Payment::SUCCESS);
@@ -105,14 +109,8 @@ class PaymentProcessor extends Controller {
         break;
     }
     
-    if ($this->postProcessRedirect) {
-      // Put the payment ID in a session
-      Session::set('PaymentID', $this->payment->ID);
-      Controller::curr()->redirect($this->postProcessRedirect);
-    } else {
-      // Render a default page
-      return $this->renderPostProcess();
-    }
+    // Do post-processing
+    $this->postProcess();
   }
 
   /**
@@ -122,17 +120,24 @@ class PaymentProcessor extends Controller {
   }
 
   /**
-   * Render a page for showing payment status after finish processing.
-   * Can be overriden if desired.
+   * Perform an action after the payment is processed.
+   * If $postProcessRedirect is set, redirect to the url. If not,
+   * render a default page to show payment result.
    */
-  public function renderPostProcess() {
-    if ($this->payment) {
-      return $this->customise(array(
+  public function postProcess() {
+    if ($this->postProcessRedirect) {
+      // Put the payment ID in a session
+      Session::set('PaymentID', $this->payment->ID);
+      Controller::curr()->redirect($this->postProcessRedirect);
+    } else {
+      if ($this->payment) {
+        return $this->customise(array(
           "Content" => 'Payment #' . $this->payment->ID . ' status:' . $this->payment->Status,
           "Form" => '',
-      ))->renderWith("Page");
-    } else {
-      return null;
+        ))->renderWith("Page");
+      } else {
+        return null;
+      }
     }
   }
 

@@ -69,12 +69,25 @@ class PaymentGateway_Result {
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
   const INCOMPLETE = 'Incomplete';
-
+  
+  /**
+   * Status of payment processing
+   * 
+   * @var String
+   */
   protected $status;
+  
+  /**
+   * Message passed back from external gateways
+   * 
+   * @var String
+   */
+  protected $message;
 
-  function __construct($status = null) {
+  function __construct($status = null, $message = null) {
     if ($status == self::SUCCESS || $status == self::FAILURE || $status == self::INCOMPLETE) {
       $this->status = $status;
+      $this->message = $message;
     } else {
       user_error("Invalid result status", E_USER_ERROR);
     }
@@ -82,5 +95,9 @@ class PaymentGateway_Result {
 
   function getStatus() {
     return $this->status;
+  }
+  
+  function getMessage() {
+    return $this->message;
   }
 }
