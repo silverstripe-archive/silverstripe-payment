@@ -35,7 +35,7 @@ class PaymentProcessor extends Controller {
    * If this is set to some url value, the processor will redirect 
    * to the url after a payment finishes processing.
    */
-  public $postProcessRedirect;
+  public $postProcessRedirect = null;
   
   /**
    * Get the supported methods array set by the yaml configuraion
@@ -110,7 +110,7 @@ class PaymentProcessor extends Controller {
     }
     
     // Do post-processing
-    $this->postProcess();
+    return $this->postProcess();
   }
 
   /**
@@ -199,11 +199,7 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     $response = $this->gateway->process($data);
     return $this->processresponse($response);
   }
-
-  public function processresponse($response) {
-    return parent::processResponse($response);
-  }
-
+  
   public function getPaymentObject($response) {
     return $this->payment;
   }
@@ -247,9 +243,5 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 
   public function getPaymentObject($response) {
     return DataObject::get_by_id('Payment', $response->param('OtherID'));
-  }
-
-  public function getCustomFormFields() {
-    return parent::getCustomFormFields();
   }
 }
