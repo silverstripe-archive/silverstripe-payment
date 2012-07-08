@@ -38,6 +38,8 @@ class PayPalExpressGateway extends PayPalGateway {
     if ($token = $response['TOKEN']) {
       $this->token = $token;
     }
+    
+    return $token;
   }
 
   public function getResponse($response) {

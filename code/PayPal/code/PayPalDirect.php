@@ -6,7 +6,7 @@
 class PayPalDirectGateway extends PayPalGateway {
   
   public function paymentDataRequirements() {
-    return array('CreditCardType', 'CreditCardNumber', 'Cvv2', 'DateExpiry', 'FirstName', 'LastName');
+    return array('CreditCardType', 'CardNumber', 'Cvv2', 'DateExpiry', 'FirstName', 'LastName');
   }
 
   public function process($data) {

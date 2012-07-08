@@ -89,7 +89,7 @@ class PaymentProcessor extends Controller {
   public function processRequest($data) {
     if (! $this->verifyPaymentData($data)) {
       // If the payment data is not of the correct form, terminate the purchase
-      user_error('The payment data is imcomplete.');
+      user_error('The payment data is incomplete for the gateway ' . $this->methodName, E_USER_ERROR);
     }
     
     // Save preliminary data to database
