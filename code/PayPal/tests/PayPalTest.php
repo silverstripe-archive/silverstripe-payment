@@ -24,7 +24,13 @@ class PayPalDirectTest extends SapphireTest {
     $controller = PaymentProcessor::factory('PayPalDirect');
     $data = array(
       'Amount' => '10.00',
-      'Currenct' => 'USD'
+      'Currenct' => 'USD',
+      'CreditCardType' => 'Visa',
+      'CreditCardNumber' => '4381258770269608',
+      'DateExpiry'=> '112020',
+      'Cvv2' => '000',
+      'FirstName' => 'Ryan',
+      'LastName' => 'Dao'
     );
     
     $result = $controller->gateway->process($data);
