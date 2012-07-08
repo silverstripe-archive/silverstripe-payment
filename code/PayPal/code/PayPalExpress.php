@@ -14,7 +14,7 @@ class PayPalExpressGateway extends PayPalGateway {
   public function process($data) {
     parent::process($data);
 
-    $this->authorize();
+    $this->setExpressCheckout();
     if ($$this->token) {
       // If Authorization successful, redirect to PayPal to complete the payment
       Controller::curr()->redirect(self::get_paypal_redirect_url() . "?cmd=_express-checkout&token=$token");
@@ -26,7 +26,7 @@ class PayPalExpressGateway extends PayPalGateway {
   /**
    * Send a request to PayPal to authorize an express checkout transaction
    */
-  public function authorize() {
+  public function setExpressCheckout() {
     $this->postData['METHOD'] = 'SetExpressCheckout';
     // Add return and cancel urls
     $this->postData['RETURNURL'] = $this->returnURL;

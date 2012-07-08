@@ -41,6 +41,13 @@ abstract class PaymentGateway {
    * @return PaymentGateway_Result
    */
   abstract public function getResponse($response);
+  
+  /**
+   * Return a set of requirements for the payment data array for this gateway 
+   */
+  public function paymentDataRequirements() {
+    return array('Amount', 'Currency');
+  }
 
   /**
    * Post a set of payment data to a remote server

@@ -63,6 +63,22 @@ class PaymentProcessor extends Controller {
   public function setMethodName($method) {
     $this->methodName = $method;
   }
+  
+  /**
+   * Check the payment data against the gateway's requirements.
+   * 
+   * @param array $data
+   * @return true if satisfied, false otherwise
+   */
+  public function verifyPaymentData($data) {
+    foreach ($this->gateway->paymentDataRequirements() as $key) {
+      if (! array_key_exists($key, $data)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
 
   /**
    * Process a payment request.
@@ -71,6 +87,11 @@ class PaymentProcessor extends Controller {
    * @return Payment
    */
   public function processRequest($data) {
+    if (! $this->verifyPaymentData($data)) {
+      // If the payment data is not of the correct form, terminate the purchase
+      user_error('The payment data is imcomplete.');
+    }
+    
     // Save preliminary data to database
     $this->payment->Amount->Amount = $data['Amount'];
     $this->payment->Amount->Currency = $data['Currency'];
