@@ -41,7 +41,7 @@ class PayPalDirectTest extends SapphireTest {
     $controller = PaymentFactory::factory('PayPalDirect');
     $data = array(
       'Amount' => '10.00',
-      'Currency' => 'USD',
+      'Currency' => '123',
       'CreditCardType' => 'Visa',
       'CardNumber' => '4381258770269608',
       'DateExpiry'=> '112020',
@@ -66,6 +66,8 @@ class PayPalExpressTest extends SapphireTest {
   
   function testSetExpressCheckout() {
     $controller = PaymentFactory::factory('PayPalExpress');
+    $controller->gateway->setReturnURL('www.example.com');
+    $controller->gateway->setCancelURL('www.example.com');
     
     $token = $controller->gateway->setExpressCheckout();
     $this->assertNotNull($token);

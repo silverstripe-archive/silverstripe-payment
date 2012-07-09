@@ -15,7 +15,7 @@ class PayPalExpressGateway extends PayPalGateway {
     parent::process($data);
 
     $this->setExpressCheckout();
-    if ($$this->token) {
+    if ($this->token) {
       // If Authorization successful, redirect to PayPal to complete the payment
       Controller::curr()->redirect(self::get_paypal_redirect_url() . "?cmd=_express-checkout&token=$token");
     } else {
@@ -30,16 +30,18 @@ class PayPalExpressGateway extends PayPalGateway {
     $this->postData['METHOD'] = 'SetExpressCheckout';
     // Add return and cancel urls
     $this->postData['RETURNURL'] = $this->returnURL;
-    $this->postData['CANCELURL'] = Director::absoluteBaseURL();
+    $this->postData['CANCELURL'] = $this->cancelURL;
     
     // Post the data to PayPal server to get the token
     $response = $this->parseResponse($this->postPaymentData($this->postData));
     
-    if ($token = $response['TOKEN']) {
+    if (isset($response['TOKEN'])) {
+      $token = $response['TOKEN'];
       $this->token = $token;
+      return $token;
     }
     
-    return $token;
+    return null;
   }
 
   public function getResponse($response) {

@@ -248,7 +248,13 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
         'processresponse',
         $this->methodName,
         $this->payment->ID));
+    $cancelURL = Director::absoluteURL(Controller::join_links(
+        $this->link(),
+        'cancel',
+        $this->methodName,
+        $this->payment->ID));
     $this->gateway->setReturnURL($returnURL);
+    $this->gateway->setCancelURL($cancelURL);
 
     // Send a request to the gateway
     $this->gateway->process($data);
@@ -260,6 +266,10 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     $this->gateway = PaymentFactory::get_gateway($this->methodName);
 
     return parent::processresponse($response);
+  }
+  
+  public function cancel($response) {
+    return $this->processresponse(new PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE));
   }
 
   public function getPaymentObject($response) {

@@ -15,6 +15,11 @@ abstract class PaymentGateway {
    * The link to return to after processing payment
    */
   protected $returnURL;
+  
+  /**
+   * The link to return to after cancelling payment
+   */
+  protected $cancelURL;
 
   /**
    * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
@@ -23,8 +28,20 @@ abstract class PaymentGateway {
     return Config::inst()->get('PaymentGateway', 'environment');
   }
 
-  public function setReturnURL($url) {
-    $this->returnURL = $url;
+  public function setReturnURL($url = null) {
+    if ($url) {
+      $this->returnURL = $url;
+    } else {
+      $this->returnURL = Director::absoluteBaseURL();
+    }
+  }
+  
+  public function setCancelURL($url) {
+    if ($url) {
+      $this->cancelURL = $url;
+    } else {
+      $this->cancelURL = Director::absoluteBaseURL();
+    }
   }
 
   /**
