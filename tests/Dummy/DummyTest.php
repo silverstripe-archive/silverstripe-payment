@@ -28,13 +28,13 @@ class DummyMerchantHostedTest extends SapphireTest {
     
     $controller = PaymentProcessor::factory('DummyMerchantHosted');
     
-    $controller->processRequest(null, $successData);
+    $controller->processRequest($successData);
     $this->assertEquals($controller->payment->Status, Payment::SUCCESS);
     
-    $failureResult = $controller->processRequest(null, $failureData);
+    $failureResult = $controller->processRequest($failureData);
     $this->assertEquals($controller->payment->Status, Payment::FAILURE);
     
-    $incompleteResult = $controller->processRequest(null, $incompleteData);
+    $incompleteResult = $controller->processRequest($incompleteData);
     $this->assertEquals($controller->payment->Status, Payment::INCOMPLETE);
   }  
 }

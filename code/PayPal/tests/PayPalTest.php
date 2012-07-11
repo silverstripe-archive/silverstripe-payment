@@ -2,6 +2,20 @@
 
 class PayPalTest extends SapphireTest {
   
+  function setUp() {
+    parent::setUp();
+  
+    $paymentMethods = array(
+        'PayPalDirect',
+        'PayPalExpress'
+    );
+    Config::inst()->remove('PaymentProcessor', 'supported_methods');
+    Config::inst()->update('PaymentProcessor', 'supported_methods', $paymentMethods);
+  
+    $supportedMethods = Config::inst()->get('PaymentProcessor', 'supported_methods');
+    $this->assertEquals($supportedMethods, $paymentMethods);
+  }
+  
   function testPayPalURL() {
     $configDev = Config::inst()->get('PayPalGateway', 'dev');
     $this->assertEquals($configDev['url'], 'https://api-3t.sandbox.paypal.com/nvp');
@@ -11,7 +25,11 @@ class PayPalTest extends SapphireTest {
   }
 }
 
-class PayPalDirectTest extends SapphireTest {
+class PayPalDirectTest extends PayPalTest {
+  
+  function setUp() {
+    parent::setUp();
+  }
   
   function testClassConfig() {
     $controller = PaymentFactory::factory('PayPalDirect');
@@ -55,7 +73,11 @@ class PayPalDirectTest extends SapphireTest {
   }
 }
 
-class PayPalExpressTest extends SapphireTest {
+class PayPalExpressTest extends PayPalTest {
+  
+  function setUp() {
+    parent::setUp();
+  }
   
   function testClassConfig() {
     $controller = PaymentFactory::factory('PayPalExpress');

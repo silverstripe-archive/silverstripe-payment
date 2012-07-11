@@ -4,7 +4,7 @@ name: PayPal
 PaymentFactory:
   PayPalDirect:
     title: 'PayPal Direct Payment'
-    controller: 'PaymentProcessor_MerchantHosted'
+    controller: 'PayPalDirectProcessor'
     gateway_classes:
       live: PayPalDirectGateway
       dev: PayPalDirectGateway

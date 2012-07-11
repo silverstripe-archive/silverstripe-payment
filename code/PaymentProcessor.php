@@ -182,32 +182,8 @@ class PaymentProcessor extends Controller {
    *
    * return FieldList
    */
-  public function getCustomFormFields() {
-    return new FieldList();
-  }
-
-  /**
-   * Return a list of combined form fields from all supported payment methods
-   *
-   * @return FieldList
-   */
-  public static function get_combined_form_fields() {
-    $fieldList = new FieldList();
-
-    // Add the default form fields
-    foreach (singleton('PaymentProcessor')->getDefaultFormFields() as $field) {
-      $fieldList->push($field);
-    }
-
-    // Custom form fields for each gateway
-    foreach (self::get_supported_methods() as $methodName) {
-      $controller = PaymentFactory::factory($methodName);
-      foreach ($controller->getCustomFormFields() as $field) {
-        $fieldList->push($field);
-      }
-    }
-
-    return $fieldList;
+  public function getFormFields() {
+    return $this->getDefaultFormFields();
   }
 }
 
@@ -224,13 +200,19 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
   public function getPaymentObject($response) {
     return $this->payment;
   }
-
-  public function getCustomFormFields() {
-    $fieldList = parent::getCustomFormFields();
-    $fieldList->push(new TextField('CardHolderName', 'Credit Card Holder Name :'));
+  
+  public function getCreditCardFields() {
+    $fieldList = new FieldList();
     $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number :'));
     $fieldList->push(new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4));
     $fieldList->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
+    
+    return $fieldList;
+  }
+
+  public function getFormFields() {
+    $fieldList = parent::getFormFields();
+    $fieldList->merge($this->getCreditCardFields());
 
     return $fieldList;
   }
