@@ -18,6 +18,7 @@ class PayPalGateway extends PaymentGateway {
   const SUCCESS_CODE = 'Success';
   const SUCCESS_WARNING = 'SuccessWithWarning';
   const FAILURE_CODE = 'Failure';
+  const PAYPAL_VERSION = '51.0'; 
   
   /**
    * The data to be posted to PayPal server
@@ -95,7 +96,7 @@ class PayPalGateway extends PaymentGateway {
     $this->postData['USER'] = $authentication['username'];
     $this->postData['PWD'] = $authentication['password'];
     $this->postData['SIGNATURE'] = $authentication['signature'];
-    $this->postData['VERSION'] = '51.0';
+    $this->postData['VERSION'] = self::PAYPAL_VERSION;
   }
   
   public function process($data) {

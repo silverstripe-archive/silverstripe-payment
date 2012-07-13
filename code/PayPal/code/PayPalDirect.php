@@ -48,27 +48,52 @@ class PayPalDirectGateway extends PayPalGateway {
 
 class PayPalDirectGateway_Mock extends PayPalDirectGateway {
   
-  private $responseFile = 'PayPalDirectMock.xml';
+  /**
+   * The response template string for PayPalDirect
+   * 
+   * @var 
+   */
+  private $responseTemplate = 'TIMESTAMP=&CORRELATIONID=&ACK=&VERSION=&BUILD=&AMT=&CURRENCYCODE=&AVSCODE=&CVV2MATCH=&TRANSACTIONID=';
+  
+  /**
+   * Generate a dummy NVP response string with some pre-set value
+   * 
+   * @param $data - The payment data; $ack - The desired ACK code, default to Success
+   * 
+   *  @return the dummy response NVP string 
+   */
+  public function genrateDummyResponse($data, $ack = null) {
+    $templateArr = $this->parseResponse($this->responseTemplate);
+    $templateArr['TIMESTAMP'] = time();
+    $templateArr['CORRELATIONID'] = 'cfcb59afaabb4';
+    $templateArr['ACK'] = (isset($ack)) ? $ack : 'Success';
+    $templateArr['VERSION'] = self::PAYPAL_VERSION;
+    $templateArr['BUILD'] = '1195961';
+    $templateArr['AMT'] = $data['Amount'];
+    $templateArr['CURRENCYCODE'] = $data['Currency'];
+    $templateArr['AVSCODE'] = 'X';
+    $templateArr['CVV2MATCH'] = 'M';
+    $templateArr['TRANSACTIONID'] = '1000';
+    
+    return http_build_query($templateArr);
+  }
   
   public function process($data) {
-    $xml = file_get_contents($responseFile);
-    $xmlArr = Convert::xml2array($xml);
+    //$xml = file_get_contents($responseFile);
+    //$xmlArr = Convert::xml2array($xml);
     
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
     
     switch ($cents) {
       case 0.00:
-        return $xmlArr['Success'];
+        return $this->genrateDummyResponse($data, 'Success');
         break;
       case 0.01:
-        return $xmlArr['Failure'];
-        break;
-      case 0.02:
-        return $xmlArr['Incomplete'];
+        return $this->genrateDummyResponse($data, 'Failure');
         break;
       default:
-        return $xmlArr['Failure'];
+        return $this->genrateDummyResponse($data, 'Failure');
         break;
     }
   }
