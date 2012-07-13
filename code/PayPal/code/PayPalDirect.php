@@ -46,6 +46,34 @@ class PayPalDirectGateway extends PayPalGateway {
   }
 }
 
+class PayPalDirectGateway_Mock extends PayPalDirectGateway {
+  
+  private $responseFile = 'PayPalDirectMock.xml';
+  
+  public function process($data) {
+    $xml = file_get_contents($responseFile);
+    $xmlArr = Convert::xml2array($xml);
+    
+    $amount = $data['Amount'];
+    $cents = round($amount - intval($amount), 2);
+    
+    switch ($cents) {
+      case 0.00:
+        return $xmlArr['Success'];
+        break;
+      case 0.01:
+        return $xmlArr['Failure'];
+        break;
+      case 0.02:
+        return $xmlArr['Incomplete'];
+        break;
+      default:
+        return $xmlArr['Failure'];
+        break;
+    }
+  }
+}
+
 class PayPalDirectProcessor extends PaymentProcessor_MerchantHosted {
   
   public function getFormFields() {

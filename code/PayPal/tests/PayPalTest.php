@@ -38,6 +38,26 @@ class PayPalDirectTest extends PayPalTest {
     $this->assertEquals(get_class($controller->payment), 'PayPal');
   }
   
+  function testPayPalDirectMock() {
+    Config::inst()->remove('PaymentGateway', 'environment');
+    Config::inst()->update('PaymentGateway', 'environment', 'test');
+    
+    $controller = PaymentFactory::factory('PayPalDirect');
+    $this->assertEquals(get_class($controller->gateway), 'PayPalDirectGateway_Mock');
+    
+    $successData = array(
+      'Amount' => '10.00'  
+    );
+    $result = $controller->processRequest($successData);
+    $this->assertEquals($result->getStatus(), PaymentGateway_Result::SUCCESS);
+    
+    $failureData = array(
+      'Amount' => '10.01'
+    );
+    $result = $controller->processRequest($failureData);
+    $this->assertEquals($result->getStatus(), PaymentGateway_Result::FAILURE);
+  }
+  
   function testPaymentSuccess() {
     $controller = PaymentFactory::factory('PayPalDirect');
     $data = array(
