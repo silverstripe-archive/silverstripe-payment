@@ -33,7 +33,7 @@ class PayPalDirectTest extends PayPalTest {
   
   function testClassConfig() {
     $controller = PaymentFactory::factory('PayPalDirect');
-    $this->assertEquals(get_class($controller), 'PaymentProcessor_MerchantHosted');
+    $this->assertEquals(get_class($controller), 'PayPalDirectProcessor');
     $this->assertEquals(get_class($controller->gateway), 'PayPalDirectGateway');
     $this->assertEquals(get_class($controller->payment), 'PayPal');
   }
@@ -46,15 +46,17 @@ class PayPalDirectTest extends PayPalTest {
     $this->assertEquals(get_class($controller->gateway), 'PayPalDirectGateway_Mock');
     
     $successData = array(
-      'Amount' => '10.00'  
+      'Amount' => '10.00',
+      'Currency' => 'USD'  
     );
-    $result = $controller->processRequest($successData);
+    $result = $controller->gateway->getResponse($controller->gateway->process($successData));
     $this->assertEquals($result->getStatus(), PaymentGateway_Result::SUCCESS);
     
     $failureData = array(
-      'Amount' => '10.01'
+      'Amount' => '10.01',
+      'Currency' => 'USD'
     );
-    $result = $controller->processRequest($failureData);
+    $result = $controller->gateway->getResponse($controller->gateway->process($failureData));
     $this->assertEquals($result->getStatus(), PaymentGateway_Result::FAILURE);
   }
   

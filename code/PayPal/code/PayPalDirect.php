@@ -51,9 +51,13 @@ class PayPalDirectGateway_Mock extends PayPalDirectGateway {
   /**
    * The response template string for PayPalDirect
    * 
-   * @var 
+   * @var String
    */
   private $responseTemplate = 'TIMESTAMP=&CORRELATIONID=&ACK=&VERSION=&BUILD=&AMT=&CURRENCYCODE=&AVSCODE=&CVV2MATCH=&TRANSACTIONID=';
+  
+  public function paymentDataRequirements() {
+    return array('Amount', 'Currency');
+  }
   
   /**
    * Generate a dummy NVP response string with some pre-set value
@@ -79,9 +83,6 @@ class PayPalDirectGateway_Mock extends PayPalDirectGateway {
   }
   
   public function process($data) {
-    //$xml = file_get_contents($responseFile);
-    //$xmlArr = Convert::xml2array($xml);
-    
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
     

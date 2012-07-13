@@ -109,11 +109,17 @@ class PayPalGateway extends PaymentGateway {
   /**
    * Parse the raw data and response from gateway
    *
-   * @param unknown_type $response
+   * @param $response - This can be the response string itself or the 
+   *                    string encapsulated in a HTTPResponse object
    * @return the parsed array
    */
   public function parseResponse($response) {
-    parse_str($response->getBody(), $responseArr);
+    if ($response instanceof HTTPResponse) {
+      parse_str($response->getBody(), $responseArr);
+    } else {
+      parse_str($response, $responseArr);
+    }
+    
     return $responseArr;
   }
   
