@@ -1,0 +1,101 @@
+<?php
+
+/**
+ * Object encapsulating credit card details and validation
+ */
+class CreditCard {
+  
+  private static $CARD_COMPANIES = array(
+    'visa' => '/^4\d{12}(\d{3})?$/',
+    'master' => '/^(5[1-5]\d{4}|677189)\d{10}$/',
+    'discover' => '/^(6011|65\d{2})\d{12}$/',
+    'american_express' => '/^3[47]\d{13}$/',
+    'diners_club' => '/^3(0[0-5]|[68]\d)\d{11}$/'
+  );
+  
+  /* Credit Card data */
+  public $firstName;
+  public $lastName;
+  public $month;
+  public $year;
+  public $type;
+  public $number;
+  
+  /**
+   * A ValidationResult object that stores the validation status and errors
+   * 
+   * @var ValidationResult
+   */ 
+  public $validationResult;
+  
+  public function __construct($options) {
+    $this->firstName = $options['firstName'];
+    $this->lastName = $options['lastName'];
+    $this->month = $options['month'];
+    $this->year = $options['year'];
+    $this->type = $options['type'];
+    $this->number = $options['number'];
+    $this->validationResult = new ValidationResult();
+  }
+  
+  /**
+   * Check if the card is already exprired
+   */
+  private function isExpired() {
+    $time = strtotime($this->month . '-' . $this->year);
+    $expriration = strtotime('+1 Month', $time);
+    
+    return (time() >= $expriration);
+  }
+  
+  private function validateEssentialAttributes() {
+    if ($this->firstName === null || $this->firstName == "") {
+      $this->validationResult->error('First name cannot be empty');
+    }
+    
+    if ($this->lastName === null || $this->lastName == "") {
+      $this->validationResult->error('Last name cannot be empty');
+    }
+    
+    if (checkdate($this->month, 1, $this->year) === false) {
+      $this->validationResult->error('Expiration date not valid');
+    }
+    
+    if ($this->is_expired() === true) {
+      $this->validationResult->error('Expired');
+    }
+  }
+  
+  private function validateCardType() {
+    if ($this->type === null || $this->type == "") {
+      $this->validationResult->error('Credit card type is required');
+    }
+    
+    if (!isset(self::$CARD_COMPANIES[$this->type])) {
+      $this->validationResult->error('Credit card type is invalid');
+    }
+  }
+  
+  private function validateCardNumber() {
+    if (strlen($this->number) >= 12) {
+      $this->validationResult->error('Card number length is invalid');
+    }
+    
+    // Luhn algorithm to check the validity of the card number
+    $map = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 2, 4, 6, 8, 1, 3, 5, 7, 9);
+    $sum = 0;
+    $last = strlen($this->number) - 1;
+    for ($i = 0; $i <= $last; $i++) {
+      $sum += $map[$this->number[$last - $i] + ($i & 1) * 10];
+    }
+    if (! $sum % 10 == 0) {
+      $this->validationResult->error('Card number is invalid');
+    }
+  }
+  
+  public function validate() {
+    $this->validateEssentialAttributes();
+    $this->validateCardType();
+    $this->validateCardNumber();
+  }
+}
