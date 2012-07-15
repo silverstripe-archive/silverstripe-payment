@@ -99,20 +99,3 @@ class PayPalDirectGateway_Mock extends PayPalDirectGateway {
     }
   }
 }
-
-class PayPalDirectProcessor extends PaymentProcessor_MerchantHosted {
-  
-  public function getFormFields() {
-    $fieldList = parent::getFormFields();
-    
-    $fieldList->insertBefore(new DropDownField(
-      'CreditCardType', 
-      'Select Credit Card Type', 
-      array('visa' => 'Visa', 'master' => 'Master')
-    ), 'CardNumber');
-    $fieldList->insertBefore(new TextField('FirstName', 'First Name:'), 'CardNumber');
-    $fieldList->insertBefore(new TextField('LastName', 'Last Name:'), 'CardNumber');
-    
-    return $fieldList;
-  }
-}

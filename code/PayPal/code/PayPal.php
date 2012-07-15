@@ -85,6 +85,15 @@ class PayPalGateway extends PaymentGateway {
     $this->gatewayURL = self::get_url();
   }
   
+  public function getSupportedCreditCardType() {
+    return array(
+      'visa' => 'Visa',
+      'master' => 'Master',
+      'americanExpress' => 'American Express',
+      'maestro' => 'Maestro'
+    );
+  }
+  
   /**
    * Clear the data array and prepare for a new post to PayPal.
    * Add the basic information to the data array

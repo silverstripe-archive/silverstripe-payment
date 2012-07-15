@@ -43,7 +43,23 @@ abstract class PaymentGateway {
       $this->cancelURL = Director::absoluteBaseURL();
     }
   }
+  
+  /**
+   * Get the list of credit card types supported by this gateway
+   * 
+   *  @return array('id' => 'Credit Card Type')
+   */
+  public function getSupportedCreditCardType() {
+    return null;
+  }
 
+  /**
+   * Validate the payment data against the gateway-specific requirements
+   * 
+   * @param array $data
+   */
+  abstract public function validatePaymentData($data);
+  
   /**
    * Send a request to the gateway to process the payment.
    * To be implemented by individual gateway
