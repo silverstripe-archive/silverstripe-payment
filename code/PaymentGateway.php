@@ -57,8 +57,29 @@ abstract class PaymentGateway {
    * Validate the payment data against the gateway-specific requirements
    * 
    * @param array $data
+   * @return ValidationResult
    */
-  abstract public function validatePaymentData($data);
+  public function validatePaymentData($data) {
+    $result = new ValidationResult();
+    
+    if (! isset($data['Amount'])) {
+      $result->error('Payment amount not set');
+    }
+    
+    if (! $data['Amount']) {
+      $result->error('Payment amount cannot be null');
+    } 
+    
+    if (! isset($data['Currency'])) {
+      $result->error('Payment currency not set');
+    }
+    
+    if (! $data['Currency']) {
+      $result->error('Payment currency cannot be null');
+    }
+    
+    return $result;
+  }
   
   /**
    * Send a request to the gateway to process the payment.
