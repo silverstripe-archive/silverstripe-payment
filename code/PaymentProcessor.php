@@ -177,6 +177,17 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
   public function processRequest($data) {
     parent::processRequest($data);
+    
+    // Construct a credit card object and add to the payment data
+    $options = array(
+      'firstName' => $data['FirstName'],
+      'lastName' => $data['LastName'],
+      'month' => date('n', $data['DateExpiry']),
+      'year' => date('m', $data['DateExpiry']),
+      'type' => $data['CreditCardType'],
+      'number' => $data['CreditCardNumber']  
+    );
+    $data['CreditCard'] = new CreditCard($options); 
 
     // Call processResponse directly since there's no need to set return link
     $response = $this->gateway->process($data);
