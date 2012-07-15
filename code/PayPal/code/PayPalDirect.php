@@ -5,8 +5,21 @@
  */
 class PayPalDirectGateway extends PayPalGateway {
   
-  public function paymentDataRequirements() {
-    return array('CreditCardType', 'CardNumber', 'Cvv2', 'DateExpiry', 'FirstName', 'LastName');
+  public function validatePaymentData($data) {
+    $result = parent::validatePaymentData($data);
+    
+    if (! isset($data['CreditCard'])) {
+      $result->error('Credit card details are not available');
+    }
+    
+    $creditCardValidation = $data['CreditCard']->validate();
+    if (! $creditCardValidation->valid()) {
+      foreach ($creditCardValidation->messageList() as $error) {
+        $result->error($error);
+      }
+    }
+    
+    return $result;
   }
 
   public function process($data) {
