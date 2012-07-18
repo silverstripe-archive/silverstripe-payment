@@ -4,6 +4,10 @@
  * Test class for merchant-hosted payment
  */
 class DummyMerchantHostedGateway extends PaymentGateway {
+  
+  public function getSupportedCreditCardType() {
+    return (array('master' => 'Master', 'visa' => 'Visa'));
+  }
 
   public function process($data) {
     $amount = $data['Amount'];
@@ -46,13 +50,13 @@ class DummyGatewayHostedGateway extends PaymentGateway {
       'ReturnURL' => $this->returnURL    
     ); 
     
-    // TODO: Use curl and GET instead of Session
-    Session::set('paymentData', $postData);
-    Controller::curr()->redirect($this->gatewayURL);
+    $queryString = http_build_query($postData);
+    Controller::curr()->redirect($this->gatewayURL . '?' . $queryString);
   }
 
   public function getResponse($response) {
-    switch (Session::get('result')) {
+    $result = $response->getVar('result');
+    switch ($result) {
       case PaymentGateway_Result::SUCCESS:
         return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
         break;
@@ -74,49 +78,56 @@ class DummyGatewayHostedGateway extends PaymentGateway {
 class DummyExternalGateway_Controller extends Controller{
 
   function pay($request) {
+    Session::set('Amount', $request->getVar('Amount'));
+    Session::set('Currency', $request->getVar('Currenct'));
+    Session::set('ReturnURL', $request->getVar('ReturnURL'));
+    
     return $this->customise(array(
-        'Content' => "<h1>Fill out this form to make payment</h1>",
-        'Form' => $this->PayForm()
+      'Content' => "<h1>Fill out this form to make payment</h1>",
+      'Form' => $this->PayForm()
     ))->renderWith('Page');
   }
 
   function PayForm() {
     $fields = new FieldList(
-        new TextField('CardHolderName', 'Card Holder Name'),
-        new CreditCardField('CardNumber', 'Card Number'),
-        new DateField('DateExpiry', 'Expiration date')
+      new TextField('CardHolderName', 'Card Holder Name'),
+      new CreditCardField('CardNumber', 'Card Number'),
+      new DateField('DateExpiry', 'Expiration date')
     );
 
     $actions = new FieldList(
-        new FormAction("dopay")
+      new FormAction("dopay")
     );
 
     return new Form($this, "PayForm", $fields, $actions);
   }
 
   function dopay() {
-    if ($data = Session::get('paymentData')) {
-      $amount = $data['Amount'];
+    if ($amount = Session::get('Amount')) {
+      $amount = $amount;
       $cents = round($amount - intval($amount), 2);
 
       switch ($cents) {
         case 0.00:
-          Session::set('result', PaymentGateway_Result::SUCCESS);
+          $result = PaymentGateway_Result::SUCCESS;
           break;
         case 0.01:
-          Session::set('result', PaymentGateway_Result::FAILURE);
+          $result = PaymentGateway_Result::FAILURE;
           break;
         case 0.02:
-          Session::set('result', PaymentGateway_Result::INCOMPLETE);
+          $result = PaymentGateway_Result::INCOMPLETE;
           break;
         default:
-          Session::set('result', PaymentGateway_Result::FAILURE);
+          $result = PaymentGateway_Result::FAILURE;
           break;
       }
-
-      Controller::redirect($data['ReturnURL']);
+      if ($returnURL = Session::get('ReturnURL')) {
+        Controller::redirect($returnURL . "?result=$result");
+      } else {
+        user_error("Return URL is not set for this transaction", E_USER_ERROR);
+      }
     } else {
-      user_error("No user data is set for this transaction", E_USER_ERROR);
+      user_error("Payment data is invalid for this transaction", E_USER_ERROR);
     }
   }
 }

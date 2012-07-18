@@ -3,7 +3,7 @@ name: Payment
   
 PaymentGateway:
   environment:
-    'test'      
+    'dev'      
 
 Director:
   rules:
