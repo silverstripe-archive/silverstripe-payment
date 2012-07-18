@@ -41,14 +41,14 @@ class CreditCard {
   /**
    * Check if the card is already exprired
    */
-  private function isExpired() {
+  public function isExpired() {
     $time = strtotime($this->month . '-' . $this->year);
     $expriration = strtotime('+1 Month', $time);
     
-    return (time() >= $expriration);
+    return (time() < $expriration);
   }
   
-  private function validateEssentialAttributes() {
+  public function validateEssentialAttributes() {
     if ($this->firstName === null || $this->firstName == "") {
       $this->validationResult->error('First name cannot be empty');
     }
@@ -61,12 +61,12 @@ class CreditCard {
       $this->validationResult->error('Expiration date not valid');
     }
     
-    if ($this->is_expired() === true) {
+    if ($this->isExpired() === true) {
       $this->validationResult->error('Expired');
     }
   }
   
-  private function validateCardType() {
+  public function validateCardType() {
     if ($this->type === null || $this->type == "") {
       $this->validationResult->error('Credit card type is required');
     }
@@ -76,7 +76,7 @@ class CreditCard {
     }
   }
   
-  private function validateCardNumber() {
+  public function validateCardNumber() {
     if (strlen($this->number) >= 12) {
       $this->validationResult->error('Card number length is invalid');
     }
