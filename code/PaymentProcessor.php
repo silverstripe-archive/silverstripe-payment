@@ -246,7 +246,7 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
   
   public function getFormRequirements() {
     $required = parent::getFormRequirements();
-    $required->appendRequiredFields(array('FirstName', 'LastName', 'CardNumber', 'DateExpiry', 'Cvc2'));
+    $required->appendRequiredFields(new RequiredFields('FirstName', 'LastName', 'CardNumber', 'DateExpiry', 'Cvc2'));
   }
 }
 
