@@ -42,10 +42,10 @@ class CreditCard {
    * Check if the card is already exprired
    */
   public function isExpired() {
-    $time = strtotime($this->month . '-' . $this->year);
-    $expriration = strtotime('+1 Month', $time);
+    // last day of the expiration month
+    $expriration = strtotime(date('Y-m-t', mktime(0, 0, 0, $this->month, 1, $this->year)));  
     
-    return (time() < $expriration);
+    return (time() >= $expriration);
   }
   
   public function validateEssentialAttributes() {

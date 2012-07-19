@@ -16,14 +16,14 @@ class CreditCardTest extends SapphireTest {
   }
   
   function testIsExpired() {
-    $previousMonth = strtotime('-1 Month', time());
+    $previousMonth = date('n', strtotime('-1 Month', time()));
     
     $this->card->month = $previousMonth;
     $this->assertTrue($this->card->isExpired());
   } 
   
   function testIsNotExpired() {
-    $nextMonth = strtotime('+1 Month', time());
+    $nextMonth = date('n', strtotime('+1 Month', time()));
     
     $this->card->month = $nextMonth;
     $this->assertFalse($this->card->isExpired());
