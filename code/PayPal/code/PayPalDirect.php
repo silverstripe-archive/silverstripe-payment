@@ -27,6 +27,7 @@ class PayPalDirectGateway extends PayPalGateway {
 
     $this->postData['METHOD'] = 'DoDirectPayment';
     // Add credit card data. May have to parse the data to fit PayPal's format
+    $creditCard = $data['CreditCard'];
     $this->postData['CREDITCARDTYPE'] = $data['CreditCardType'];
     $this->postData['ACCT'] = $data['CardNumber'];
     $this->postData['EXPDATE'] = $data['DateExpiry'];

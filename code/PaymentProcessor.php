@@ -18,18 +18,31 @@
 class PaymentProcessor extends Controller {
   /**
    * The method name of this controller
+   * 
+   * @var String
    */
   protected $methodName;
 
   /**
    * The payment object to be injected to this controller
+   * 
+   * @var Payment
    */
   public $payment;
 
   /**
    * The gateway object to be injected to this controller
+   * 
+   * @var PaymentGateway
    */
   public $gateway;
+  
+  /**
+   * The payment data array
+   * 
+   * #var array 
+   */
+  public $paymentData;
 
   /**
    * If this is set to some url value, the processor will redirect 
@@ -63,7 +76,19 @@ class PaymentProcessor extends Controller {
   public function setMethodName($method) {
     $this->methodName = $method;
   }
-
+  
+  /**
+   * Perform some actions before the payment is processed
+   */
+  public function preProcess() { 
+    // Save preliminary data to database
+    $this->payment->Amount->Amount = $this->paymentData['Amount'];
+    $this->payment->Amount->Currency = $this->paymentData['Currency'];
+    $this->payment->Status = Payment::PENDING;
+    $this->payment->Method = $this->methodName;
+    $this->payment->write();
+  }
+  
   /**
    * Process a payment request.
    *
@@ -71,19 +96,17 @@ class PaymentProcessor extends Controller {
    * @return Payment
    */
   public function processRequest($data) {
-    // Validate the payment data using gateway's validation
-    // Terminate the transaction if validation fails
-    $validationResult = $this->gateway->validatePaymentData($data);
-    if (! $validationResult->valid()) {
-      user_error('Invalid payment data. Error: ' . $validationResult->message(), E_USER_ERROR);
-    }
+    $this->paymentData = $data;
     
-    // Save preliminary data to database
-    $this->payment->Amount->Amount = $data['Amount'];
-    $this->payment->Amount->Currency = $data['Currency'];
-    $this->payment->Status = Payment::PENDING;
-    $this->payment->Method = $this->methodName;
-    $this->payment->write();
+    // Do pre-processing
+    $this->preProcess();
+    
+    // Do gateway validation of payment data
+    $this->gateway->validatePaymentData($this->paymentData);
+    
+    if (! $this->gateway->validationResult->valid()) {
+      user_error('Payment data is not valid', E_USER_ERROR);
+    }
   }
 
   /**
@@ -123,8 +146,7 @@ class PaymentProcessor extends Controller {
   /**
    * Helper function to get the payment object from the gateway response
    */
-  public function getPaymentObject($response) {
-  }
+  public function getPaymentObject($response) { }
 
   /**
    * Perform an action after the payment is processed.
@@ -162,26 +184,38 @@ class PaymentProcessor extends Controller {
 
     return $fieldList;
   }
+  
+  /**
+   * Get the form requirements
+   */
+  public function getFormRequirements() {
+    return new RequiredFields('Amount', 'Currency');
+  }
 }
 
 class PaymentProcessor_MerchantHosted extends PaymentProcessor {
+  
+  public function preProcess() {
+    parent::preProcess();
+    
+    // Construct a credit card object and add to the payment data
+    $options = array(
+      'firstName' => $this->paymentData['FirstName'],
+      'lastName' => $this->paymentData['LastName'],
+      'month' => date('n', strtotime($this->paymentData['DateExpiry'])),
+      'year' => date('m', strtotime($this->paymentData['DateExpiry'])),
+      'type' => $this->paymentData['CreditCardType'],
+      'number' => $this->paymentData['CardNumber']
+    );
+    
+    $this->paymentData['CreditCard'] = new CreditCard($options);    
+  }
 
   public function processRequest($data) {
     parent::processRequest($data);
     
-    // Construct a credit card object and add to the payment data
-    $options = array(
-      'firstName' => $data['FirstName'],
-      'lastName' => $data['LastName'],
-      'month' => date('n', $data['DateExpiry']),
-      'year' => date('m', $data['DateExpiry']),
-      'type' => $data['CreditCardType'],
-      'number' => $data['CreditCardNumber']  
-    );
-    $data['CreditCard'] = new CreditCard($options); 
-
     // Call processResponse directly since there's no need to set return link
-    $response = $this->gateway->process($data);
+    $response = $this->gateway->process($this->paymentData);
     return $this->processresponse($response);
   }
   
@@ -209,6 +243,11 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
     return $fieldList;
   }
+  
+  public function getFormRequirements() {
+    $required = parent::getFormRequirements();
+    $required->appendRequiredFields(array('FirstName', 'LastName', 'CardNumber', 'DateExpiry', 'Cvc2'));
+  }
 }
 
 class PaymentProcessor_GatewayHosted extends PaymentProcessor {
@@ -232,7 +271,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     $this->gateway->setCancelURL($cancelURL);
 
     // Send a request to the gateway
-    $this->gateway->process($data);
+    $this->gateway->process($this->paymentData);
   }
 
   public function processresponse($response) {

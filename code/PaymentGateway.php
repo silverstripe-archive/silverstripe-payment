@@ -20,6 +20,14 @@ abstract class PaymentGateway {
    * The link to return to after cancelling payment
    */
   protected $cancelURL;
+  
+  /**
+   * A ValidationResult object that holds the validation status
+   * of the payment data.
+   *
+   * @var ValidationResult
+   */
+  public $validationResult;
 
   /**
    * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
@@ -60,25 +68,25 @@ abstract class PaymentGateway {
    * @return ValidationResult
    */
   public function validatePaymentData($data) {
-    $result = new ValidationResult();
+    if (! ($this->validationResult != null && $this->validationResult instanceof ValidationResult)) {
+      $this->validationResult = new ValidationResult();
+    }
     
     if (! isset($data['Amount'])) {
-      $result->error('Payment amount not set');
+      $this->validationResult->error('Payment amount not set');
     }
     
     if (! $data['Amount']) {
-      $result->error('Payment amount cannot be null');
+      $this->validationResult->error('Payment amount cannot be null');
     } 
     
     if (! isset($data['Currency'])) {
-      $result->error('Payment currency not set');
+      $this->validationResult->error('Payment currency not set');
     }
     
     if (! $data['Currency']) {
-      $result->error('Payment currency cannot be null');
+      $this->validationResult->error('Payment currency cannot be null');
     }
-    
-    return $result;
   }
   
   /**
