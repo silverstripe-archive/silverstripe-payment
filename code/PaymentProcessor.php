@@ -149,27 +149,18 @@ class PaymentProcessor extends Controller {
   }
 
   /**
-   * Get the default form fields to be shown at the checkout page
+   * Get the processor's form fields. Custom controllers use this function
+   * to add the form fields specifically to gateways.
    *
    * return FieldList
    */
-  public function getDefaultFormFields() {
+  public function getFormFields() {
     $fieldList = new FieldList();
 
     $fieldList->push(new NumericField('Amount', 'Amount', ''));
     $fieldList->push(new TextField('Currency', 'Currency', 'NZD'));
 
     return $fieldList;
-  }
-
-  /**
-   * Get the custom form fields. Custom controllers use this function
-   * to add the form fields specifically to gateways.
-   *
-   * return FieldList
-   */
-  public function getFormFields() {
-    return $this->getDefaultFormFields();
   }
 }
 
