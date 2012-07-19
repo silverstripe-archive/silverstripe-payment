@@ -5,6 +5,8 @@ class CreditCardTest extends SapphireTest {
   public $card;
   
   function setUp() {
+    parent::setUp();
+    
     $this->card = new CreditCard(array(
       'firstName' => 'Test',
       'lastName' => 'Test',

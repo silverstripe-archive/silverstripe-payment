@@ -77,7 +77,7 @@ class CreditCard {
   }
   
   public function validateCardNumber() {
-    if (strlen($this->number) >= 12) {
+    if (strlen($this->number) < 12) {
       $this->validationResult->error('Card number length is invalid');
     }
     
@@ -88,7 +88,7 @@ class CreditCard {
     for ($i = 0; $i <= $last; $i++) {
       $sum += $map[$this->number[$last - $i] + ($i & 1) * 10];
     }
-    if (! $sum % 10 == 0) {
+    if (! ($sum % 10 == 0)) {
       $this->validationResult->error('Card number is invalid');
     }
   }
