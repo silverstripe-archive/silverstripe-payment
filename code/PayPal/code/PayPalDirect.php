@@ -28,12 +28,12 @@ class PayPalDirectGateway extends PayPalGateway {
     $this->postData['METHOD'] = 'DoDirectPayment';
     // Add credit card data. May have to parse the data to fit PayPal's format
     $creditCard = $data['CreditCard'];
-    $this->postData['CREDITCARDTYPE'] = $data['CreditCardType'];
-    $this->postData['ACCT'] = $data['CardNumber'];
-    $this->postData['EXPDATE'] = $data['DateExpiry'];
-    $this->postData['CVV2'] = $data['Cvv2'];
-    $this->postData['FIRSTNAME'] = $data['FirstName'];
-    $this->postData['LASTNAME'] = $data['LastName'];
+    $this->postData['CREDITCARDTYPE'] = $creditCard->type;
+    $this->postData['ACCT'] = $creditCard->number;
+    $this->postData['EXPDATE'] = $creditCard->month . $creditCard->year;
+    //$this->postData['CVV2'] = $data['Cvv2'];
+    $this->postData['FIRSTNAME'] = $creditCard->firstName;
+    $this->postData['LASTNAME'] = $creditCard->lastName;
 
     // Add optional parameters 
     $this->postData['IP'] = isset($data['IP']) ? $data['IP'] : $_SERVER['REMOTE_ADDR'];

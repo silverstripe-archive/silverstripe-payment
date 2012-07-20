@@ -1,12 +1,16 @@
 <?php
 
-class PayPalDirectTest extends PayPalTest {
+class PayPalDirectTest extends SapphireTest {
 
   public $processor;
   public $data;
 
   function setUp() {
     parent::setUp();
+    
+    $paymentMethods = array('PayPalDirect');
+    Config::inst()->remove('PaymentProcessor', 'supported_methods');
+    Config::inst()->update('PaymentProcessor', 'supported_methods', $paymentMethods);
     
     Config::inst()->remove('PaymentGateway', 'environment');
     Config::inst()->update('PaymentGateway', 'environment', 'dev');
@@ -15,12 +19,14 @@ class PayPalDirectTest extends PayPalTest {
     $this->data = array(
       'Amount' => '10',
       'Currency' => 'USD',
-      'FirstName' => 'Ryan',
-      'LastName' => 'Dao',
-      'CreditCardType' => 'master',
-      'CardNumber' => '4381258770269608',
-      'DateExpiry' => '11-2016',
-      'Cvc2' => '146'
+      'CreditCard' => new CreditCard(array(
+        'firstName' => 'Ryan',
+        'lastName' => 'Dao',
+        'type' => 'master',
+        'month' => '11',
+        'year' => '2016',
+        'number' => '4381258770269608'             
+      ))
     );
   }
 
@@ -44,25 +50,14 @@ class PayPalDirectTest extends PayPalTest {
   }
 }
 
-class PayPalDirectMockTest extends PayPalTest {
+class PayPalDirectMockTest extends PayPalDirectTest {
   
   function setUp() {
     parent::setUp();
     
     Config::inst()->remove('PaymentGateway', 'environment');
     Config::inst()->update('PaymentGateway', 'environment', 'test');
-    
     $this->processor = PaymentFactory::factory('PayPalDirect');
-    $this->data = array(
-      'Amount' => '10',
-      'Currency' => 'USD',
-      'FirstName' => 'Ryan',
-      'LastName' => 'Dao',
-      'CreditCardType' => 'master',
-      'CardNumber' => '4381258770269608',
-      'DateExpiry' => '11-2016',
-      'Cvc2' => '146'
-    );
   }
   
   function testClassConfig() {
@@ -71,13 +66,13 @@ class PayPalDirectMockTest extends PayPalTest {
     $this->assertEquals(get_class($this->processor->payment), 'PayPal');
   }
   
-  function testPayPalDirectMockSuccess() {
+  function testPaymentSuccess() {
     $response = $this->processor->gateway->process($this->data);
     $result = $this->processor->gateway->getResponse($response);
     $this->assertEquals($result->getStatus(), PaymentGateway_Result::SUCCESS);
   }
   
-  function testPayPalDirectMockFailure() {
+  function testPaymentFailure() {
     $this->data['Amount'] = '10.01';
     $response = $this->processor->gateway->process($this->data);
     $result = $this->processor->gateway->getResponse($response);
