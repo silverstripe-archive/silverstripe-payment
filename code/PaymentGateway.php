@@ -149,7 +149,7 @@ class PaymentGateway_Result extends ValidationResult {
   function __construct($valid = true, $message = null) {
     parent::__construct($valid, $message);
     
-    if ($valid = true) {
+    if ($valid == true) {
       $this->status = self::SUCCESS;
     } else {
       $this->status = self::FAILURE;
@@ -159,8 +159,10 @@ class PaymentGateway_Result extends ValidationResult {
   function setStatus($status) {
     if ($status == self::SUCCESS) {
       $this->valid = true;
-    } else if ($status = self::FAILURE || $status = self::INCOMPLETE) {
+      $this->status = $status;
+    } else if ($status == self::FAILURE || $status == self::INCOMPLETE) {
       $this->valid = false;
+      $this->status = $status;
     } else {
       user_error("Result status is invalid", E_USER_ERROR);
     }
