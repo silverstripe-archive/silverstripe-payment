@@ -122,7 +122,7 @@ class PaymentProcessor extends Controller {
     }
     
     // Save gateway message
-    $this->payment->Message = $result->getMessage();
+    $this->payment->Message = $result->message();
     
     // Save payment status
     switch ($result->getStatus()) {
@@ -133,7 +133,7 @@ class PaymentProcessor extends Controller {
       $this->payment->updatePaymentStatus(Payment::FAILURE);
       break;
       case PaymentGateway_Result::INCOMPLETE;
-      $this->payment->updatePaymentStatus(Payment::INCOMPLETE);
+        $this->payment->updatePaymentStatus(Payment::INCOMPLETE);
       break;
       default:
         break;

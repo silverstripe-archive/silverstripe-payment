@@ -48,13 +48,13 @@ class PayPalDirectGateway extends PayPalGateway {
     switch ($responseArr['ACK']) {
       case self::SUCCESS_CODE:
       case self::SUCCESS_WARNING:
-        return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
+        return new PaymentGateway_Result();
         break;
       case self::FAILURE_CODE:
-        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE);
+        return new PaymentGateway_Result(false);
         break;
       default:
-        return new PaymentGateway_Result();
+        return new PaymentGateway_Result(false);
         break;
     }
   }

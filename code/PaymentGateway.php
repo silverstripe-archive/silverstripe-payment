@@ -133,7 +133,7 @@ abstract class PaymentGateway {
 /**
  * Class for gateway results
  */
-class PaymentGateway_Result {
+class PaymentGateway_Result extends ValidationResult {
 
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
@@ -145,28 +145,34 @@ class PaymentGateway_Result {
    * @var String
    */
   protected $status;
-  
-  /**
-   * Message passed back from external gateways
-   * 
-   * @var String
-   */
-  protected $message;
 
-  function __construct($status = null, $message = null) {
-    if ($status == self::SUCCESS || $status == self::FAILURE || $status == self::INCOMPLETE) {
-      $this->status = $status;
-      $this->message = $message;
+  function __construct($valid = true, $message = null) {
+    parent::__construct($valid, $message);
+    
+    if ($valid = true) {
+      $this->status = self::SUCCESS;
     } else {
-      user_error("Invalid result status", E_USER_ERROR);
+      $this->status = self::FAILURE;
     }
   }
-
-  function getStatus() {
-    return $this->status;
+  
+  function setStatus($status) {
+    if ($status == self::SUCCESS) {
+      $this->valid = true;
+    } else if ($status = self::FAILURE || $status = self::INCOMPLETE) {
+      $this->valid = false;
+    } else {
+      user_error("Result status is invalid", E_USER_ERROR);
+    }
   }
   
-  function getMessage() {
-    return $this->message;
+  function error($message, $code = null) {
+    parent::error();
+    
+    $this->status = self::FAILURE;
+  }
+
+  public function getStatus() {
+    return $this->status;
   }
 }

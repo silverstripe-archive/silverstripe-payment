@@ -15,16 +15,18 @@ class DummyMerchantHostedGateway extends PaymentGateway {
     
     switch ($cents) {
       case 0.00:
-        return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
+        return new PaymentGateway_Result();
         break;
       case 0.01:
-        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE);
+        return new PaymentGateway_Result(false);
         break;
       case 0.02:
-        return new PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE);
+        $result = new PaymentGateway_Result();
+        $result->setStatus(PaymentGateway_Result::INCOMPLETE);
+        return $result;
         break;
       default:
-        return new PaymentGateway_Result();
+        return new PaymentGateway_Result(false);
         break;
     }
   }
@@ -58,15 +60,17 @@ class DummyGatewayHostedGateway extends PaymentGateway {
     $result = $response->getVar('result');
     switch ($result) {
       case PaymentGateway_Result::SUCCESS:
-        return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
+        return new PaymentGateway_Result();
         break;
       case PaymentGateway_Result::FAILURE:
-        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE);
+        return new PaymentGateway_Result(false);
         break;
       case PaymentGateway_Result::INCOMPLETE:
-        return PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE);
+        $result = new PaymentGateway_Result();
+        $result->setStatus(PaymentGateway_Result::INCOMPLETE);
+        return $result;
       default:
-        return new PaymentGateway_Result();
+        return new PaymentGateway_Result(false);
         break;
     }
   }
