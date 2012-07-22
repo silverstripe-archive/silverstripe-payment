@@ -18,7 +18,7 @@ class PayPalExpressTest extends SapphireTest {
     $this->processor = PaymentFactory::factory('PayPalExpress');
     $this->data = array(
       'Amount' => '10',
-      'Currency' => 'USD'  
+      'Currency' => 'USD'
     );
   }
 
@@ -29,10 +29,22 @@ class PayPalExpressTest extends SapphireTest {
   }
 
   function testSetExpressCheckout() {
-    $this->processor->gateway->setReturnURL('www.example.com');
-    $this->processor->gateway->setCancelURL('www.example.com');
-
-    $token = $this->processor->gateway->setExpressCheckout();
+    $authentication = PayPalGateway::get_authentication();
+    
+    $postData = array(
+      'PAYMENTACTION' => 'Sale',
+      'AMT' => '10',
+      'CURRENCY' => 'USD',
+      'METHOD' => 'SetExpressCheckout',
+      'RETURNURL' => 'http://www.example.com',
+      'CANCELURL' => 'http://www.example.com',
+      'USER' => $authentication['username'],
+      'PWD' => $authentication['password'],
+      'SIGNATURE' => $authentication['signature'],
+      'VERSION' => PayPalGateway::PAYPAL_VERSION        
+    );
+    
+    $token = $this->processor->gateway->setExpressCheckout($postData);
     $this->assertNotNull($token);
   }
 }
