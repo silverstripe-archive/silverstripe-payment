@@ -80,7 +80,7 @@ class PayPalDirectGateway_Mock extends PayPalDirectGateway {
    * 
    *  @return the dummy response NVP string 
    */
-  public function genrateDummyResponse($data, $ack = null) {
+  public function generateDummyResponse($data, $ack = null) {
     $templateArr = $this->parseResponse($this->responseTemplate);
     $templateArr['TIMESTAMP'] = time();
     $templateArr['CORRELATIONID'] = 'cfcb59afaabb4';
@@ -102,13 +102,13 @@ class PayPalDirectGateway_Mock extends PayPalDirectGateway {
     
     switch ($cents) {
       case 0.00:
-        return $this->genrateDummyResponse($data, 'Success');
+        return new RestfulService_Response($this->generateDummyResponse($data, 'Success'));
         break;
       case 0.01:
-        return $this->genrateDummyResponse($data, 'Failure');
+        return new RestfulService_Response($this->generateDummyResponse($data, 'Failure'));
         break;
       default:
-        return $this->genrateDummyResponse($data, 'Failure');
+        return new RestfulService_Response($this->generateDummyResponse($data, 'Failure'));
         break;
     }
   }
