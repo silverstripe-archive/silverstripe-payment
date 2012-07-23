@@ -22,7 +22,7 @@ class PayPalDirectTest extends SapphireTest {
       'CreditCard' => new CreditCard(array(
         'firstName' => 'Ryan',
         'lastName' => 'Dao',
-        'type' => 'master',
+        'type' => 'MasterCard',
         'month' => '11',
         'year' => '2016',
         'number' => '4381258770269608'             

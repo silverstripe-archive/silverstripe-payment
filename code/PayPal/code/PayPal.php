@@ -85,12 +85,17 @@ class PayPalGateway extends PaymentGateway {
     $this->gatewayURL = self::get_url();
   }
   
+  public function getSupportedCurrencies() {
+    return array('AUD', 'CAD', 'CZK', 'DKK', 'EUR', 'HKD', 'HUF', 'JPY',
+                 'NOK', 'NZD', 'PLN', 'GBP', 'SGD', 'SEK', 'CHF', 'USD'); 
+  }
+  
   public function getSupportedCreditCardType() {
     return array(
-      'visa' => 'Visa',
-      'master' => 'Master',
-      'americanExpress' => 'American Express',
-      'maestro' => 'Maestro'
+      'Visa' => 'Visa',
+      'MasterCard' => 'Master',
+      'Amex' => 'American Express',
+      'Maestro' => 'Maestro'
     );
   }
   

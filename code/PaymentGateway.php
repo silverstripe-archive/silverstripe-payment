@@ -60,6 +60,13 @@ abstract class PaymentGateway {
   public function getSupportedCreditCardType() {
     return null;
   }
+  
+  /**
+   * Get the list of currencies supported by this gateway
+   */
+  public function getSupportedCurrencies() {
+    return array('USD');  
+  }
 
   /**
    * Validate the payment data against the gateway-specific requirements
@@ -86,6 +93,10 @@ abstract class PaymentGateway {
     
     if (! $data['Currency']) {
       $this->validationResult->error('Payment currency cannot be null');
+    }
+    
+    if (! in_array($data['Currency'], $this->getSupportedCurrencies())) {
+      $this->validationResult->error('Currency ' . $data['Currency'] . ' not supported by this gateway');
     }
   }
   
