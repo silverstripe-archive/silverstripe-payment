@@ -1,7 +1,7 @@
 ## PayPal Payment
 
-# Configuration guide: </br>
-  Add to mysite/_config:
+# Configuration guide: 
+  Add to mysite/_config: </br>
     PayPalGateway: 
       dev: // to be added only if Sandbox is used
         url: 
