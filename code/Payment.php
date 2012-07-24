@@ -33,6 +33,7 @@ class Payment extends DataObject {
     'Status' => "Enum('Incomplete, Success, Failure, Pending')",
     'Amount' => 'Money',
     'Message' => 'Text',
+    'ErrorCodes' => 'Text',
     'Method' => 'Text'
   );
   

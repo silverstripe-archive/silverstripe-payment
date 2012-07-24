@@ -130,13 +130,20 @@ class PaymentProcessor extends Controller {
         $this->payment->updatePaymentStatus(Payment::SUCCESS);
         break;
       case PaymentGateway_Result::FAILURE;
-      $this->payment->updatePaymentStatus(Payment::FAILURE);
-      break;
+        $this->payment->updatePaymentStatus(Payment::FAILURE);
+        break;
       case PaymentGateway_Result::INCOMPLETE;
         $this->payment->updatePaymentStatus(Payment::INCOMPLETE);
-      break;
+        break;
       default:
         break;
+    }
+    
+    // Save messages and error codes if any
+    if ($this->gateway->gatewayResult) {
+      $this->payment->Message = $this->gateway->gatewayResult->message();      
+      $this->payment->ErrorCodes = implode('; ', $this->gateway->codeList());
+      $this->payment-write();
     }
     
     // Do post-processing
