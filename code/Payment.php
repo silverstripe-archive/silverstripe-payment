@@ -34,6 +34,7 @@ class Payment extends DataObject {
     'Amount' => 'Money',
     'Message' => 'Text',
     'ErrorCodes' => 'Text',
+    'HTTPStatus' => 'Text',
     'Method' => 'Text'
   );
   
