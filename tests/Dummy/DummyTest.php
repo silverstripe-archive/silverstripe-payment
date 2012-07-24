@@ -47,7 +47,7 @@ class DummyMerchantHostedTest extends SapphireTest {
   }  
 }
 
-class DummyGatewayHostedTest extends FunctionalTest {
+class DummyGatewayHostedTest extends SapphireTest {
   
   /* Black-box testing */
   function testClassConfig() {

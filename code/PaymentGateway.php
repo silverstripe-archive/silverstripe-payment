@@ -89,21 +89,15 @@ abstract class PaymentGateway {
     
     if (! isset($data['Amount'])) {
       $this->validationResult->error('Payment amount not set');
-    }
-    
-    if (! $data['Amount']) {
+    } else if (empty($data['Amount'])) {
       $this->validationResult->error('Payment amount cannot be null');
     } 
     
     if (! isset($data['Currency'])) {
       $this->validationResult->error('Payment currency not set');
-    }
-    
-    if (! $data['Currency']) {
+    } else if (empty($data['Currency'])) {
       $this->validationResult->error('Payment currency cannot be null');
-    }
-    
-    if (! in_array($data['Currency'], $this->getSupportedCurrencies())) {
+    } else if (! in_array($data['Currency'], $this->getSupportedCurrencies())) {
       $this->validationResult->error('Currency ' . $data['Currency'] . ' not supported by this gateway');
     }
   }
