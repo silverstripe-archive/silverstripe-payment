@@ -8,6 +8,14 @@ class DummyMerchantHostedGateway extends PaymentGateway {
   public function getSupportedCreditCardType() {
     return (array('master' => 'Master', 'visa' => 'Visa'));
   }
+  
+  /**
+   * Override to cancel data validation
+   * @see PaymentGateway::validatePaymentData()
+   */
+  public function validatePaymentData($data) {
+    return; 
+  }
 
   public function process($data) {
     $amount = $data['Amount'];
@@ -42,7 +50,17 @@ class DummyMerchantHostedGateway extends PaymentGateway {
 class DummyGatewayHostedGateway extends PaymentGateway {
   
   public function __construct() {
+    parent::__construct();
+    
     $this->gatewayURL = Director::baseURL() . 'dummy/external/pay';
+  }
+  
+  /**
+   * Override to cancel validation
+   * @see PaymentGateway::validatePaymentData()
+   */
+  public function validatePaymentData($data) {
+    return;
   }
 
   public function process($data) {
