@@ -111,8 +111,20 @@ class PaymentProcessor extends Controller {
 
   /**
    * Process a payment response.
+   * 
+   * @param SS_HTTPResponse $response
    */
   public function processresponse($response) {
+    // Check the HTTP response status 
+    $statusCode = $response->getStatusCode();
+    if ($statusCode != '200') {
+      // HTTP fails. Stop the payment and save the code to database
+      // TODO: Log the error for developers to troubleshoot
+      $this->payment->HTTPStatus = $statusCode;
+      $this->payment->Status = Payment::FAILURE;
+      $this->payment->write();
+    }
+    
     // Get the reponse result from gateway
     $result = $this->gateway->getResponse($response);
 
@@ -142,7 +154,7 @@ class PaymentProcessor extends Controller {
     // Save messages and error codes if any
     if ($this->gateway->gatewayResult) {
       $this->payment->Message = $this->gateway->gatewayResult->message();      
-      $this->payment->ErrorCodes = implode('; ', $this->gateway->codeList());
+      $this->payment->ErrorCodes = implode('; ', $this->gateway->getwayResult->codeList());
       $this->payment-write();
     }
     

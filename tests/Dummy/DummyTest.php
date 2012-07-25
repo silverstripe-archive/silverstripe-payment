@@ -45,6 +45,13 @@ class DummyMerchantHostedTest extends SapphireTest {
     $this->processor->processRequest($this->data);
     $this->assertEquals($this->processor->payment->Status, Payment::INCOMPLETE);
   }  
+  
+  function testFailedHTTP() {
+    $this->data['Amount'] = '10.03';
+    $this->processor->processRequest($this->data);
+    $this->assertEquals($this->processor->payment->Status, Payment::FAILURE);
+    $this->assertEquals($this->processor->payment->HTTPStatus, '501');
+  }
 }
 
 class DummyGatewayHostedTest extends SapphireTest {

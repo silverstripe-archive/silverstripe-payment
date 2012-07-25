@@ -110,13 +110,15 @@ abstract class PaymentGateway {
    * Send a request to the gateway to process the payment.
    * To be implemented by individual gateway
    *
-   * @param $data
+   * @param array $data
    */
   abstract public function process($data);
 
   /**
    * Process the response from the external gateway
    *
+   * @param SS_HTTPResponse $response 
+   * 
    * @return PaymentGateway_Result
    */
   abstract public function getResponse($response);

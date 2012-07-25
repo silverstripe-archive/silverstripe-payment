@@ -23,12 +23,32 @@ class DummyMerchantHostedGateway extends PaymentGateway {
     
     switch ($cents) {
       case 0.00:
-        return new PaymentGateway_Result();
+        return new SS_HTTPResponse(PaymentGateway_Result::SUCCESS);
         break;
       case 0.01:
-        return new PaymentGateway_Result(false);
+        return new SS_HTTPResponse(PaymentGateway_Result::FAILURE);
         break;
       case 0.02:
+        return new SS_HTTPResponse(PaymentGateway_Result::INCOMPLETE);
+        break;
+      case 0.03:
+        return new SS_HTTPResponse(PaymentGateway_Result::FAILURE, '501');
+        break;
+      default:
+        return new SS_HTTPResponse(PaymentGateway_Result::FAILURE);
+        break;
+    }
+  }
+
+  public function getResponse($response) {
+    switch($response->getBody()) {
+      case PaymentGateway_Result::SUCCESS:
+        return new PaymentGateway_Result();
+        break;
+      case PaymentGateway_Result::FAILURE:
+        return new PaymentGateway_Result(false);
+        break;
+      case PaymentGateway_Result::INCOMPLETE:
         $result = new PaymentGateway_Result();
         $result->setStatus(PaymentGateway_Result::INCOMPLETE);
         return $result;
@@ -37,10 +57,6 @@ class DummyMerchantHostedGateway extends PaymentGateway {
         return new PaymentGateway_Result(false);
         break;
     }
-  }
-
-  public function getResponse($response) {
-    return $response;
   }
 }
 
