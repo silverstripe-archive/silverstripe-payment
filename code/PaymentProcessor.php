@@ -57,16 +57,17 @@ class PaymentProcessor extends Controller {
    * @return array
    */
   public static function get_supported_methods() {
-    $supported_methods = Config::inst()->get('PaymentProcessor', 'supported_methods');
+    $methodConfig = Config::inst()->get('PaymentProcessor', 'supported_methods');
+    $environment = PaymentGateway::get_environment();
 
     // Check if all methods are defined in factory
-    foreach ($supported_methods as $method) {
+    foreach ($methodConfig[$environment] as $method) {
       if (! PaymentFactory::get_factory_config($method)) {
         user_error("Method $method not defined in factory", E_USER_ERROR);
       }
     }
 
-    return $supported_methods;
+    return $methodConfig[$environment];
   }
 
   /**
