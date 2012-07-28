@@ -40,18 +40,21 @@ class PaymentProcessor extends Controller {
   /**
    * The payment data array
    * 
-   * #var array 
+   * @var array 
    */
   public $paymentData;
 
   /**
-   * If this is set to some url value, the processor will redirect 
-   * to the url after a payment finishes processing.
+   * The url that will be redirected to after processing the payment
+   * 
+   * @var String
    */
-  public $postProcessRedirect = null;
+  public $redirectURL;
   
   /**
    * Get the supported methods array set by the yaml configuraion
+   * 
+   * @return array
    */
   public static function get_supported_methods() {
     $supported_methods = Config::inst()->get('PaymentProcessor', 'supported_methods');
@@ -78,10 +81,9 @@ class PaymentProcessor extends Controller {
   }
   
   /**
-   * Perform some actions before the payment is processed
+   * Save preliminary data to database before processing payment
    */
   public function preProcess() { 
-    // Save preliminary data to database
     $this->payment->Amount->Amount = $this->paymentData['Amount'];
     $this->payment->Amount->Currency = $this->paymentData['Currency'];
     $this->payment->Status = Payment::PENDING;
@@ -90,7 +92,7 @@ class PaymentProcessor extends Controller {
   }
   
   /**
-   * Process a payment request.
+   * Process a payment request. To be extending by individual processor type
    *
    * @param $data
    * @return Payment
@@ -110,7 +112,7 @@ class PaymentProcessor extends Controller {
   }
 
   /**
-   * Process a payment response.
+   * Process a payment response. 
    * 
    * @param SS_HTTPResponse $response
    */
@@ -159,41 +161,31 @@ class PaymentProcessor extends Controller {
     }
     
     // Do post-processing
-    return $this->postProcess();
+    return $this->redirectPostProcess();
   }
 
   /**
-   * Helper function to get the payment object from the gateway response
+   * Helper function to get the payment object from the gateway response.
+   * To be implemented by subclasses.
+   * 
+   * @return PaymentGateway
    */
   public function getPaymentObject($response) { }
 
   /**
-   * Perform an action after the payment is processed.
-   * If $postProcessRedirect is set, redirect to the url. If not,
-   * render a default page to show payment result.
+   * Redirection for post-processing
    */
-  public function postProcess() {
-    if ($this->postProcessRedirect) {
-      // Put the payment ID in a session
-      Session::set('PaymentID', $this->payment->ID);
-      Controller::curr()->redirect($this->postProcessRedirect);
-    } else {
-      if ($this->payment) {
-        return $this->customise(array(
-          "Content" => 'Payment #' . $this->payment->ID . ' status:' . $this->payment->Status,
-          "Form" => '',
-        ))->renderWith("Page");
-      } else {
-        return null;
-      }
-    }
+  public function redirectPostProcess() {
+    // Put the payment ID in a session
+    Session::set('PaymentID', $this->payment->ID);
+    Controller::curr()->redirect($this->postProcessRedirect);
   }
 
   /**
    * Get the processor's form fields. Custom controllers use this function
    * to add the form fields specifically to gateways.
    *
-   * return FieldList
+   * @return FieldList
    */
   public function getFormFields() {
     $fieldList = new FieldList();
@@ -207,6 +199,8 @@ class PaymentProcessor extends Controller {
   
   /**
    * Get the form requirements
+   * 
+   * @return RequiredFields
    */
   public function getFormRequirements() {
     return new RequiredFields('Amount', 'Currency');

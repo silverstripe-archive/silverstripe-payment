@@ -8,30 +8,34 @@
 abstract class PaymentGateway {
   /**
    * The gateway url
+   * 
+   * @var String
    */
   public $gatewayURL;
 
   /**
-   * The link to return to after processing payment
+   * The link to return to after processing payment (for gateway-hosted payments only)
+   * 
+   * @var String
    */
   protected $returnURL;
   
   /**
-   * The link to return to after cancelling payment
+   * The link to return to after cancelling payment (for gateway-hosted payments only)
+   * 
+   * @var String
    */
   protected $cancelURL;
   
   /**
-   * A ValidationResult object that holds the validation status
-   * of the payment data.
+   * A ValidationResult object that holds the validation status of the payment data
    *
    * @var ValidationResult
    */
   public $validationResult;
   
   /**
-   * A PaymentGateway_Result object that holds the status and message 
-   * of the current transaction
+   * A PaymentGateway_Result object that holds the status and message of the current transaction
    * 
    * @var PaymentGateway_Result
    */
@@ -47,7 +51,12 @@ abstract class PaymentGateway {
   public function __construct() {
     $this->validationResult = new ValidationResult();
   }
-
+  
+  /**
+   * Set the return url, default to the site root
+   * 
+   * @param String $url
+   */
   public function setReturnURL($url = null) {
     if ($url) {
       $this->returnURL = $url;
@@ -56,6 +65,11 @@ abstract class PaymentGateway {
     }
   }
   
+  /**
+   * Set the cancel url, default to the site root
+   * 
+   * @param String $url
+   */
   public function setCancelURL($url) {
     if ($url) {
       $this->cancelURL = $url;
@@ -67,7 +81,7 @@ abstract class PaymentGateway {
   /**
    * Get the list of credit card types supported by this gateway
    * 
-   *  @return array('id' => 'Credit Card Type')
+   * @return array('id' => 'Credit Card Type')
    */
   public function getSupportedCreditCardType() {
     return null;
@@ -75,6 +89,8 @@ abstract class PaymentGateway {
   
   /**
    * Get the list of currencies supported by this gateway
+   * 
+   * @return array
    */
   public function getSupportedCurrencies() {
     return array('USD');  
@@ -125,6 +141,8 @@ abstract class PaymentGateway {
   
   /**
    * Return a set of requirements for the payment data array for this gateway 
+   * 
+   * @return array
    */
   public function paymentDataRequirements() {
     return array('Amount', 'Currency');
@@ -137,7 +155,6 @@ abstract class PaymentGateway {
    * @param String $endpoint. If not set, assume $gatewayURL
    *
    * @return RestfulService_Response
-   * TODO: May consider subclasssing this to make it more suitable for our case
    */
   public function postPaymentData($data, $endpoint = null) {
     if (! $endpoint) {
@@ -175,6 +192,12 @@ class PaymentGateway_Result extends ValidationResult {
     }
   }
   
+  /**
+   * Set the payment result status.
+   * validate() returns true if the status is Success, false otherwise
+   * 
+   * @param String $status
+   */
   function setStatus($status) {
     if ($status == self::SUCCESS) {
       $this->valid = true;
