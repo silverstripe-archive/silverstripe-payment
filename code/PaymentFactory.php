@@ -51,7 +51,7 @@ class PaymentFactory {
     if (class_exists($gatewayClass)) {
       return new $gatewayClass();
     } else {
-      user_error("$gatewayClass class does not exists.", E_USER_ERROR);
+      throw new Exception("$gatewayClass class does not exists.");
     }
   }
   
@@ -76,7 +76,7 @@ class PaymentFactory {
     if (class_exists($paymentClass)) {
       return new $paymentClass();
     } else {
-      user_error("$paymentClass class does not exists.", E_USER_ERROR);
+      throw new Exception("$paymentClass class does not exists");
     }
   }
   
@@ -89,7 +89,7 @@ class PaymentFactory {
     $supported_methods = PaymentProcessor::get_supported_methods();
   
     if (! in_array($methodName, $supported_methods)) {
-      user_error("The method $methodName is not supported.");
+      throw new Exception("The method $methodName is not supported");
     }
   
     $methodConfig = self::get_factory_config($methodName);
@@ -104,7 +104,7 @@ class PaymentFactory {
   
       return $controller;
     } else {
-      user_error("No controller is defined for the method $methodName");
+      throw new Exception("No controller is defined for the method $methodName");
     }
   }
 }

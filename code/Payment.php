@@ -54,14 +54,17 @@ class Payment extends DataObject {
    * Update the status of this payment
    *
    * @param String $status
+   * @return true if successful, false otherwise
    */
   public function updatePaymentStatus($status) {
     if ($status == self::SUCCESS || $status == self::FAILURE || 
         $status == self::INCOMPLETE || $status == self::PENDING) {
       $this->Status = $status;
       $this->write();
+      
+      return true;
     } else {
-      user_error("Invalid payment status", E_USER_ERROR);
+      return false;
     }
   }
 }

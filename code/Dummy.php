@@ -162,6 +162,7 @@ class DummyExternalGateway_Controller extends Controller{
       if ($returnURL = Session::get('ReturnURL')) {
         Controller::redirect($returnURL . "?result=$result");
       } else {
+        // TODO: Return a error for processor to handle rather than user_error
         user_error("Return URL is not set for this transaction", E_USER_ERROR);
       }
     } else {

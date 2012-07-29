@@ -49,7 +49,7 @@ class PaymentProcessor extends Controller {
    * 
    * @var String
    */
-  public $redirectURL;
+  protected $redirectURL;
   
   /**
    * Get the supported methods array set by the yaml configuraion
@@ -81,6 +81,10 @@ class PaymentProcessor extends Controller {
     $this->methodName = $method;
   }
   
+  public function setRedirectURL($url) {
+    $this->redirectURL = $url;
+  }
+  
   /**
    * Save preliminary data to database before processing payment
    */
@@ -105,10 +109,10 @@ class PaymentProcessor extends Controller {
     $this->preProcess();
     
     // Do gateway validation of payment data
-    $this->gateway->validatePaymentData($this->paymentData);
+    $validation = $this->gateway->validatePaymentData($this->paymentData);
     
     if (! $this->gateway->validationResult->valid()) {
-      user_error('Payment data is not valid', E_USER_ERROR);
+      throw new ValidationException($validation, "Payment data validation error: " . $valid->message(), E_USER_WARNING);
     }
   }
 
@@ -142,16 +146,20 @@ class PaymentProcessor extends Controller {
     // Save payment status
     switch ($result->getStatus()) {
       case PaymentGateway_Result::SUCCESS:
-        $this->payment->updatePaymentStatus(Payment::SUCCESS);
+        $status = Payment::SUCCESS;
         break;
-      case PaymentGateway_Result::FAILURE;
-        $this->payment->updatePaymentStatus(Payment::FAILURE);
+      case PaymentGateway_Result::FAILURE:
+        $status = Payment::FAILURE;
         break;
-      case PaymentGateway_Result::INCOMPLETE;
-        $this->payment->updatePaymentStatus(Payment::INCOMPLETE);
+      case PaymentGateway_Result::INCOMPLETE:
+        $status = Payment::INCOMPLETE;
         break;
       default:
+        $status = 'invalid';
         break;
+    }
+    if (! $this->payment->updatePaymentStatus($status)) {
+      throw new Exception('Invalid payment status');
     }
     
     // Save messages and error codes if any
@@ -162,7 +170,7 @@ class PaymentProcessor extends Controller {
     }
     
     // Do post-processing
-    return $this->redirectPostProcess();
+    $this->redirectPostProcess();
   }
 
   /**
@@ -179,7 +187,7 @@ class PaymentProcessor extends Controller {
   public function redirectPostProcess() {
     // Put the payment ID in a session
     Session::set('PaymentID', $this->payment->ID);
-    Controller::curr()->redirect($this->postProcessRedirect);
+    Controller::curr()->redirect($this->redirectURL);
   }
 
   /**
