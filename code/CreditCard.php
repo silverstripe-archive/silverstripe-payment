@@ -97,5 +97,7 @@ class CreditCard {
     $this->validateEssentialAttributes();
     $this->validateCardType();
     $this->validateCardNumber();
+    
+    return $this->validationResult;
   }
 }

@@ -112,7 +112,7 @@ class PaymentProcessor extends Controller {
     $validation = $this->gateway->validatePaymentData($this->paymentData);
     
     if (! $this->gateway->validationResult->valid()) {
-      throw new ValidationException($validation, "Payment data validation error: " . $valid->message(), E_USER_WARNING);
+      throw new ValidationException($validation, "Payment data validation error: " . $validation->message(), E_USER_WARNING);
     }
   }
 
@@ -187,7 +187,7 @@ class PaymentProcessor extends Controller {
   public function redirectPostProcess() {
     // Put the payment ID in a session
     Session::set('PaymentID', $this->payment->ID);
-    Controller::curr()->redirect($this->redirectURL);
+    Controller::curr()->redirect($this->redi);
   }
 
   /**
@@ -228,7 +228,7 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
       'month' => date('n', strtotime($this->paymentData['DateExpiry'])),
       'year' => date('m', strtotime($this->paymentData['DateExpiry'])),
       'type' => $this->paymentData['CreditCardType'],
-      'number' => $this->paymentData['CardNumber']
+      'number' => implode('', $this->paymentData['CardNumber'])
     );
     
     $this->paymentData['CreditCard'] = new CreditCard($options);    
