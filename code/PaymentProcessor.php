@@ -183,7 +183,7 @@ class PaymentProcessor extends Controller {
   public function redirectPostProcess() {
     // Put the payment ID in a session
     Session::set('PaymentID', $this->payment->ID);
-    Controller::curr()->redirect($this->redi);
+    Controller::curr()->redirect($this->redirectURL);
   }
 
   /**
@@ -196,7 +196,8 @@ class PaymentProcessor extends Controller {
     $fieldList = new FieldList();
 
     $fieldList->push(new NumericField('Amount', 'Amount', ''));
-    $currencies = $this->gateway->getSupportedCurrencies();
+    
+    $currencies = array_combine($this->gateway->getSupportedCurrencies(), $this->gateway->getSupportedCurrencies());
     $fieldList->push(new DropDownField('Currency', 'Select currency :', $currencies));
 
     return $fieldList;
@@ -221,8 +222,8 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     $options = array(
       'firstName' => $this->paymentData['FirstName'],
       'lastName' => $this->paymentData['LastName'],
-      'month' => date('n', strtotime($this->paymentData['DateExpiry'])),
-      'year' => date('m', strtotime($this->paymentData['DateExpiry'])),
+      'month' => $this->paymentData['MonthExpiry'],
+      'year' => $this->paymentData['YearExpiry'],
       'type' => $this->paymentData['CreditCardType'],
       'number' => implode('', $this->paymentData['CardNumber'])
     );
@@ -243,14 +244,17 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
   }
   
   public function getCreditCardFields() {
-    $fieldList = new FieldList();
-    
     $creditCardTypes = $this->gateway->getSupportedCreditCardType();
+    $months = array_combine(range(1, 12), range(1, 12));
+    $years = array_combine(range(date('Y'), date('Y') + 10), range(date('Y'), date('Y') + 10));
+    
+    $fieldList = new FieldList();
     $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $creditCardTypes));
     $fieldList->push(new TextField('FirstName'), 'First Name :');
     $fieldList->push(new TextField('LastName'), 'Last Name :');
     $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number :'));
-    $fieldList->push(new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4));
+    $fieldList->push(new DropDownField('MonthExpiry', 'Expiration Month: ', $months));
+    $fieldList->push(new DropDownField('YearExpiry', 'Expiration Year: ', $years));
     $fieldList->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
     
     return $fieldList;

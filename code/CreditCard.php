@@ -6,11 +6,11 @@
 class CreditCard {
   
   private static $CARD_COMPANIES = array(
-    'visa' => '/^4\d{12}(\d{3})?$/',
-    'master' => '/^(5[1-5]\d{4}|677189)\d{10}$/',
-    'discover' => '/^(6011|65\d{2})\d{12}$/',
-    'american_express' => '/^3[47]\d{13}$/',
-    'diners_club' => '/^3(0[0-5]|[68]\d)\d{11}$/'
+    'Visa' => '/^4\d{12}(\d{3})?$/',
+    'MasterCard' => '/^(5[1-5]\d{4}|677189)\d{10}$/',
+    'Discover' => '/^(6011|65\d{2})\d{12}$/',
+    'Amex' => '/^3[47]\d{13}$/',
+    'DinnersClub' => '/^3(0[0-5]|[68]\d)\d{11}$/'
   );
   
   /* Credit Card data */

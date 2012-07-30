@@ -65,12 +65,12 @@ class PaymentFactory {
    */
   static function get_payment_model($methodName) {
     // Get the custom payment class configuration.
-    // If not applicable, apply naming convention
+    // If not applicable, take the default model
     $methodConfig = self::get_factory_config($methodName);
     if (isset($methodConfig['model'])) {
       $paymentClass = $methodConfig['model'];
     } else {
-      $paymentClass = $methodName;
+      $paymentClass = 'Payment';
     }
   
     if (class_exists($paymentClass)) {
