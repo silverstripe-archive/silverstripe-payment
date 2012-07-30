@@ -111,7 +111,7 @@ class PaymentProcessor extends Controller {
     // Do gateway validation of payment data
     $validation = $this->gateway->validatePaymentData($this->paymentData);
     
-    if (! $this->gateway->validationResult->valid()) {
+    if (! $validation->valid()) {
       throw new ValidationException($validation, "Payment data validation error: " . $validation->message(), E_USER_WARNING);
     }
   }
@@ -125,23 +125,26 @@ class PaymentProcessor extends Controller {
     // Check the HTTP response status 
     $statusCode = $response->getStatusCode();
     if ($statusCode != '200') {
-      // HTTP fails. Stop the payment and save the code to database
+      // HTTP fails. Throw an exception and save the code to database
       // TODO: Log the error for developers to troubleshoot
       $this->payment->HTTPStatus = $statusCode;
       $this->payment->Status = Payment::FAILURE;
       $this->payment->write();
+      
+      throw Exception("Connection error for payment " . $this->payment->ID . ". HTTP status: $statusCode");
     }
     
     // Get the reponse result from gateway
     $result = $this->gateway->getResponse($response);
+    
+    // Save gateway messages and errors
+    $this->payment->Message = $result->message();
+    $this->payment->ErrorCodes = implode('; ', $result->codeList());
 
     // Retrieve the payment object if none is referenced at this point
     if (! $this->payment) {
       $this->payment = $this->getPaymentObject($response);
     }
-    
-    // Save gateway message
-    $this->payment->Message = $result->message();
     
     // Save payment status
     switch ($result->getStatus()) {
@@ -159,14 +162,7 @@ class PaymentProcessor extends Controller {
         break;
     }
     if (! $this->payment->updatePaymentStatus($status)) {
-      throw new Exception('Invalid payment status');
-    }
-    
-    // Save messages and error codes if any
-    if ($this->gateway->gatewayResult) {
-      $this->payment->Message = $this->gateway->gatewayResult->message();      
-      $this->payment->ErrorCodes = implode('; ', $this->gateway->getwayResult->codeList());
-      $this->payment-write();
+      throw new Exception('Invalid payment status for payment ' . $this->payment->ID);
     }
     
     // Do post-processing
@@ -177,7 +173,7 @@ class PaymentProcessor extends Controller {
    * Helper function to get the payment object from the gateway response.
    * To be implemented by subclasses.
    * 
-   * @return PaymentGateway
+   * @return Payment
    */
   public function getPaymentObject($response) { }
 

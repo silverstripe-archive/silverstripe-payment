@@ -33,44 +33,44 @@ class CreditCardTest extends SapphireTest {
   
   function testValidateEssentialAttributes() {
     $this->card->validateEssentialAttributes();
-    $this->assertTrue($this->card->validationResult->valid());
+    $this->assertTrue($this->card->getValidationResult()->valid());
   }
 
   function testFirstNameNull() {
     $this->card->firstName = '';
     $this->card->validateEssentialAttributes();
-    $this->assertFalse($this->card->validationResult->valid());
-    $this->assertEquals($this->card->validationResult->message(), "First name cannot be empty");
+    $this->assertFalse($this->card->getValidationResult()->valid());
+    $this->assertEquals($this->card->getValidationResult()->message(), "First name cannot be empty");
   }
   
   function testLastNameNull() {
     $this->card->lastName = '';
     $this->card->validateEssentialAttributes();
-    $this->assertFalse($this->card->validationResult->valid());
-    $this->assertEquals($this->card->validationResult->message(), "Last name cannot be empty");
+    $this->assertFalse($this->card->getValidationResult()->valid());
+    $this->assertEquals($this->card->getValidationResult()->message(), "Last name cannot be empty");
   }
   
   function testInvalidExpiryDate() {
     $this->card->month = '13';
     $this->card->validateEssentialAttributes();
-    $this->assertFalse($this->card->validationResult->valid());
-    $this->assertEquals($this->card->validationResult->message(), "Expiration date not valid");
+    $this->assertFalse($this->card->getValidationResult()->valid());
+    $this->assertEquals($this->card->getValidationResult()->message(), "Expiration date not valid");
   }
   
   function testValidCardType() {
     $this->card->validateCardType();
-    $this->assertTrue($this->card->validationResult->valid());
+    $this->assertTrue($this->card->getValidationResult()->valid());
   }
   
   function testInvalidCardType() {
     $this->card->type = 'random';
     $this->card->validateCardType();
-    $this->assertFalse($this->card->validationResult->valid());
-    $this->assertEquals($this->card->validationResult->message(), "Credit card type is invalid");
+    $this->assertFalse($this->card->getValidationResult()->valid());
+    $this->assertEquals($this->card->getValidationResult()->message(), "Credit card type is invalid");
   }
   
   function testCardNumber() {
     $this->card->validateCardNumber();
-    $this->assertTrue($this->card->validationResult->valid());
+    $this->assertTrue($this->card->getValidationResult()->valid());
   }
 }

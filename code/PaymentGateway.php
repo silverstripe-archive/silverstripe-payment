@@ -32,14 +32,7 @@ abstract class PaymentGateway {
    *
    * @var ValidationResult
    */
-  public $validationResult;
-  
-  /**
-   * A PaymentGateway_Result object that holds the status and message of the current transaction
-   * 
-   * @var PaymentGateway_Result
-   */
-  public $gatewayResult;
+  protected $validationResult;
 
   /**
    * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
@@ -76,6 +69,10 @@ abstract class PaymentGateway {
     } else {
       $this->cancelURL = Director::absoluteBaseURL();
     }
+  }
+  
+  public function getValidationResult() {
+    return $this->validationResult;
   }
   
   /**

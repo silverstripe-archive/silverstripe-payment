@@ -26,7 +26,7 @@ class CreditCard {
    * 
    * @var ValidationResult
    */ 
-  public $validationResult;
+  private $validationResult;
   
   public function __construct($options) {
     $this->firstName = $options['firstName'];
@@ -36,6 +36,10 @@ class CreditCard {
     $this->type = $options['type'];
     $this->number = $options['number'];
     $this->validationResult = new ValidationResult();
+  }
+  
+  public function getValidationResult() {
+    return $this->validationResult;
   }
   
   /**
