@@ -289,6 +289,9 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     $this->gateway->setReturnURL($returnURL);
     $this->gateway->setCancelURL($cancelURL);
 
+    // Save the redirection url in a session to be retrieved after the gateway returns
+    Session::set('PostRedirectionURL', $this->redirectURL);
+    
     // Send a request to the gateway
     $this->gateway->process($this->paymentData);
   }
@@ -297,6 +300,9 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     // Reconstruct the gateway object
     $this->setMethodName($response->param('ID'));
     $this->gateway = PaymentFactory::get_gateway($this->methodName);
+    
+    // Retrieve the redirection url from Session
+    $this->redirectURL = Session::get('PostRedirectionURL');
 
     return parent::processresponse($response);
   }
