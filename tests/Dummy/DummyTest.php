@@ -15,7 +15,8 @@ class DummyMerchantHostedTest extends SapphireTest {
       'LastName' => 'Dao',
       'CreditCardType' => 'master',
       'CardNumber' => '4381258770269608',
-      'DateExpiry' => '11-2016',
+      'MonthExpiry' => '11',
+      'YearExpiry' => '2016',
       'Cvc2' => '146'  
     );
     

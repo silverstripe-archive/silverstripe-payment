@@ -7,6 +7,11 @@
  */
 abstract class PaymentGateway {
   /**
+   * The default environment. This will be overriden by yaml config.
+   */
+  public static $environment = 'dev';
+  
+  /**
    * The gateway url
    * 
    * @var String

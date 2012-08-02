@@ -12,7 +12,7 @@ class CreditCardTest extends SapphireTest {
       'lastName' => 'Test',
       'month' => '11',
       'year' => date('Y'),
-      'type' => 'master',
+      'type' => 'Master',
       'number' => '4381258770269608'
     ));
   }

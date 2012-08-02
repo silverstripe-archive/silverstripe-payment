@@ -8,12 +8,8 @@
  * Configuration format for PaymentProcessor:
  * PaymentProcessor:
  *   supported_methods:
- *     {method name}:
- *       {controller name}
- *   gateway_classes:
  *     {environment}:
- *       {gateway class name}
- *
+ *       - {method name}
  */
 class PaymentProcessor extends Controller {
   /**
