@@ -1,9 +1,5 @@
 name: Payment
 ---
-  
-PaymentGateway:
-  environment:
-    'dev'      
 
 Director:
   rules:
