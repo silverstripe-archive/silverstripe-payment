@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Abstract class for a number of payment gateways
  *
