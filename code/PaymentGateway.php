@@ -109,7 +109,7 @@ abstract class PaymentGateway {
   /**
    * Validate the payment data against the gateway-specific requirements
    * 
-   * @param array $data
+   * @param Array $data
    * @return ValidationResult
    */
   public function validatePaymentData($data) {

@@ -11,10 +11,14 @@ class DummyMerchantHostedGateway extends PaymentGateway {
   
   /**
    * Override to cancel data validation
+   * 
    * @see PaymentGateway::validatePaymentData()
+   * 
+   * @param Array $data
+   * @return ValidationResult
    */
   public function validatePaymentData($data) {
-    return; 
+    return $this->getValidationResult();
   }
 
   public function process($data) {
@@ -73,10 +77,14 @@ class DummyGatewayHostedGateway extends PaymentGateway {
   
   /**
    * Override to cancel validation
+   * 
    * @see PaymentGateway::validatePaymentData()
+   * 
+   * @param Array $data
+   * @return ValidationResult
    */
   public function validatePaymentData($data) {
-    return;
+    return $this->getValidationResult();
   }
 
   public function process($data) {

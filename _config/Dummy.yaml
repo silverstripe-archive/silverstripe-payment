@@ -12,7 +12,7 @@ PaymentFactory:
       dev: 'DummyMerchantHostedGateway'
     controller: 'PaymentProcessor_MerchantHosted'
     model: 'Payment'
-    
+
   DummyGatewayHosted:
     title: 'Dummy Gateway (Hosted)'
     gateway_classes:
