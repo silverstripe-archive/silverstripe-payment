@@ -12,16 +12,16 @@ class DummyMerchantHostedGateway extends PaymentGateway {
   /**
    * Override to cancel data validation
    * 
-   * @see PaymentGateway::validatePaymentData()
+   * @see PaymentGateway::validate()
    * 
    * @param Array $data
    * @return ValidationResult
    */
-  public function validatePaymentData() {
+  public function validate($data) {
 
     //Use this->validationResult so that all errors are added and can be accessible from Payment Test
+    //TODO this should do actual validation of the data 
 
-    $data = $this->data;
     $result = $this->getValidationResult();
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
@@ -37,15 +37,13 @@ class DummyMerchantHostedGateway extends PaymentGateway {
 
   public function process($data) {
 
-    //To set the data on the Gateway, validate can be called later from other part of the system
-    parent::process($data);
-
     //Validate first
-    $result = $this->validatePaymentData();
+    $result = $this->validate($data);
     if (!$result->valid()) {
       return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, $result->message());
     }
 
+    //Mimic failures, like a gateway response such as 404, 500 etc.
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
     
@@ -115,12 +113,12 @@ class DummyGatewayHostedGateway extends PaymentGateway {
   /**
    * Override to cancel validation
    * 
-   * @see PaymentGateway::validatePaymentData()
+   * @see PaymentGateway::validate()
    * 
    * @param Array $data
    * @return ValidationResult
    */
-  public function validatePaymentData($data) {
+  public function validate($data) {
     return new ValidationResult();
   }
 

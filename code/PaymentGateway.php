@@ -39,16 +39,7 @@ abstract class PaymentGateway {
    */
   protected $cancelURL;
 
-  /**
-   * Data that is going to be sent to the gateway 
-   */
-  protected $data;
-
-  public function setData(Array $data) {
-    $this->data = $data;
-  }
-
-  protected $validationResult;
+  private $validationResult;
 
 
   public static function get_environment() {
@@ -117,9 +108,8 @@ abstract class PaymentGateway {
    * @param Array $data
    * @return ValidationResult
    */
-  public function validatePaymentData() {
+  public function validate($data) {
 
-    $data = $this->data;
     $validationResult = $this->getValidationResult();
     
     if (! isset($data['Amount'])) {
@@ -148,11 +138,7 @@ abstract class PaymentGateway {
    *
    * @param array $data
    */
-  //abstract public function process($data);
-  public function process($data) {
-    //Need to set the data on the gateway so can call validate on gateway later from controller
-    $this->setData($data);
-  }
+  abstract public function process($data);
 
   /**
    * Process the response from the external gateway
