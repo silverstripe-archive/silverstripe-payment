@@ -7,7 +7,11 @@
  *
  * Configuration format for PaymentProcessor:
  * PaymentProcessor:
+<<<<<<< HEAD
  *   supported_methods:
+=======
+ *   supported_methods:
+>>>>>>> a61dc935b7497373046a8952838abbad1b16e34a
  *     {environment}:
  *       - {method name}
  */
@@ -103,7 +107,7 @@ class PaymentProcessor extends Controller {
     
     // Do pre-processing
     $this->preProcess();
-    
+
     // Do gateway validation of payment data
     $validation = $this->gateway->validatePaymentData($this->paymentData);
     

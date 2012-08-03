@@ -6,11 +6,19 @@
  * @package payment
  */
 abstract class PaymentGateway {
+
   /**
-   * The default environment. This will be overriden by yaml config.
+   * Default gateway environment. Override by adding settings to config yaml files.
+   * 
+   * e.g:
+   * PaymentGateway:
+   *   environment:
+   *     'dev'
+   * 
+   * @var String
    */
-  public static $environment = 'dev';
-  
+  public $environment = 'live';
+
   /**
    * The gateway url
    * 
@@ -31,13 +39,6 @@ abstract class PaymentGateway {
    * @var String
    */
   protected $cancelURL;
-  
-  /**
-   * A ValidationResult object that holds the validation status of the payment data
-   *
-   * @var ValidationResult
-   */
-  protected $validationResult;
 
   /**
    * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
@@ -77,6 +78,9 @@ abstract class PaymentGateway {
   }
   
   public function getValidationResult() {
+    if (!$this->validationResult) {
+      $this->validationResult = new ValidationResult();
+    }
     return $this->validationResult;
   }
   
@@ -101,29 +105,30 @@ abstract class PaymentGateway {
   /**
    * Validate the payment data against the gateway-specific requirements
    * 
-   * @param array $data
+   * @param Array $data
    * @return ValidationResult
    */
   public function validatePaymentData($data) {
-    if (! ($this->validationResult != null && $this->validationResult instanceof ValidationResult)) {
-      $this->validationResult = new ValidationResult();
-    }
+    $validationResult = $this->getValidationResult();
     
     if (! isset($data['Amount'])) {
-      $this->validationResult->error('Payment amount not set');
-    } else if (empty($data['Amount'])) {
-      $this->validationResult->error('Payment amount cannot be null');
+      $validationResult->error('Payment amount not set');
+    } 
+    else if (empty($data['Amount'])) {
+      $validationResult->error('Payment amount cannot be null');
     } 
     
     if (! isset($data['Currency'])) {
-      $this->validationResult->error('Payment currency not set');
-    } else if (empty($data['Currency'])) {
-      $this->validationResult->error('Payment currency cannot be null');
-    } else if (! in_array($data['Currency'], $this->getSupportedCurrencies())) {
-      $this->validationResult->error('Currency ' . $data['Currency'] . ' not supported by this gateway');
+      $validationResult->error('Payment currency not set');
+    } 
+    else if (empty($data['Currency'])) {
+      $validationResult->error('Payment currency cannot be null');
+    } 
+    else if (! in_array($data['Currency'], $this->getSupportedCurrencies())) {
+      $validationResult->error('Currency ' . $data['Currency'] . ' not supported by this gateway');
     }
     
-    return $this->validationResult;
+    return $validationResult;
   }
   
   /**
