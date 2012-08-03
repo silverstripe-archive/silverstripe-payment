@@ -7,11 +7,7 @@
  *
  * Configuration format for PaymentProcessor:
  * PaymentProcessor:
-<<<<<<< HEAD
  *   supported_methods:
-=======
- *   supported_methods:
->>>>>>> a61dc935b7497373046a8952838abbad1b16e34a
  *     {environment}:
  *       - {method name}
  */
