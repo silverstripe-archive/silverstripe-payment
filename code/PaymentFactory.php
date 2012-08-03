@@ -84,6 +84,7 @@ class PaymentFactory {
    * Factory function to create payment controller object
    *
    * @param String $methodName
+   * @return PaymentProcessor
    */
   public static function factory($methodName) {
     $supported_methods = PaymentProcessor::get_supported_methods();
