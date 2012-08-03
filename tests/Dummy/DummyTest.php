@@ -31,25 +31,25 @@ class DummyMerchantHostedTest extends SapphireTest {
   }
   
   function testPaymentSuccess() {
-    $this->processor->processRequest($this->data);
+    $this->processor->capture($this->data);
     $this->assertEquals($this->processor->payment->Status, Payment::SUCCESS);
   }
   
   function testPaymentFailure() {
     $this->data['Amount'] = '10.01';
-    $this->processor->processRequest($this->data);
+    $this->processor->capture($this->data);
     $this->assertEquals($this->processor->payment->Status, Payment::FAILURE);
   }
   
   function testPaymentIncomplete() {
     $this->data['Amount'] = '10.02';
-    $this->processor->processRequest($this->data);
+    $this->processor->capture($this->data);
     $this->assertEquals($this->processor->payment->Status, Payment::INCOMPLETE);
   }  
   
   function testFailedHTTP() {
     $this->data['Amount'] = '10.03';
-    $this->processor->processRequest($this->data);
+    $this->processor->capture($this->data);
     $this->assertEquals($this->processor->payment->Status, Payment::FAILURE);
     $this->assertEquals($this->processor->payment->HTTPStatus, '501');
   }

@@ -84,7 +84,7 @@ class PaymentProcessor extends Controller {
   /**
    * Save preliminary data to database before processing payment
    */
-  public function preProcess() { 
+  public function setup() { 
     $this->payment->Amount->Amount = $this->paymentData['Amount'];
     $this->payment->Amount->Currency = $this->paymentData['Currency'];
     $this->payment->Status = Payment::PENDING;
@@ -98,11 +98,11 @@ class PaymentProcessor extends Controller {
    * @param $data
    * @return Payment
    */
-  public function processRequest($data) {
+  public function capture($data) {
     $this->paymentData = $data;
     
     // Do pre-processing
-    $this->preProcess();
+    $this->setup();
 
     // Do gateway validation of payment data
     $validation = $this->gateway->validatePaymentData($this->paymentData);
@@ -117,7 +117,7 @@ class PaymentProcessor extends Controller {
    * 
    * @param SS_HTTPResponse $response
    */
-  public function processresponse($response) {
+  public function complete($response) {
     // Check the HTTP response status 
     $statusCode = $response->getStatusCode();
     if ($statusCode != '200') {
@@ -162,7 +162,7 @@ class PaymentProcessor extends Controller {
     }
     
     // Do post-processing
-    $this->redirectPostProcess();
+    $this->doRedirect();
   }
 
   /**
@@ -176,7 +176,7 @@ class PaymentProcessor extends Controller {
   /**
    * Redirection for post-processing
    */
-  public function redirectPostProcess() {
+  public function doRedirect() {
     // Put the payment ID in a session
     Session::set('PaymentID', $this->payment->ID);
     Controller::curr()->redirect($this->redirectURL);
@@ -211,8 +211,8 @@ class PaymentProcessor extends Controller {
 
 class PaymentProcessor_MerchantHosted extends PaymentProcessor {
   
-  public function preProcess() {
-    parent::preProcess();
+  public function setup() {
+    parent::setup();
     
     // Construct a credit card object and add to the payment data
     $options = array(
@@ -227,12 +227,12 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     $this->paymentData['CreditCard'] = new CreditCard($options);    
   }
 
-  public function processRequest($data) {
-    parent::processRequest($data);
+  public function capture($data) {
+    parent::capture($data);
     
-    // Call processResponse directly since there's no need to set return link
+    // Call complete directly since there's no need to set return link
     $response = $this->gateway->process($this->paymentData);
-    return $this->processresponse($response);
+    return $this->complete($response);
   }
   
   public function getPaymentObject($response) {
@@ -271,14 +271,14 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
 class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 
-  public function processRequest($data) {
-    parent::processRequest($data);
+  public function capture($data) {
+    parent::capture($data);
 
     // Set the return link
     // TODO: Allow custom return url
     $returnURL = Director::absoluteURL(Controller::join_links(
         $this->link(),
-        'processresponse',
+        'complete',
         $this->methodName,
         $this->payment->ID));
     $cancelURL = Director::absoluteURL(Controller::join_links(
@@ -296,7 +296,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     $this->gateway->process($this->paymentData);
   }
 
-  public function processresponse($response) {
+  public function complete($response) {
     // Reconstruct the gateway object
     $this->setMethodName($response->param('ID'));
     $this->gateway = PaymentFactory::get_gateway($this->methodName);
@@ -304,11 +304,11 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     // Retrieve the redirection url from Session
     $this->redirectURL = Session::get('PostRedirectionURL');
 
-    return parent::processresponse($response);
+    return parent::complete($response);
   }
   
   public function cancel($response) {
-    return $this->processresponse(new PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE));
+    return $this->complete(new PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE));
   }
 
   public function getPaymentObject($response) {
