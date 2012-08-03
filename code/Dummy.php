@@ -18,7 +18,7 @@ class DummyMerchantHostedGateway extends PaymentGateway {
    * @return ValidationResult
    */
   public function validatePaymentData($data) {
-    return $this->getValidationResult();
+    return new ValidationResult();
   }
 
   public function process($data) {
@@ -84,7 +84,7 @@ class DummyGatewayHostedGateway extends PaymentGateway {
    * @return ValidationResult
    */
   public function validatePaymentData($data) {
-    return $this->getValidationResult();
+    return new ValidationResult();
   }
 
   public function process($data) {

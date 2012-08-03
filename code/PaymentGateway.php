@@ -38,13 +38,6 @@ abstract class PaymentGateway {
    * @var String
    */
   protected $cancelURL;
-  
-  /**
-   * A ValidationResult object that holds the validation status of the payment data
-   *
-   * @var ValidationResult
-   */
-  protected $validationResult;
 
   /**
    * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
