@@ -190,14 +190,20 @@ class PaymentGateway_Result extends ValidationResult {
    */
   protected $status;
 
-  function __construct($valid = true, $message = null) {
+  function __construct($status, $valid = true, $message = null) {
     parent::__construct($valid, $message);
+
+    //TODO bounds checking that matches the constants above
+    //maybe use setStatus and wrap the checking in there
+    $this->status = $status;
     
+    /*
     if ($valid == true) {
       $this->status = self::SUCCESS;
     } else {
       $this->status = self::FAILURE;
     }
+    */
   }
   
   /**
@@ -216,6 +222,18 @@ class PaymentGateway_Result extends ValidationResult {
     } else {
       user_error("Result status is invalid", E_USER_ERROR);
     }
+  }
+
+  public function isSuccess() {
+    return $this->status == PaymentGateway_Result::SUCCESS;
+  }
+
+  public function isFailure() {
+    return $this->status == PaymentGateway_Result::FAILURE;
+  }
+
+  public function isIncomplete() {
+    return $this->status == PaymentGateway_Result::INCOMPLETE;
   }
   
   function error($message, $code = null) {

@@ -22,6 +22,14 @@ class DummyMerchantHostedGateway extends PaymentGateway {
   }
 
   public function process($data) {
+
+    //Check the cents value, return different results based on that
+
+    //Check that gateway responds with 200, if not return failure gateway result
+    return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
+
+
+    /*
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
     
@@ -42,6 +50,7 @@ class DummyMerchantHostedGateway extends PaymentGateway {
         return new SS_HTTPResponse(PaymentGateway_Result::FAILURE);
         break;
     }
+    */
   }
 
   public function getResponse($response) {

@@ -6,8 +6,10 @@
  *  @package payment
  */
 class Payment extends DataObject {
+
   /**
    * Constants for payment statuses
+   * TODO maybe these constants should be linked/coupled to the Gateway constants?
    */
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
@@ -52,6 +54,8 @@ class Payment extends DataObject {
   
   /**
    * Update the status of this payment
+   * 
+   * TODO rename to updateStatus
    *
    * @param String $status
    * @return true if successful, false otherwise
