@@ -317,7 +317,9 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
       $this->payment->updatePaymentStatus(Payment::SUCCESS);
     }
     else {
+      //Gateway did not respond or did not validate
       $this->payment->updatePaymentStatus(Payment::FAILURE);
+      throw new Exception($result->message());
     }
 
     $request = new SS_HTTPRequest('GET', '/PaymentProcessor/complete', array(

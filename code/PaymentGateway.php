@@ -40,8 +40,17 @@ abstract class PaymentGateway {
   protected $cancelURL;
 
   /**
-   * Get the gateway type set by the yaml config ('live', 'dev', 'mock')
+   * Data that is going to be sent to the gateway 
    */
+  protected $data;
+
+  public function setData(Array $data) {
+    $this->data = $data;
+  }
+
+  protected $validationResult;
+
+
   public static function get_environment() {
     return Config::inst()->get('PaymentGateway', 'environment');
   }
@@ -103,11 +112,14 @@ abstract class PaymentGateway {
 
   /**
    * Validate the payment data against the gateway-specific requirements
+   * TODO use $this->data instead of passing $data
    * 
    * @param Array $data
    * @return ValidationResult
    */
-  public function validatePaymentData($data) {
+  public function validatePaymentData() {
+
+    $data = $this->data;
     $validationResult = $this->getValidationResult();
     
     if (! isset($data['Amount'])) {
@@ -136,7 +148,11 @@ abstract class PaymentGateway {
    *
    * @param array $data
    */
-  abstract public function process($data);
+  //abstract public function process($data);
+  public function process($data) {
+    //Need to set the data on the gateway so can call validate on gateway later from controller
+    $this->setData($data);
+  }
 
   /**
    * Process the response from the external gateway
@@ -176,6 +192,8 @@ abstract class PaymentGateway {
 
 /**
  * Class for gateway results
+ * 
+ * TODO break down into Failure_Result, Success_Result, Incomplete_Result for convenience?
  */
 class PaymentGateway_Result extends ValidationResult {
 

@@ -17,17 +17,45 @@ class DummyMerchantHostedGateway extends PaymentGateway {
    * @param Array $data
    * @return ValidationResult
    */
-  public function validatePaymentData($data) {
-    return new ValidationResult();
+  public function validatePaymentData() {
+
+    //Use this->validationResult so that all errors are added and can be accessible from Payment Test
+
+    $data = $this->data;
+    $result = $this->getValidationResult();
+    $amount = $data['Amount'];
+    $cents = round($amount - intval($amount), 2);
+    
+    switch ($cents) {
+      case 0.11:
+        $result->error('Cents value is .11');
+        $result->error('This is another error message for cents = .11');
+        break;
+    }
+    return $result;
   }
 
   public function process($data) {
 
-    //Check the cents value, return different results based on that
+    //To set the data on the Gateway, validate can be called later from other part of the system
+    parent::process($data);
 
-    //Check that gateway responds with 200, if not return failure gateway result
-    return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
+    //Validate first
+    $result = $this->validatePaymentData();
+    if (!$result->valid()) {
+      return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, $result->message());
+    }
 
+    $amount = $data['Amount'];
+    $cents = round($amount - intval($amount), 2);
+    
+    switch ($cents) {
+      case 0.01:
+        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, 'Cents value was .01');
+        break;
+      default:
+        return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
+    }
 
     /*
     $amount = $data['Amount'];
