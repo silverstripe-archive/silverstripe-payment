@@ -60,14 +60,24 @@ class Payment extends DataObject {
    * @param String $status
    * @return true if successful, false otherwise
    */
-  public function updatePaymentStatus($status) {
+  public function updatePaymentStatus($status, SS_HTTPResponse $response = null) {
+
+
     if ($status == self::SUCCESS || $status == self::FAILURE || 
         $status == self::INCOMPLETE || $status == self::PENDING) {
+
+      //TODO response message and status code - perhaps not save into message?
+      if ($response) {
+        $this->Message = $response->getBody();
+        $this->HTTPStatus = $response->getStatusCode();
+      }
+
       $this->Status = $status;
       $this->write();
       
       return true;
-    } else {
+    } 
+    else {
       return false;
     }
   }

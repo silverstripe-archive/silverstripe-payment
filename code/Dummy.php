@@ -6,7 +6,10 @@
 class DummyMerchantHostedGateway extends PaymentGateway {
   
   public function getSupportedCreditCardType() {
-    return (array('master' => 'Master', 'visa' => 'Visa'));
+    return array(
+      'master' => 'Master', 
+      'visa' => 'Visa'
+    );
   }
   
   /**
@@ -47,33 +50,13 @@ class DummyMerchantHostedGateway extends PaymentGateway {
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
 
-    //TODO set this->gatewayResponse so that can be used by paymentProcessor to update payment
-    
     switch ($cents) {
       case 0.01:
-        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, 'Cents value was .01');
-        break;
+        $this->gatewayResponse = new SS_HTTPResponse('Internal Server Error', 500);
+        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, 'Connection Error: 500 - Internal Server Error');
       default:
+        //$this->gatewayResponse = new SS_HTTPResponse('OK', 200);
         return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
-    }
-  }
-
-  public function getResponse($response) {
-    switch($response->getBody()) {
-      case PaymentGateway_Result::SUCCESS:
-        return new PaymentGateway_Result();
-        break;
-      case PaymentGateway_Result::FAILURE:
-        return new PaymentGateway_Result(false);
-        break;
-      case PaymentGateway_Result::INCOMPLETE:
-        $result = new PaymentGateway_Result();
-        $result->setStatus(PaymentGateway_Result::INCOMPLETE);
-        return $result;
-        break;
-      default:
-        return new PaymentGateway_Result(false);
-        break;
     }
   }
 }
@@ -98,38 +81,47 @@ class DummyGatewayHostedGateway extends PaymentGateway {
    * @return ValidationResult
    */
   public function validate($data) {
+
     $result = $this->getValidationResult();
+
+    $amount = $data['Amount'];
+    $cents = round($amount - intval($amount), 2);
+    
+    switch ($cents) {
+      case 0.11:
+        $result->error('Cents value is .11');
+        $result->error('This is another error message for cents = .11');
+        break;
+    }
     return $result;
   }
 
   public function process($data) {
+
+    //Validate first
+    $result = $this->validate($data);
+    if (!$result->valid()) {
+      return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, $result->message());
+    }
+
     $postData = array(
       'Amount' => $data['Amount'],
       'Currency' => $data['Currency'],
       'ReturnURL' => $this->returnURL    
     ); 
-    
+
+    //Mimic failures, like a gateway response such as 404, 500 etc.
+    $amount = $data['Amount'];
+    $cents = round($amount - intval($amount), 2);
+
+    switch ($cents) {
+      case 0.01:
+        $this->gatewayResponse = new SS_HTTPResponse('Internal Server Error', 500);
+        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, 'Connection Error: 500 - Internal Server Error');
+    }
+
     $queryString = http_build_query($postData);
     Controller::curr()->redirect($this->gatewayURL . '?' . $queryString);
-  }
-
-  public function getResponse($response) {
-    $result = $response->getVar('result');
-    switch ($result) {
-      case PaymentGateway_Result::SUCCESS:
-        return new PaymentGateway_Result();
-        break;
-      case PaymentGateway_Result::FAILURE:
-        return new PaymentGateway_Result(false);
-        break;
-      case PaymentGateway_Result::INCOMPLETE:
-        $result = new PaymentGateway_Result();
-        $result->setStatus(PaymentGateway_Result::INCOMPLETE);
-        return $result;
-      default:
-        return new PaymentGateway_Result(false);
-        break;
-    }
   }
 }
 
@@ -140,13 +132,6 @@ class DummyExternalGateway_Controller extends Controller{
 
   function pay($request) {
 
-    //Why do we set these in session?
-    // Session::set('Amount', $request->getVar('Amount'));
-    // Session::set('Currency', $request->getVar('Currenct'));
-
-    //TODO this should be getter and setter for consistency of Session var etc.
-    Session::set('ReturnURL', $request->getVar('ReturnURL'));
-    
     return $this->customise(array(
       'Content' => "<h1>Fill out this form to make payment</h1>",
       'Form' => $this->PayForm()
@@ -162,7 +147,8 @@ class DummyExternalGateway_Controller extends Controller{
       new TextField('Currency', 'Currency', $request->getVar('Currency')),
       new TextField('CardHolderName', 'Card Holder Name', 'Test Testoferson'),
       new CreditCardField('CardNumber', 'Card Number', '1234567812345678'),
-      new TextField('DateExpiry', 'Expiration date', '12/15')
+      new TextField('DateExpiry', 'Expiration date', '12/15'),
+      new TextField('ReturnURL', 'ReturnURL', $request->getVar('ReturnURL'))
     );
 
     $actions = new FieldList(
@@ -176,23 +162,12 @@ class DummyExternalGateway_Controller extends Controller{
 
   function dopay($data, $form) {
 
+    $returnURL = $data['ReturnURL'];
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
 
-    switch ($cents) {
-      case 0.01:
-        $result = PaymentGateway_Result::FAILURE;
-        break;
-      case 0.02:
-        $result = PaymentGateway_Result::INCOMPLETE;
-        break;
-      default:
-        $result = PaymentGateway_Result::SUCCESS;
-        break;
-    }
-
-    if ($returnURL = Session::get('ReturnURL')) {
-      Controller::redirect($returnURL . "?result=$result");
+    if ($returnURL) {
+      Controller::redirect($returnURL);
     } 
     else {
       // TODO: Return a error for processor to handle rather than user_error

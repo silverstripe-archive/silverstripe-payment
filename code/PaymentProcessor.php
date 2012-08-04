@@ -54,7 +54,6 @@ class PaymentProcessor extends Controller {
         user_error("Method $method not defined in factory", E_USER_ERROR);
       }
     }
-
     return $methodConfig[$environment];
   }
 
@@ -108,15 +107,6 @@ class PaymentProcessor extends Controller {
     
     // Do pre-processing
     $this->setup();
-
-    // Do gateway validation of payment data
-    /*
-    $validation = $this->gateway->validatePaymentData($this->paymentData);
-    
-    if (! $validation->valid()) {
-      throw new ValidationException($validation, "Payment data validation error: " . $validation->message(), E_USER_WARNING);
-    }
-    */
   }
 
   /**
@@ -126,114 +116,14 @@ class PaymentProcessor extends Controller {
    */
   public function complete($request) {
 
-    
-    //SS_Log::log(new Exception(print_r($this->getRequest(), true)), SS_Log::NOTICE);
-
-    /*
-    // Check the HTTP response status 
-    $statusCode = $response->getStatusCode();
-
-    if ($statusCode != '200') {
-      // HTTP fails. Throw an exception and save the code to database
-      // TODO: Log the error for developers to troubleshoot
-      $this->payment->HTTPStatus = $statusCode;
-      $this->payment->Status = Payment::FAILURE;
-      $this->payment->write();
-      
-      throw Exception("Connection error for payment " . $this->payment->ID . ". HTTP status: $statusCode");
-    }
-    
-    // Get the reponse result from gateway
-    $result = $this->gateway->getResponse($response);
-    
-    
-    // Save gateway messages and errors
-    $this->payment->Message = $result->message();
-    $this->payment->ErrorCodes = implode('; ', $result->codeList());
-    */
-
     // Retrieve the payment object if none is referenced at this point
     if (! $this->payment) {
       $this->payment = $this->getPaymentObject($request);
     }
 
-    //SS_Log::log(new Exception(print_r($request, true)), SS_Log::NOTICE);
-    //SS_Log::log(new Exception(print_r($this->payment, true)), SS_Log::NOTICE);
-    
-    /*
-    // Save payment status
-    switch ($result->getStatus()) {
-      case PaymentGateway_Result::SUCCESS:
-        $status = Payment::SUCCESS;
-        break;
-      case PaymentGateway_Result::FAILURE:
-        $status = Payment::FAILURE;
-        break;
-      case PaymentGateway_Result::INCOMPLETE:
-        $status = Payment::INCOMPLETE;
-        break;
-      default:
-        $status = 'invalid';
-        break;
-    }
-    if (! $this->payment->updatePaymentStatus($status)) {
-      throw new Exception('Invalid payment status for payment ' . $this->payment->ID);
-    }
-    */
-    
-    // Do post-processing
-    $this->doRedirect();
-  }
+    //Need to double check that the payment is successful by querying the gateway
+    $this->payment->updatePaymentStatus(Payment::SUCCESS);
 
-  /**
-   * Process a payment response. 
-   * 
-   * @param SS_HTTPResponse $response
-   */
-  public function processresponse($response) {
-    // Check the HTTP response status 
-    $statusCode = $response->getStatusCode();
-    if ($statusCode != '200') {
-      // HTTP fails. Throw an exception and save the code to database
-      // TODO: Log the error for developers to troubleshoot
-      $this->payment->HTTPStatus = $statusCode;
-      $this->payment->Status = Payment::FAILURE;
-      $this->payment->write();
-      
-      throw Exception("Connection error for payment " . $this->payment->ID . ". HTTP status: $statusCode");
-    }
-    
-    // Get the reponse result from gateway
-    $result = $this->gateway->getResponse($response);
-    
-    // Save gateway messages and errors
-    $this->payment->Message = $result->message();
-    $this->payment->ErrorCodes = implode('; ', $result->codeList());
-
-    // Retrieve the payment object if none is referenced at this point
-    if (! $this->payment) {
-      $this->payment = $this->getPaymentObject($response);
-    }
-    
-    // Save payment status
-    switch ($result->getStatus()) {
-      case PaymentGateway_Result::SUCCESS:
-        $status = Payment::SUCCESS;
-        break;
-      case PaymentGateway_Result::FAILURE:
-        $status = Payment::FAILURE;
-        break;
-      case PaymentGateway_Result::INCOMPLETE:
-        $status = Payment::INCOMPLETE;
-        break;
-      default:
-        $status = 'invalid';
-        break;
-    }
-    if (! $this->payment->updatePaymentStatus($status)) {
-      throw new Exception('Invalid payment status for payment ' . $this->payment->ID);
-    }
-    
     // Do post-processing
     $this->doRedirect();
   }
@@ -244,7 +134,8 @@ class PaymentProcessor extends Controller {
    * 
    * @return Payment
    */
-  public function getPaymentObject($response) { }
+  public function getPaymentObject($request) { 
+  }
 
   /**
    * Get the processor's form fields. Custom controllers use this function
@@ -296,36 +187,30 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     
     // Call complete directly since there's no need to set return link
     $result = $this->gateway->process($this->paymentData);
-    
 
     //$result will be PaymentGateway_Result, check status
     //If failure throw an exception, payment test page can catch it
     //Update the payment status with HTTPStatus etc.
     //Update the payment as success or failure etc.
 
-    //SS_Log::log(new Exception(print_r($result, true)), SS_Log::NOTICE);
-    //SS_Log::log(new Exception(print_r($result->getStatus(), true)), SS_Log::NOTICE);
-
-
     if ($result->isSuccess()) {
-      $this->payment->updatePaymentStatus(Payment::SUCCESS);
+      $this->payment->updatePaymentStatus(Payment::SUCCESS, $this->gateway->gatewayResponse);
     }
     else {
+
       //Gateway did not respond or did not validate
-
-      //Need to get the gateway response and save HTTP Status, errors etc. to Payment
-
-      $this->payment->updatePaymentStatus(Payment::FAILURE);
+      $this->payment->updatePaymentStatus(Payment::FAILURE, $this->gateway->gatewayResponse);
       throw new Exception($result->message());
     }
 
+    //Make this consistent with gateay hosted
     $request = new SS_HTTPRequest('GET', '/PaymentProcessor/complete', array(
       'PaymentID' => $this->payment->ID
     ));
     return $this->complete($request);
   }
   
-  public function getPaymentObject($response) {
+  public function getPaymentObject($request) {
     return $this->payment;
   }
   
@@ -366,7 +251,6 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     parent::capture($data);
 
     // Set the return link
-    // TODO: Allow custom return url
     $returnURL = Director::absoluteURL(Controller::join_links(
         $this->link(),
         'complete',
@@ -375,28 +259,21 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     ));
     $this->gateway->setReturnURL($returnURL);
 
-    //Which gateways use cancelURL? Should we not just have complete() action which marks Payment as success
-    //consider payment a failure otherwise?
-    /*
-    $cancelURL = Director::absoluteURL(Controller::join_links(
-        $this->link(),
-        'cancel',
-        $this->methodName,
-        $this->payment->ID
-    ));
-    $this->gateway->setCancelURL($cancelURL);
-    */
-
-    //TODO use setReturnURL() for this instead
-    // Save the redirection url in a session to be retrieved after the gateway returns
-    //Session::set('PostRedirectionURL', $this->redirectURL);
-    
     // Send a request to the gateway
     $result = $this->gateway->process($this->paymentData);
 
     //processing may not get to here if all goes smoothly, customer will be at the 3rd party gateway 
     //$result may be a PaymentGateway_Result, if failure throw exception with message from gateway result
     //PaymentTestPage can then use the error message in the Excpetion or call gateway->validate() to get validaiton messages
+
+    if ($result && !$result->isSuccess()) {
+
+      //Gateway did not respond or did not validate
+      //Need to get the gateway response and save HTTP Status, errors etc. to Payment
+
+      $this->payment->updatePaymentStatus(Payment::FAILURE, $this->gateway->gatewayResponse);
+      throw new Exception($result->message());
+    }
   }
 
   public function complete($request) {
@@ -407,15 +284,8 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 
     return parent::complete($request);
   }
-  
-  //When is a gateway going to return to cancel action?
-  /*
-  public function cancel($response) {
-    return $this->complete(new PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE));
-  }
-  */
 
-  public function getPaymentObject($response) {
+  public function getPaymentObject($request) {
     return DataObject::get_by_id('Payment', $response->param('OtherID'));
   }
 }
