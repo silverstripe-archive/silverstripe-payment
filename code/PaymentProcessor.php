@@ -276,6 +276,6 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
   }
 
   public function getPaymentObject($request) {
-    return DataObject::get_by_id('Payment', $response->param('OtherID'));
+    return DataObject::get_by_id('Payment', $request->param('OtherID'));
   }
 }
