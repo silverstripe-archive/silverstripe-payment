@@ -187,20 +187,10 @@ class PaymentGateway_Result extends ValidationResult {
    */
   protected $status;
 
-  function __construct($status, $valid = true, $message = null) {
-    parent::__construct($valid, $message);
+  function __construct($status, $message = null) {
 
-    //TODO bounds checking that matches the constants above
-    //maybe use setStatus and wrap the checking in there
-    $this->status = $status;
-    
-    /*
-    if ($valid == true) {
-      $this->status = self::SUCCESS;
-    } else {
-      $this->status = self::FAILURE;
-    }
-    */
+    $this->setStatus($status);
+    parent::__construct($this->valid, $message);
   }
   
   /**
@@ -210,36 +200,61 @@ class PaymentGateway_Result extends ValidationResult {
    * @param String $status
    */
   function setStatus($status) {
+
     if ($status == self::SUCCESS) {
       $this->valid = true;
       $this->status = $status;
-    } else if ($status == self::FAILURE || $status == self::INCOMPLETE) {
+    } 
+    else if ($status == self::FAILURE || $status == self::INCOMPLETE) {
       $this->valid = false;
       $this->status = $status;
-    } else {
+    } 
+    else {
       user_error("Result status is invalid", E_USER_ERROR);
     }
   }
 
   public function isSuccess() {
-    return $this->status == PaymentGateway_Result::SUCCESS;
+    return $this->status == self::SUCCESS;
   }
 
   public function isFailure() {
-    return $this->status == PaymentGateway_Result::FAILURE;
+    return $this->status == self::FAILURE;
   }
 
   public function isIncomplete() {
-    return $this->status == PaymentGateway_Result::INCOMPLETE;
+    return $this->status == self::INCOMPLETE;
   }
   
   function error($message, $code = null) {
-    parent::error();
-    
     $this->status = self::FAILURE;
+    return parent::error($message, $code);
   }
 
   public function getStatus() {
     return $this->status;
   }
 }
+
+class PaymentGateway_Success extends PaymentGateway_Result {
+
+  function __construct($message = null) {
+    parent::__construct(self::SUCCESS, $message);
+  }
+}
+
+class PaymentGateway_Failure extends PaymentGateway_Result {
+
+  function __construct($message = null) {
+    parent::__construct(self::FAILURE, $message);
+  }
+}
+
+class PaymentGateway_Incomplete extends PaymentGateway_Result {
+
+  function __construct($message = null) {
+    parent::__construct(self::INCOMPLETE, $message);
+  }
+}
+
+

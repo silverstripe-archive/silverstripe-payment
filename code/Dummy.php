@@ -43,7 +43,7 @@ class DummyMerchantHostedGateway extends PaymentGateway {
     //Validate first
     $result = $this->validate($data);
     if (!$result->valid()) {
-      return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, $result->message());
+      return new PaymentGateway_Failure($result->message());
     }
 
     //Mimic failures, like a gateway response such as 404, 500 etc.
@@ -53,10 +53,10 @@ class DummyMerchantHostedGateway extends PaymentGateway {
     switch ($cents) {
       case 0.01:
         $this->gatewayResponse = new SS_HTTPResponse('Internal Server Error', 500);
-        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, 'Connection Error: 500 - Internal Server Error');
+        return new PaymentGateway_Failure('Connection Error: 500 - Internal Server Error');
       default:
         //$this->gatewayResponse = new SS_HTTPResponse('OK', 200);
-        return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
+        return new PaymentGateway_Success();
     }
   }
 }
@@ -101,7 +101,7 @@ class DummyGatewayHostedGateway extends PaymentGateway {
     //Validate first
     $result = $this->validate($data);
     if (!$result->valid()) {
-      return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, $result->message());
+      return new PaymentGateway_Failure($result->message());
     }
 
     $postData = array(
@@ -117,7 +117,7 @@ class DummyGatewayHostedGateway extends PaymentGateway {
     switch ($cents) {
       case 0.01:
         $this->gatewayResponse = new SS_HTTPResponse('Internal Server Error', 500);
-        return new PaymentGateway_Result(PaymentGateway_Result::FAILURE, false, 'Connection Error: 500 - Internal Server Error');
+        return new PaymentGateway_Failure('Connection Error: 500 - Internal Server Error');
     }
 
     $queryString = http_build_query($postData);
