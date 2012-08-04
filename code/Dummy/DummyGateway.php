@@ -6,10 +6,11 @@
 class DummyGateway_MerchantHosted extends PaymentGateway {
   
   public function getSupportedCreditCardType() {
-    return array(
-      'Visa' => 'Visa',
-      'MasterCard' => 'MasterCard'
-    );
+    return array('visa', 'master');
+  }
+  
+  protected function creditCardTypeIDMapping() {
+    return array();
   }
   
   /**

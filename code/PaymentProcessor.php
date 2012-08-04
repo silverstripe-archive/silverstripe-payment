@@ -199,12 +199,15 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
   }
   
   public function getCreditCardFields() {
+    // Retrieve the array of credit card types to be put in a credit card form field
     $creditCardTypes = $this->gateway->getSupportedCreditCardType();
+    $creditCardTypeDisplays = CreditCard::getCreditCardTypeDisplays($creditCardTypes);
+    
     $months = array_combine(range(1, 12), range(1, 12));
     $years = array_combine(range(date('Y'), date('Y') + 10), range(date('Y'), date('Y') + 10));
     
     $fieldList = new FieldList();
-    $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $creditCardTypes));
+    $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $creditCardTypeDisplays));
     $fieldList->push(new TextField('FirstName', 'First Name:'));
     $fieldList->push(new TextField('LastName', 'Last Name:'));
     $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number:'));

@@ -5,12 +5,28 @@
  */
 class CreditCard {
   
+  /**
+   * The card number patterns for credit card companies
+   * @var array
+   */
   private static $CARD_COMPANIES = array(
-    'Visa' => '/^4\d{12}(\d{3})?$/',
-    'MasterCard' => '/^(5[1-5]\d{4}|677189)\d{10}$/',
-    'Discover' => '/^(6011|65\d{2})\d{12}$/',
-    'Amex' => '/^3[47]\d{13}$/',
-    'DinnersClub' => '/^3(0[0-5]|[68]\d)\d{11}$/'
+    'visa' => '/^4\d{12}(\d{3})?$/',
+    'master' => '/^(5[1-5]\d{4}|677189)\d{10}$/',
+    'discover' => '/^(6011|65\d{2})\d{12}$/',
+    'american_express' => '/^3[47]\d{13}$/',
+    'diners' => '/^3(0[0-5]|[68]\d)\d{11}$/'
+  );
+  
+  /**
+   * A mapping of the card types and their display names
+   * @var array
+   */
+  private static $CARD_TYPE_NAMES = array(
+    'visa' => 'Visa',
+    'master' => 'MasterCard',
+    'american_express' => 'American Express',
+    'discover' => 'Discover',
+    'diners' => 'Diners Club'
   );
   
   /* Credit Card data */
@@ -27,6 +43,23 @@ class CreditCard {
    * @var ValidationResult
    */ 
   private $validationResult;
+  
+  /**
+   * Helper function to retrieve the display names for an array of 
+   * credit card types.
+   * 
+   * @param array $creditCardTypes
+   * @return array('CC type id' => 'CC type displays').
+   */
+  public static function getCreditCardTypeDisplays($creditCardTypes) {
+    $displays = array();
+
+    foreach ($creditCardTypes as $type) {
+      $displays[$type] = self::$CARD_TYPE_NAMES[$type];
+    }
+    
+    return $displays;
+  }
   
   public function __construct($options) {
     $this->firstName = $options['firstName'];

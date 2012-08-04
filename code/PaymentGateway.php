@@ -88,11 +88,21 @@ abstract class PaymentGateway {
   /**
    * Get the list of credit card types supported by this gateway
    * 
-   * @return array('id' => 'Credit Card Type')
+   * @return array({Credit Card Type})
    */
   public function getSupportedCreditCardType() {
-    return null;
+    return array();
   }
+  
+  /**
+   * A mapping of credit card type ids provided by the CreditCard class and 
+   * the credit card type ids required by the gateay. 
+   * 
+   * @return array('CreditCard class id' => 'Gateway id')
+   */
+   protected function creditCardTypeIDMapping() {
+     return array();
+   }
   
   /**
    * Get the list of currencies supported by this gateway
