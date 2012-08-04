@@ -3,7 +3,7 @@
 /**
  * Test class for merchant-hosted payment
  */
-class DummyMerchantHostedGateway extends PaymentGateway {
+class DummyGateway_MerchantHosted extends PaymentGateway {
   
   public function getSupportedCreditCardType() {
     return array(
@@ -64,7 +64,7 @@ class DummyMerchantHostedGateway extends PaymentGateway {
 /**
  * Test class for gateway-hosted payment
  */
-class DummyGatewayHostedGateway extends PaymentGateway {
+class DummyGateway_GatewayHosted extends PaymentGateway {
   
   public function __construct() {
     parent::__construct();
@@ -128,7 +128,7 @@ class DummyGatewayHostedGateway extends PaymentGateway {
 /**
  * Imaginary place to visit external gateway
  */
-class DummyExternalGateway_Controller extends Controller{
+class DummyGateway_Controller extends Controller{
 
   function pay($request) {
 

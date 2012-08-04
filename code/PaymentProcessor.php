@@ -221,12 +221,12 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     
     $fieldList = new FieldList();
     $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $creditCardTypes));
-    $fieldList->push(new TextField('FirstName'), 'First Name :');
-    $fieldList->push(new TextField('LastName'), 'Last Name :');
-    $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number :'));
+    $fieldList->push(new TextField('FirstName', 'First Name:'));
+    $fieldList->push(new TextField('LastName', 'Last Name:'));
+    $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number:'));
     $fieldList->push(new DropDownField('MonthExpiry', 'Expiration Month: ', $months));
     $fieldList->push(new DropDownField('YearExpiry', 'Expiration Year: ', $years));
-    $fieldList->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
+    $fieldList->push(new TextField('Cvc2', 'Credit Card CVN: (3 or 4 digits)', '', 4));
     
     return $fieldList;
   }
