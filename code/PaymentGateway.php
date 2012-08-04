@@ -41,6 +41,8 @@ abstract class PaymentGateway {
 
   private $validationResult;
 
+  public $gatewayResponse;
+
 
   public static function get_environment() {
     return Config::inst()->get('PaymentGateway', 'environment');

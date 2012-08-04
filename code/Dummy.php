@@ -46,6 +46,8 @@ class DummyMerchantHostedGateway extends PaymentGateway {
     //Mimic failures, like a gateway response such as 404, 500 etc.
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
+
+    //TODO set this->gatewayResponse so that can be used by paymentProcessor to update payment
     
     switch ($cents) {
       case 0.01:
@@ -54,29 +56,6 @@ class DummyMerchantHostedGateway extends PaymentGateway {
       default:
         return new PaymentGateway_Result(PaymentGateway_Result::SUCCESS);
     }
-
-    /*
-    $amount = $data['Amount'];
-    $cents = round($amount - intval($amount), 2);
-    
-    switch ($cents) {
-      case 0.00:
-        return new SS_HTTPResponse(PaymentGateway_Result::SUCCESS);
-        break;
-      case 0.01:
-        return new SS_HTTPResponse(PaymentGateway_Result::FAILURE);
-        break;
-      case 0.02:
-        return new SS_HTTPResponse(PaymentGateway_Result::INCOMPLETE);
-        break;
-      case 0.03:
-        return new SS_HTTPResponse(PaymentGateway_Result::FAILURE, '501');
-        break;
-      default:
-        return new SS_HTTPResponse(PaymentGateway_Result::FAILURE);
-        break;
-    }
-    */
   }
 
   public function getResponse($response) {
@@ -119,7 +98,8 @@ class DummyGatewayHostedGateway extends PaymentGateway {
    * @return ValidationResult
    */
   public function validate($data) {
-    return new ValidationResult();
+    $result = $this->getValidationResult();
+    return $result;
   }
 
   public function process($data) {
@@ -159,8 +139,12 @@ class DummyGatewayHostedGateway extends PaymentGateway {
 class DummyExternalGateway_Controller extends Controller{
 
   function pay($request) {
-    Session::set('Amount', $request->getVar('Amount'));
-    Session::set('Currency', $request->getVar('Currenct'));
+
+    //Why do we set these in session?
+    // Session::set('Amount', $request->getVar('Amount'));
+    // Session::set('Currency', $request->getVar('Currenct'));
+
+    //TODO this should be getter and setter for consistency of Session var etc.
     Session::set('ReturnURL', $request->getVar('ReturnURL'));
     
     return $this->customise(array(
@@ -170,46 +154,49 @@ class DummyExternalGateway_Controller extends Controller{
   }
 
   function PayForm() {
+
+    $request = $this->getRequest();
+
     $fields = new FieldList(
-      new TextField('CardHolderName', 'Card Holder Name'),
-      new CreditCardField('CardNumber', 'Card Number'),
-      new DateField('DateExpiry', 'Expiration date')
+      new TextField('Amount', 'Amount', $request->getVar('Amount')),
+      new TextField('Currency', 'Currency', $request->getVar('Currency')),
+      new TextField('CardHolderName', 'Card Holder Name', 'Test Testoferson'),
+      new CreditCardField('CardNumber', 'Card Number', '1234567812345678'),
+      new TextField('DateExpiry', 'Expiration date', '12/15')
     );
 
     $actions = new FieldList(
-      new FormAction("dopay")
+      new FormAction("dopay", 'Process Payment')
     );
+
+    //TODO validate this form
 
     return new Form($this, "PayForm", $fields, $actions);
   }
 
-  function dopay() {
-    if ($amount = Session::get('Amount')) {
-      $amount = $amount;
-      $cents = round($amount - intval($amount), 2);
+  function dopay($data, $form) {
 
-      switch ($cents) {
-        case 0.00:
-          $result = PaymentGateway_Result::SUCCESS;
-          break;
-        case 0.01:
-          $result = PaymentGateway_Result::FAILURE;
-          break;
-        case 0.02:
-          $result = PaymentGateway_Result::INCOMPLETE;
-          break;
-        default:
-          $result = PaymentGateway_Result::FAILURE;
-          break;
-      }
-      if ($returnURL = Session::get('ReturnURL')) {
-        Controller::redirect($returnURL . "?result=$result");
-      } else {
-        // TODO: Return a error for processor to handle rather than user_error
-        user_error("Return URL is not set for this transaction", E_USER_ERROR);
-      }
-    } else {
-      user_error("Payment data is invalid for this transaction", E_USER_ERROR);
+    $amount = $data['Amount'];
+    $cents = round($amount - intval($amount), 2);
+
+    switch ($cents) {
+      case 0.01:
+        $result = PaymentGateway_Result::FAILURE;
+        break;
+      case 0.02:
+        $result = PaymentGateway_Result::INCOMPLETE;
+        break;
+      default:
+        $result = PaymentGateway_Result::SUCCESS;
+        break;
+    }
+
+    if ($returnURL = Session::get('ReturnURL')) {
+      Controller::redirect($returnURL . "?result=$result");
+    } 
+    else {
+      // TODO: Return a error for processor to handle rather than user_error
+      user_error("Return URL is not set for this transaction", E_USER_ERROR);
     }
   }
 }

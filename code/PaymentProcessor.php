@@ -38,13 +38,6 @@ class PaymentProcessor extends Controller {
    * @var array 
    */
   public $paymentData;
-
-  /**
-   * The url that will be redirected to after processing the payment
-   * 
-   * @var String
-   */
-  protected $redirectURL;
   
   /**
    * Get the supported methods array set by the yaml configuraion
@@ -77,10 +70,20 @@ class PaymentProcessor extends Controller {
   }
   
   public function setRedirectURL($url) {
+    Session::set('PostRedirectionURL', $url);
+  }
 
-    //TODO Set this in the Session instead/additionally
+  public function getRedirectURL() {
+    return Session::get('PostRedirectionURL');
+  }
 
-    $this->redirectURL = $url;
+  /**
+   * Redirection for post-processing
+   */
+  public function doRedirect() {
+    // Put the payment ID in a session
+    Session::set('PaymentID', $this->payment->ID);
+    Controller::curr()->redirect($this->getRedirectURL());
   }
   
   /**
@@ -151,7 +154,7 @@ class PaymentProcessor extends Controller {
 
     // Retrieve the payment object if none is referenced at this point
     if (! $this->payment) {
-      $this->payment = $this->getPaymentObject($response);
+      $this->payment = $this->getPaymentObject($request);
     }
 
     //SS_Log::log(new Exception(print_r($request, true)), SS_Log::NOTICE);
@@ -244,15 +247,6 @@ class PaymentProcessor extends Controller {
   public function getPaymentObject($response) { }
 
   /**
-   * Redirection for post-processing
-   */
-  public function doRedirect() {
-    // Put the payment ID in a session
-    Session::set('PaymentID', $this->payment->ID);
-    Controller::curr()->redirect($this->redirectURL);
-  }
-
-  /**
    * Get the processor's form fields. Custom controllers use this function
    * to add the form fields specifically to gateways.
    *
@@ -318,6 +312,9 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     }
     else {
       //Gateway did not respond or did not validate
+
+      //Need to get the gateway response and save HTTP Status, errors etc. to Payment
+
       $this->payment->updatePaymentStatus(Payment::FAILURE);
       throw new Exception($result->message());
     }
@@ -376,18 +373,23 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
         $this->methodName,
         $this->payment->ID
     ));
+    $this->gateway->setReturnURL($returnURL);
+
+    //Which gateways use cancelURL? Should we not just have complete() action which marks Payment as success
+    //consider payment a failure otherwise?
+    /*
     $cancelURL = Director::absoluteURL(Controller::join_links(
         $this->link(),
         'cancel',
         $this->methodName,
         $this->payment->ID
     ));
-    $this->gateway->setReturnURL($returnURL);
     $this->gateway->setCancelURL($cancelURL);
+    */
 
-    //TODO use setRedirectURL() for this instead
+    //TODO use setReturnURL() for this instead
     // Save the redirection url in a session to be retrieved after the gateway returns
-    Session::set('PostRedirectionURL', $this->redirectURL);
+    //Session::set('PostRedirectionURL', $this->redirectURL);
     
     // Send a request to the gateway
     $result = $this->gateway->process($this->paymentData);
@@ -397,20 +399,21 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     //PaymentTestPage can then use the error message in the Excpetion or call gateway->validate() to get validaiton messages
   }
 
-  public function complete($response) {
-    // Reconstruct the gateway object
-    $this->setMethodName($response->param('ID'));
-    $this->gateway = PaymentFactory::get_gateway($this->methodName);
-    
-    // Retrieve the redirection url from Session
-    $this->redirectURL = Session::get('PostRedirectionURL');
+  public function complete($request) {
 
-    return parent::complete($response);
+    // Reconstruct the gateway object
+    $this->setMethodName($request->param('ID'));
+    $this->gateway = PaymentFactory::get_gateway($this->methodName);
+
+    return parent::complete($request);
   }
   
+  //When is a gateway going to return to cancel action?
+  /*
   public function cancel($response) {
     return $this->complete(new PaymentGateway_Result(PaymentGateway_Result::INCOMPLETE));
   }
+  */
 
   public function getPaymentObject($response) {
     return DataObject::get_by_id('Payment', $response->param('OtherID'));
