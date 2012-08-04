@@ -1,7 +1,11 @@
 <?php
 
 class DummyProcessor_MerchantHosted extends PaymentProcessor_MerchantHosted {
-
+  
+  /**
+   * Pre-fill the credit card fields with testing data
+   * @see PaymentProcessor_MerchantHosted::getCreditCardFields()
+   */
   public function getCreditCardFields() {
     $creditCardTypes = $this->gateway->getSupportedCreditCardType();
     $months = array_combine(range(1, 12), range(1, 12));
@@ -30,7 +34,6 @@ class DummyProcessor_MerchantHosted extends PaymentProcessor_MerchantHosted {
 
     return $fieldList;
   }
-
 }
 
 class DummyProcessor_GatewayHosted extends PaymentProcessor_GatewayHosted {
