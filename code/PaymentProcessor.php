@@ -122,7 +122,7 @@ class PaymentProcessor extends Controller {
     }
 
     //Need to double check that the payment is successful by querying the gateway
-    $this->payment->updatePaymentStatus(Payment::SUCCESS);
+    $this->payment->updateStatus(Payment::SUCCESS);
 
     // Do post-processing
     $this->doRedirect();
@@ -169,7 +169,6 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
   public function capture($data) {
     parent::capture($data);
     
-    // Call complete directly since there's no need to set return link
     $result = $this->gateway->process($this->paymentData);
 
     //$result will be PaymentGateway_Result, check status
@@ -177,17 +176,14 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     //Update the payment status with HTTPStatus etc.
     //Update the payment as success or failure etc.
 
-    if ($result->isSuccess()) {
-      $this->payment->updatePaymentStatus(Payment::SUCCESS, $this->gateway->gatewayResponse);
-    }
-    else {
-
+    if ($result && !$result->isSuccess()) {
       //Gateway did not respond or did not validate
-      $this->payment->updatePaymentStatus(Payment::FAILURE, $this->gateway->gatewayResponse);
+      $this->payment->updateStatus(Payment::FAILURE, $this->gateway->gatewayResponse);
       throw new Exception($result->message());
     }
 
-    //Make this consistent with gateay hosted
+    //Make this consistent with gateway hosted
+    //If the payment succeeded will be marked as success in complete()
     $request = new SS_HTTPRequest('GET', '/PaymentProcessor/complete', array(
       'PaymentID' => $this->payment->ID
     ));
@@ -264,7 +260,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
       //Gateway did not respond or did not validate
       //Need to get the gateway response and save HTTP Status, errors etc. to Payment
 
-      $this->payment->updatePaymentStatus(Payment::FAILURE, $this->gateway->gatewayResponse);
+      $this->payment->updateStatus(Payment::FAILURE, $this->gateway->gatewayResponse);
       throw new Exception($result->message());
     }
   }

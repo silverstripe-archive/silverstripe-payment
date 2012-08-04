@@ -60,7 +60,7 @@ class Payment extends DataObject {
    * @param String $status
    * @return true if successful, false otherwise
    */
-  public function updatePaymentStatus($status, SS_HTTPResponse $response = null) {
+  public function updateStatus($status, SS_HTTPResponse $response = null) {
 
 
     if ($status == self::SUCCESS || $status == self::FAILURE || 
