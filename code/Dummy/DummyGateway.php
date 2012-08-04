@@ -141,14 +141,13 @@ class DummyGateway_GatewayHosted extends PaymentGateway {
 /**
  * Mock external gateway with payment form fields
  */
-class DummyGateway_Controller extends Controller{
+class DummyGateway_Controller extends ContentController {
 
   function pay($request) {
-
-    return $this->customise(array(
+    return array(
       'Content' => "<h1>Fill out this form to make payment</h1>",
       'Form' => $this->PayForm()
-    ))->renderWith('Page');
+    );
   }
 
   function PayForm() {
