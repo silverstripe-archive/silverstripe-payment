@@ -21,6 +21,7 @@ Installation Instructions
 3. Enable supported payment methods in your application yaml file
 
 e.g: mysite/_config/Mysite.yaml
+```yaml
 PaymentGateway:
   environment:
     'dev'
@@ -32,6 +33,7 @@ PaymentProcessor:
     live:
       - 'DummyMerchantHosted'
       - 'DummyGatewayHosted'
+```
 
 Usage Overview
 --------------
