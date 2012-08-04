@@ -38,4 +38,13 @@ class DummyProcessor_MerchantHosted extends PaymentProcessor_MerchantHosted {
 
 class DummyProcessor_GatewayHosted extends PaymentProcessor_GatewayHosted {
 
+    public function getFormFields() {
+        $fieldList = parent::getFormFields();
+
+        $amountField = $fieldList->fieldByName('Amount');
+        $amountField->setValue('88.00');
+        $fieldList->replaceField('Amount', $amountField);
+
+        return $fieldList;
+      }
 }
