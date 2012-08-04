@@ -7,8 +7,8 @@ class DummyGateway_MerchantHosted extends PaymentGateway {
   
   public function getSupportedCreditCardType() {
     return array(
-      'master' => 'Master', 
-      'visa' => 'Visa'
+      'Visa' => 'Visa',
+      'MasterCard' => 'MasterCard'
     );
   }
   
@@ -28,6 +28,18 @@ class DummyGateway_MerchantHosted extends PaymentGateway {
     $result = $this->getValidationResult();
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
+
+    $options = array(
+      'firstName' => $data['FirstName'],
+      'lastName' => $data['LastName'],
+      'month' => $data['MonthExpiry'],
+      'year' => $data['YearExpiry'],
+      'type' => $data['CreditCardType'],
+      'number' => implode('', $data['CardNumber'])
+    );
+    
+    $cc = new CreditCard($options); 
+    $result->combineAnd($cc->validate());
     
     switch ($cents) {
       case 0.11:
@@ -53,9 +65,9 @@ class DummyGateway_MerchantHosted extends PaymentGateway {
     switch ($cents) {
       case 0.01:
         $this->gatewayResponse = new SS_HTTPResponse('Internal Server Error', 500);
-        return new PaymentGateway_Failure('Connection Error: 500 - Internal Server Error');
+        return new PaymentGateway_Failure($this->gatewayResponse->getBody());
       default:
-        //$this->gatewayResponse = new SS_HTTPResponse('OK', 200);
+        $this->gatewayResponse = new SS_HTTPResponse('OK', 200);
         return new PaymentGateway_Success();
     }
   }
@@ -117,7 +129,7 @@ class DummyGateway_GatewayHosted extends PaymentGateway {
     switch ($cents) {
       case 0.01:
         $this->gatewayResponse = new SS_HTTPResponse('Internal Server Error', 500);
-        return new PaymentGateway_Failure('Connection Error: 500 - Internal Server Error');
+        return new PaymentGateway_Failure($this->gatewayResponse->getBody());
     }
 
     $queryString = http_build_query($postData);
@@ -126,7 +138,7 @@ class DummyGateway_GatewayHosted extends PaymentGateway {
 }
 
 /**
- * Imaginary place to visit external gateway
+ * Mock external gateway with payment form fields
  */
 class DummyGateway_Controller extends Controller{
 

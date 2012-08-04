@@ -165,22 +165,6 @@ class PaymentProcessor extends Controller {
 }
 
 class PaymentProcessor_MerchantHosted extends PaymentProcessor {
-  
-  public function setup() {
-    parent::setup();
-    
-    // Construct a credit card object and add to the payment data
-    $options = array(
-      'firstName' => $this->paymentData['FirstName'],
-      'lastName' => $this->paymentData['LastName'],
-      'month' => $this->paymentData['MonthExpiry'],
-      'year' => $this->paymentData['YearExpiry'],
-      'type' => $this->paymentData['CreditCardType'],
-      'number' => implode('', $this->paymentData['CardNumber'])
-    );
-    
-    $this->paymentData['CreditCard'] = new CreditCard($options);    
-  }
 
   public function capture($data) {
     parent::capture($data);
