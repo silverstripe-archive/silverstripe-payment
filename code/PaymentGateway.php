@@ -141,7 +141,19 @@ abstract class PaymentGateway {
       $validationResult->error('Currency ' . $data['Currency'] . ' not supported by this gateway');
     }
 
-    
+    if (isset($data['CardNumber'])) {
+      $options = array(
+        'firstName' => $data['FirstName'],
+        'lastName' => $data['LastName'],
+        'month' => $data['MonthExpiry'],
+        'year' => $data['YearExpiry'],
+        'type' => $data['CreditCardType'],
+        'number' => implode('', $data['CardNumber'])
+      );
+      
+      $cc = new CreditCard($options);
+      $validationResult->combineAnd($cc->validate());
+    }    
     
     return $validationResult;
   }

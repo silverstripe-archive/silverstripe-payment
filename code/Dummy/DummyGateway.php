@@ -29,18 +29,6 @@ class DummyGateway_MerchantHosted extends PaymentGateway {
     $result = $this->getValidationResult();
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
-
-    $options = array(
-      'firstName' => $data['FirstName'],
-      'lastName' => $data['LastName'],
-      'month' => $data['MonthExpiry'],
-      'year' => $data['YearExpiry'],
-      'type' => $data['CreditCardType'],
-      'number' => implode('', $data['CardNumber'])
-    );
-    
-    $cc = new CreditCard($options); 
-    $result->combineAnd($cc->validate());
     
     switch ($cents) {
       case 0.11:
