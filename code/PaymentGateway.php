@@ -140,6 +140,8 @@ abstract class PaymentGateway {
     else if (! in_array($data['Currency'], $this->getSupportedCurrencies())) {
       $validationResult->error('Currency ' . $data['Currency'] . ' not supported by this gateway');
     }
+
+    
     
     return $validationResult;
   }

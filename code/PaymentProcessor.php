@@ -227,9 +227,11 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
       'FirstName', 
       'LastName', 
       'CardNumber', 
-      'DateExpiry', 
+      'MonthExpiry', 
+      'YearExpiry',
       'Cvc2'
     ));
+    return $required;
   }
 }
 
