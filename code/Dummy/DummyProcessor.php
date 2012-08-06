@@ -47,4 +47,13 @@ class DummyProcessor_GatewayHosted extends PaymentProcessor_GatewayHosted {
 
         return $fieldList;
       }
+
+    public function complete($request) {
+
+        // Reconstruct the gateway object
+        $this->setMethodName($request->param('ID'));
+        $this->gateway = PaymentFactory::get_gateway($this->methodName);
+
+        return parent::complete($request);
+    }
 }

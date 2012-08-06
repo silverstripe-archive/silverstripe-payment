@@ -153,8 +153,8 @@ abstract class PaymentGateway {
       
       $cc = new CreditCard($options);
       $validationResult->combineAnd($cc->validate());
-    }    
-    
+    }     
+     
     return $validationResult;
   }
   

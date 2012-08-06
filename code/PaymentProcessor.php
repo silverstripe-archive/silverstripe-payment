@@ -267,15 +267,6 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     }
   }
 
-  public function complete($request) {
-
-    // Reconstruct the gateway object
-    $this->setMethodName($request->param('ID'));
-    $this->gateway = PaymentFactory::get_gateway($this->methodName);
-
-    return parent::complete($request);
-  }
-
   public function getPaymentObject($request) {
     return DataObject::get_by_id('Payment', $request->param('OtherID'));
   }

@@ -68,7 +68,7 @@ class Payment extends DataObject {
 
       //TODO response message and status code - perhaps not save into message?
       if ($response) {
-        $this->Message = $response->getBody();
+        //$this->Message = $response->getBody();
         $this->HTTPStatus = $response->getStatusCode();
       }
 
