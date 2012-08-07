@@ -4,7 +4,7 @@
  *
  * @package payment
  */
-abstract class PaymentGateway {
+class PaymentGateway {
 
   /**
    * Default gateway environment. Override by adding settings to config yaml files.
@@ -138,7 +138,7 @@ abstract class PaymentGateway {
    *
    * @param array $data
    */
-  abstract public function process($data);
+  public function process($data);
   
   /**
    * Return a set of requirements for the payment data array for this gateway 
