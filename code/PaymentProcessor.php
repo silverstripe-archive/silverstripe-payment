@@ -148,7 +148,7 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     //Update the payment status with HTTPStatus etc.
     //Update the payment as success or failure etc.
     
-    if ($result && $result->isSuccess) {
+    if ($result && $result->isSuccess()) {
       $this->payment->updateStatus(Payment::SUCCESS);
     } else {
       //Gateway did not respond or did not validate
