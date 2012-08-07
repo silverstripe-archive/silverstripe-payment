@@ -137,8 +137,11 @@ class PaymentGateway {
    * To be implemented by individual gateway types 
    *
    * @param array $data
+   * @return PaymentGateway_Result
    */
-  public function process($data);
+  public function process($data) { 
+    return new PaymentGateway_Success();
+  }
   
   /**
    * Return a set of requirements for the payment data array for this gateway 
@@ -202,7 +205,9 @@ class PaymentGateway_GatewayHosted extends PaymentGateway {
    * @param SS_HTTPRequest $response
    * @return PaymentGateway_Result
    */
-  abstract public function parseResponse($response);
+   public function parseResponse($response) {
+     return new PaymentGateway_Success();
+   }
 }
 
 /**
