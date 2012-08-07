@@ -38,22 +38,13 @@ class DummyProcessor_MerchantHosted extends PaymentProcessor_MerchantHosted {
 
 class DummyProcessor_GatewayHosted extends PaymentProcessor_GatewayHosted {
 
-    public function getFormFields() {
-        $fieldList = parent::getFormFields();
+  public function getFormFields() {
+    $fieldList = parent::getFormFields();
 
-        $amountField = $fieldList->fieldByName('Amount');
-        $amountField->setValue('88.00');
-        $fieldList->replaceField('Amount', $amountField);
+    $amountField = $fieldList->fieldByName('Amount');
+    $amountField->setValue('88.00');
+    $fieldList->replaceField('Amount', $amountField);
 
-        return $fieldList;
-      }
-
-    public function complete($request) {
-
-        // Reconstruct the gateway object
-        $this->setMethodName($request->param('ID'));
-        $this->gateway = PaymentFactory::get_gateway($this->methodName);
-
-        return parent::complete($request);
-    }
+    return $fieldList;
+  }
 }

@@ -35,7 +35,7 @@ class Payment extends DataObject {
     'Status' => "Enum('Incomplete, Success, Failure, Pending')",
     'Amount' => 'Money',
     'Message' => 'Text',
-    'ErrorCodes' => 'Text',
+    'ErrorCode' => 'Text',
     'HTTPStatus' => 'Text',
     'Method' => 'Text'
   );
@@ -54,24 +54,36 @@ class Payment extends DataObject {
   
   /**
    * Update the status of this payment
-   * 
-   * TODO rename to updateStatus
    *
    * @param String $status
+   * @param String HTTPStatus 
+   * @param String $message
+   * @param array/String $error 
    * @return true if successful, false otherwise
    */
-  public function updateStatus($status, SS_HTTPResponse $response = null) {
-
-
+  public function updateStatus($status, $HTTPStatus = null, $message = null, $error = null) {
     if ($status == self::SUCCESS || $status == self::FAILURE || 
         $status == self::INCOMPLETE || $status == self::PENDING) {
 
-      //TODO response message and status code - perhaps not save into message?
-      if ($response) {
-        //$this->Message = $response->getBody();
-        $this->HTTPStatus = $response->getStatusCode();
+      // Save HTTP status
+      if (! $HTTPStatus) {
+        $HTTPStatus = '200';
       }
-
+      $this->HTTPStatus = $HTTPStatus;
+      
+      // Save messages and errors
+      if ($message) {
+        $this->Message = $message;
+      }
+      if ($error) {
+        if (is_array($error)) {
+          $this->ErrorCode = implode(',', $error);
+        } else {
+          $this->ErrorCode = $error;
+        }
+      } 
+      
+      // Save payment status and write to database
       $this->Status = $status;
       $this->write();
       

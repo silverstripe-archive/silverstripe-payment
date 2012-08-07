@@ -40,9 +40,8 @@ abstract class PaymentGateway {
   protected $cancelURL;
 
   private $validationResult;
-
-  public $gatewayResponse;
-
+  
+  private $gatewayResult;
 
   public static function get_environment() {
     return Config::inst()->get('PaymentGateway', 'environment');
@@ -50,32 +49,6 @@ abstract class PaymentGateway {
   
   public function __construct() {
     $this->validationResult = new ValidationResult();
-  }
-  
-  /**
-   * Set the return url, default to the site root
-   * 
-   * @param String $url
-   */
-  public function setReturnURL($url = null) {
-    if ($url) {
-      $this->returnURL = $url;
-    } else {
-      $this->returnURL = Director::absoluteBaseURL();
-    }
-  }
-  
-  /**
-   * Set the cancel url, default to the site root
-   * 
-   * @param String $url
-   */
-  public function setCancelURL($url) {
-    if ($url) {
-      $this->cancelURL = $url;
-    } else {
-      $this->cancelURL = Director::absoluteBaseURL();
-    }
   }
   
   public function getValidationResult() {
@@ -155,12 +128,13 @@ abstract class PaymentGateway {
       $validationResult->combineAnd($cc->validate());
     }         
     
+    $this->validationResult = $validationResult;
     return $validationResult;
   }
   
   /**
    * Send a request to the gateway to process the payment.
-   * To be implemented by individual gateway
+   * To be implemented by individual gateway types 
    *
    * @param array $data
    */
@@ -191,6 +165,44 @@ abstract class PaymentGateway {
     $service = new RestfulService($endpoint);
     return $service->request(null, 'POST', $data);
   }
+}
+
+class PaymentGateway_MerchantHosted extends PaymentGateway { }
+
+class PaymentGateway_GatewayHosted extends PaymentGateway { 
+  /**
+   * Set the return url, default to the site root
+   *
+   * @param String $url
+   */
+  public function setReturnURL($url = null) {
+    if ($url) {
+      $this->returnURL = $url;
+    } else {
+      $this->returnURL = Director::absoluteBaseURL();
+    }
+  }
+  
+  /**
+   * Set the cancel url, default to the site root
+   *
+   * @param String $url
+   */
+  public function setCancelURL($url) {
+    if ($url) {
+      $this->cancelURL = $url;
+    } else {
+      $this->cancelURL = Director::absoluteBaseURL();
+    }
+  }
+  
+  /**
+   * Parse the response object from the gateway and return the result
+   * 
+   * @param SS_HTTPRequest $response
+   * @return PaymentGateway_Result
+   */
+  abstract public function parseResponse($response);
 }
 
 /**

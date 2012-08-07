@@ -110,34 +110,6 @@ class PaymentProcessor extends Controller {
   }
 
   /**
-   * Process a payment response. 
-   * 
-   * @param SS_HTTPResponse $response
-   */
-  public function complete($request) {
-
-    // Retrieve the payment object if none is referenced at this point
-    if (! $this->payment) {
-      $this->payment = $this->getPaymentObject($request);
-    }
-
-    //Need to double check that the payment is successful by querying the gateway
-    $this->payment->updateStatus(Payment::SUCCESS);
-
-    // Do post-processing
-    $this->doRedirect();
-  }
-
-  /**
-   * Helper function to get the payment object from the gateway response.
-   * To be implemented by subclasses.
-   * 
-   * @return Payment
-   */
-  public function getPaymentObject($request) { 
-  }
-
-  /**
    * Get the processor's form fields. Custom controllers use this function
    * to add the form fields specifically to gateways.
    *
@@ -175,23 +147,20 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     //If failure throw an exception, payment test page can catch it
     //Update the payment status with HTTPStatus etc.
     //Update the payment as success or failure etc.
-
-    if ($result && !$result->isSuccess()) {
+    
+    if ($result && $result->isSuccess) {
+      $this->payment->updateStatus(Payment::SUCCESS);
+    } else {
       //Gateway did not respond or did not validate
-      $this->payment->updateStatus(Payment::FAILURE, $this->gateway->gatewayResponse);
+      $HTTPStatus = $result->HTTPResponse->getStatusCode();
+      $this->payment->updateStatus(Payment::FAILURE, $HTTPStatus, $result->message(), $result->codeList());
+      
+      // TODO: Create a separate exception for gateway result
       throw new Exception($result->message());
-    }
-
-    //Make this consistent with gateway hosted
-    //If the payment succeeded will be marked as success in complete()
-    $request = new SS_HTTPRequest('GET', '/PaymentProcessor/complete', array(
-      'PaymentID' => $this->payment->ID
-    ));
-    return $this->complete($request);
-  }
-  
-  public function getPaymentObject($request) {
-    return $this->payment;
+    }  
+    
+    // Do redirection
+    $this->doRedirect();
   }
   
   public function getCreditCardFields() {
@@ -266,7 +235,28 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
       throw new Exception($result->message());
     }
   }
-
+  
+  /**
+   * Process a payment response.
+   *
+   * @param SS_HTTPResponse $response
+   */
+  public function complete($request) {
+    // Retrieve the payment object if none is referenced at this point
+    if (! $this->payment) {
+      $this->payment = $this->getPaymentObject($request);
+    }
+    
+    // Reconstruct the gateway object
+    $methodName = $request->param('ID');
+    $this->gateway = PaymentFactory::get_gateway($methodName);
+  
+    // Query the gateway for 
+  
+    // Do post-processing
+    $this->doRedirect();
+  }
+  
   public function getPaymentObject($request) {
     return DataObject::get_by_id('Payment', $request->param('OtherID'));
   }

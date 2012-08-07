@@ -3,7 +3,7 @@
 /**
  * Test class for merchant-hosted payment
  */
-class DummyGateway_MerchantHosted extends PaymentGateway {
+class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
   
   public function getSupportedCreditCardType() {
     return array('visa', 'master');
@@ -65,7 +65,7 @@ class DummyGateway_MerchantHosted extends PaymentGateway {
 /**
  * Test class for gateway-hosted payment
  */
-class DummyGateway_GatewayHosted extends PaymentGateway {
+class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
   
   public function __construct() {
     parent::__construct();
@@ -122,6 +122,10 @@ class DummyGateway_GatewayHosted extends PaymentGateway {
 
     $queryString = http_build_query($postData);
     Controller::curr()->redirect($this->gatewayURL . '?' . $queryString);
+  }
+  
+  public function parseResponse($response) {
+    
   }
 }
 
