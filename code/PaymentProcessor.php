@@ -227,11 +227,15 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     //PaymentTestPage can then use the error message in the Excpetion or call gateway->validate() to get validaiton messages
 
     if ($result && !$result->isSuccess()) {
-
       //Gateway did not respond or did not validate
-      //Need to get the gateway response and save HTTP Status, errors etc. to Payment
-
-      $this->payment->updateStatus(Payment::FAILURE, $this->gateway->gatewayResponse);
+      //Need to save the gateway response and save HTTP Status, errors etc. to Payment
+      $this->payment->updateStatus(
+        Payment::FAILURE, 
+        $result->getHTTPResponse()->getStatusCode(),
+        $result->message(),
+        $result->errorList()
+      );
+      
       throw new Exception($result->message());
     }
   }

@@ -237,15 +237,17 @@ class PaymentGateway_Result extends ValidationResult {
   
   /**
    * @param String $status
-   * @param SS_HTTPResponse $response TODO: make $response compulsory
+   * @param SS_HTTPResponse $response
    * @param String $message
    */
   function __construct($status, $message = null, $response = null) {
-    if ($response) {
-      $this->HTTPResponse = $response;
+    if (! $response) {
+      $response = new SS_HTTPResponse('', 200);
     }
     
+    $this->HTTPResponse = $response;
     $this->setStatus($status);
+    
     parent::__construct($this->valid, $message);
   }
   

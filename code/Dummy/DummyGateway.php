@@ -52,11 +52,11 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
 
     switch ($cents) {
       case 0.01:
-        return new PaymentGateway_Failure(new SS_HTTPResponse('Internal Server Error', 500));
+        return new PaymentGateway_Failure(null, new SS_HTTPResponse('Internal Server Error', 500));
       case 0.02:
-        return new PaymentGateay_Failure(null, "Payment cannot be completed");
+        return new PaymentGateay_Failure("Payment cannot be completed");
       case 0.03:
-        return new PaymentGateay_Incomplete(null, "Awaiting payment confirmation");
+        return new PaymentGateay_Incomplete("Awaiting payment confirmation");
       default:
         return new PaymentGateway_Success();
     }
@@ -115,10 +115,8 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
 
-    switch ($cents) {
-      case 0.01:
-        $this->gatewayResponse = new SS_HTTPResponse('Internal Server Error', 500);
-        return new PaymentGateway_Failure($this->gatewayResponse->getBody());
+    if ($cents == 0.01) {
+      return new PaymentGateway_Failure(null, new SS_HTTPResponse('Internal Server Error', 500));
     }
 
     $queryString = http_build_query($postData);
