@@ -40,7 +40,6 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
   }
 
   public function process($data) {
-
     //Validate first
     $result = $this->validate($data);
     if (!$result->valid()) {
@@ -53,10 +52,12 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
 
     switch ($cents) {
       case 0.01:
-        $this->gatewayResponse = new SS_HTTPResponse('Internal Server Error', 500);
-        return new PaymentGateway_Failure($this->gatewayResponse->getBody());
+        return new PaymentGateway_Failure(new SS_HTTPResponse('Internal Server Error', 500));
+      case 0.02:
+        return new PaymentGateay_Failure(null, "Payment cannot be completed");
+      case 0.03:
+        return new PaymentGateay_Incomplete(null, "Awaiting payment confirmation");
       default:
-        $this->gatewayResponse = new SS_HTTPResponse('OK', 200);
         return new PaymentGateway_Success();
     }
   }
@@ -110,7 +111,7 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
       'ReturnURL' => $this->returnURL    
     ); 
 
-    //Mimic failures, like a gateway response such as 404, 500 etc.
+    //Mimic HTTP failure
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
 

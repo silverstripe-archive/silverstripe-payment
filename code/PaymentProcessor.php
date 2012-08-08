@@ -152,7 +152,7 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
       $this->payment->updateStatus(Payment::SUCCESS);
     } else {
       //Gateway did not respond or did not validate
-      $HTTPStatus = $result->HTTPResponse->getStatusCode();
+      $HTTPStatus = $result->getHTTPResponse()->getStatusCode();
       $this->payment->updateStatus(Payment::FAILURE, $HTTPStatus, $result->message(), $result->codeList());
       
       // TODO: Create a separate exception for gateway result

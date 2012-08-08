@@ -227,11 +227,34 @@ class PaymentGateway_Result extends ValidationResult {
    * @var String
    */
   protected $status;
-
-  function __construct($status, $message = null) {
-
+  
+  /**
+   * The HTTP response object passed back from the gateway
+   * 
+   * @var SS_HTTPResponse
+   */
+  protected $HTTPResponse;
+  
+  /**
+   * @param String $status
+   * @param SS_HTTPResponse $response TODO: make $response compulsory
+   * @param String $message
+   */
+  function __construct($status, $message = null, $response = null) {
+    if ($response) {
+      $this->HTTPResponse = $response;
+    }
+    
     $this->setStatus($status);
     parent::__construct($this->valid, $message);
+  }
+  
+  public function getHTTPResponse() {
+    return $this->HTTPResponse;
+  }
+  
+  public function getStatus() {
+    return $this->status;
   }
   
   /**
@@ -271,30 +294,26 @@ class PaymentGateway_Result extends ValidationResult {
     $this->status = self::FAILURE;
     return parent::error($message, $code);
   }
-
-  public function getStatus() {
-    return $this->status;
-  }
 }
 
 class PaymentGateway_Success extends PaymentGateway_Result {
 
   function __construct($message = null) {
-    parent::__construct(self::SUCCESS, $message);
+    parent::__construct(self::SUCCESS, null, $message);
   }
 }
 
 class PaymentGateway_Failure extends PaymentGateway_Result {
 
-  function __construct($message = null) {
-    parent::__construct(self::FAILURE, $message);
+  function __construct($message = null, $response = null) {
+    parent::__construct(self::FAILURE, $message, $response);
   }
 }
 
 class PaymentGateway_Incomplete extends PaymentGateway_Result {
 
-  function __construct($message = null) {
-    parent::__construct(self::INCOMPLETE, $message);
+  function __construct($message = null, $response = null) {
+    parent::__construct(self::INCOMPLETE, $message, $response);
   }
 }
 
