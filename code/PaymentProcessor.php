@@ -13,35 +13,35 @@
 class PaymentProcessor extends Controller {
   /**
    * The method name of this controller
-   * 
+   *
    * @var String
    */
   protected $methodName;
 
   /**
    * The payment object to be injected to this controller
-   * 
+   *
    * @var Payment
    */
   public $payment;
 
   /**
    * The gateway object to be injected to this controller
-   * 
+   *
    * @var PaymentGateway
    */
   public $gateway;
-  
+
   /**
    * The payment data array
-   * 
-   * @var array 
+   *
+   * @var array
    */
   public $paymentData;
-  
+
   /**
    * Get the supported methods array set by the yaml configuraion
-   * 
+   *
    * @return array
    */
   public static function get_supported_methods() {
@@ -67,7 +67,7 @@ class PaymentProcessor extends Controller {
   public function setMethodName($method) {
     $this->methodName = $method;
   }
-  
+
   public function setRedirectURL($url) {
     Session::set('PostRedirectionURL', $url);
   }
@@ -84,18 +84,18 @@ class PaymentProcessor extends Controller {
     Session::set('PaymentID', $this->payment->ID);
     Controller::curr()->redirect($this->getRedirectURL());
   }
-  
+
   /**
    * Save preliminary data to database before processing payment
    */
-  public function setup() { 
+  public function setup() {
     $this->payment->Amount->Amount = $this->paymentData['Amount'];
     $this->payment->Amount->Currency = $this->paymentData['Currency'];
     $this->payment->Status = Payment::PENDING;
     $this->payment->Method = $this->methodName;
     $this->payment->write();
   }
-  
+
   /**
    * Process a payment request. To be extending by individual processor type
    *
@@ -104,7 +104,7 @@ class PaymentProcessor extends Controller {
    */
   public function capture($data) {
     $this->paymentData = $data;
-    
+
     // Do pre-processing
     $this->setup();
   }
@@ -119,16 +119,16 @@ class PaymentProcessor extends Controller {
     $fieldList = new FieldList();
 
     $fieldList->push(new NumericField('Amount', 'Amount', ''));
-    
+
     $currencies = array_combine($this->gateway->getSupportedCurrencies(), $this->gateway->getSupportedCurrencies());
     $fieldList->push(new DropDownField('Currency', 'Select currency :', $currencies));
 
     return $fieldList;
   }
-  
+
   /**
    * Get the form requirements
-   * 
+   *
    * @return RequiredFields
    */
   public function getFormRequirements() {
@@ -140,37 +140,37 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
   public function capture($data) {
     parent::capture($data);
-    
+
     $result = $this->gateway->process($this->paymentData);
 
     //$result will be PaymentGateway_Result, check status
     //If failure throw an exception, payment test page can catch it
     //Update the payment status with HTTPStatus etc.
     //Update the payment as success or failure etc.
-    
+
     if ($result && $result->isSuccess()) {
       $this->payment->updateStatus(Payment::SUCCESS);
     } else {
       //Gateway did not respond or did not validate
       $HTTPStatus = $result->getHTTPResponse()->getStatusCode();
       $this->payment->updateStatus(Payment::FAILURE, $HTTPStatus, $result->message(), $result->codeList());
-      
+
       // TODO: Create a separate exception for gateway result
       throw new Exception($result->message());
-    }  
-    
+    }
+
     // Do redirection
     $this->doRedirect();
   }
-  
+
   public function getCreditCardFields() {
     // Retrieve the array of credit card types to be put in a credit card form field
     $creditCardTypes = $this->gateway->getSupportedCreditCardType();
     $creditCardTypeDisplays = CreditCard::getCreditCardTypeDisplays($creditCardTypes);
-    
+
     $months = array_combine(range(1, 12), range(1, 12));
     $years = array_combine(range(date('Y'), date('Y') + 10), range(date('Y'), date('Y') + 10));
-    
+
     $fieldList = new FieldList();
     $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $creditCardTypeDisplays));
     $fieldList->push(new TextField('FirstName', 'First Name:'));
@@ -179,7 +179,7 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     $fieldList->push(new DropDownField('MonthExpiry', 'Expiration Month: ', $months));
     $fieldList->push(new DropDownField('YearExpiry', 'Expiration Year: ', $years));
     $fieldList->push(new TextField('Cvc2', 'Credit Card CVN: (3 or 4 digits)', '', 4));
-    
+
     return $fieldList;
   }
 
@@ -189,14 +189,14 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
     return $fieldList;
   }
-  
+
   public function getFormRequirements() {
     $required = parent::getFormRequirements();
     $required->appendRequiredFields(new RequiredFields(
-      'FirstName', 
-      'LastName', 
-      'CardNumber', 
-      'MonthExpiry', 
+      'FirstName',
+      'LastName',
+      'CardNumber',
+      'MonthExpiry',
       'YearExpiry',
       'Cvc2'
     ));
@@ -222,7 +222,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     // Send a request to the gateway
     $result = $this->gateway->process($this->paymentData);
 
-    //processing may not get to here if all goes smoothly, customer will be at the 3rd party gateway 
+    //processing may not get to here if all goes smoothly, customer will be at the 3rd party gateway
     //$result may be a PaymentGateway_Result, if failure throw exception with message from gateway result
     //PaymentTestPage can then use the error message in the Excpetion or call gateway->validate() to get validaiton messages
 
@@ -230,16 +230,16 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
       //Gateway did not respond or did not validate
       //Need to save the gateway response and save HTTP Status, errors etc. to Payment
       $this->payment->updateStatus(
-        Payment::FAILURE, 
+        Payment::FAILURE,
         $result->getHTTPResponse()->getStatusCode(),
         $result->message(),
         $result->errorList()
       );
-      
+
       throw new Exception($result->message());
     }
   }
-  
+
   /**
    * Process a payment response.
    *
@@ -250,17 +250,28 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     if (! $this->payment) {
       $this->payment = $this->getPaymentObject($request);
     }
-    
+
     // Reconstruct the gateway object
     $methodName = $request->param('ID');
     $this->gateway = PaymentFactory::get_gateway($methodName);
-  
-    // Query the gateway for 
-  
+
+    // Query the gateway for the payment result
+    $result = $this->gateway->parseResponse($request);
+    if ($result && $result->isSuccess()) {
+      $this->payment->updateStatus(Payment::SUCCESS);
+    } else {
+      //Gateway did not respond or did not validate
+      $HTTPStatus = $result->getHTTPResponse()->getStatusCode();
+      $this->payment->updateStatus(Payment::FAILURE, $HTTPStatus, $result->message(), $result->codeList());
+
+      // TODO: Create a separate exception for gateway result
+      throw new Exception($result->message());
+    }
+
     // Do post-processing
     $this->doRedirect();
   }
-  
+
   public function getPaymentObject($request) {
     return DataObject::get_by_id('Payment', $request->param('OtherID'));
   }
