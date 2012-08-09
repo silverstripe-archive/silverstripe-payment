@@ -42,7 +42,6 @@ class Payment extends DataObject {
   );
   
   public static $has_one = array(
-    'PaidFor' => 'Object',
     'PaidBy' => 'Member',
   );
   
