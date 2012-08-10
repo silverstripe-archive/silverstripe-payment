@@ -22,7 +22,6 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
    * @return ValidationResult
    */
   public function validate($data) {
-
     //Use this->validationResult so that all errors are added and can be accessible from Payment Test
     //TODO this should do actual validation of the data 
 
@@ -54,9 +53,9 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
       case 0.01:
         return new PaymentGateway_Failure(null, new SS_HTTPResponse('Internal Server Error', 500));
       case 0.02:
-        return new PaymentGateay_Failure("Payment cannot be completed");
+        return new PaymentGateway_Failure("Payment cannot be completed");
       case 0.03:
-        return new PaymentGateay_Incomplete("Awaiting payment confirmation");
+        return new PaymentGateway_Incomplete("Awaiting payment confirmation");
       default:
         return new PaymentGateway_Success();
     }
@@ -82,7 +81,6 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
    * @return ValidationResult
    */
   public function validate($data) {
-
     $result = $this->getValidationResult();
 
     $amount = $data['Amount'];
@@ -98,7 +96,6 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
   }
 
   public function process($data) {
-
     //Validate first
     $result = $this->validate($data);
     if (!$result->valid()) {
@@ -123,8 +120,9 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
     Controller::curr()->redirect($this->gatewayURL . '?' . $queryString);
   }
   
-  public function parseResponse($response) {
-    
+  public function getResponse($response) {
+    // TODO: Set different results for testing purpose
+    return new PaymentGateway_Success();
   }
 }
 
@@ -141,7 +139,6 @@ class DummyGateway_Controller extends ContentController {
   }
 
   function PayForm() {
-
     $request = $this->getRequest();
 
     $fields = new FieldList(
@@ -163,7 +160,6 @@ class DummyGateway_Controller extends ContentController {
   }
 
   function dopay($data, $form) {
-
     $returnURL = $data['ReturnURL'];
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);

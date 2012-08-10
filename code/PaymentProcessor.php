@@ -233,7 +233,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
         Payment::FAILURE,
         $result->getHTTPResponse()->getStatusCode(),
         $result->message(),
-        $result->errorList()
+        $result->codeList()
       );
 
       throw new Exception($result->message());
@@ -256,7 +256,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     $this->gateway = PaymentFactory::get_gateway($methodName);
 
     // Query the gateway for the payment result
-    $result = $this->gateway->parseResponse($request);
+    $result = $this->gateway->getResponse($request);
     if ($result && $result->isSuccess()) {
       $this->payment->updateStatus(Payment::SUCCESS);
     } else {
