@@ -4,31 +4,31 @@
  * Test class for merchant-hosted payment
  */
 class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
-  
+
   public function getSupportedCreditCardType() {
     return array('visa', 'master');
   }
-  
+
   protected function creditCardTypeIDMapping() {
     return array();
   }
-  
+
   /**
    * Override to cancel data validation
-   * 
+   *
    * @see PaymentGateway::validate()
-   * 
+   *
    * @param Array $data
    * @return ValidationResult
    */
   public function validate($data) {
     //Use this->validationResult so that all errors are added and can be accessible from Payment Test
-    //TODO this should do actual validation of the data 
+    //TODO this should do actual validation of the data
 
     $result = $this->getValidationResult();
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
-    
+
     switch ($cents) {
       case 0.11:
         $result->error('Cents value is .11');
@@ -42,7 +42,7 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
     //Validate first
     $result = $this->validate($data);
     if (!$result->valid()) {
-      return new PaymentGateway_Failure($result->message());
+      return new PaymentGateway_Failure(null, $result->message());
     }
 
     //Mimic failures, like a gateway response such as 404, 500 etc.
@@ -51,9 +51,9 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
 
     switch ($cents) {
       case 0.01:
-        return new PaymentGateway_Failure(null, new SS_HTTPResponse('Internal Server Error', 500));
+        return new PaymentGateway_Failure(new SS_HTTPResponse('Internal Server Error', 500));
       case 0.02:
-        return new PaymentGateway_Failure("Payment cannot be completed");
+        return new PaymentGateway_Failure(null, "Payment cannot be completed");
       case 0.03:
         return new PaymentGateway_Incomplete("Awaiting payment confirmation");
       default:
@@ -66,17 +66,17 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
  * Test class for gateway-hosted payment
  */
 class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
-  
+
   public function __construct() {
     parent::__construct();
     $this->gatewayURL = Director::baseURL() . 'dummy/external/pay';
   }
-  
+
   /**
    * Override to cancel validation
-   * 
+   *
    * @see PaymentGateway::validate()
-   * 
+   *
    * @param Array $data
    * @return ValidationResult
    */
@@ -85,7 +85,7 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
 
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
-    
+
     switch ($cents) {
       case 0.11:
         $result->error('Cents value is .11');
@@ -99,27 +99,27 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
     //Validate first
     $result = $this->validate($data);
     if (!$result->valid()) {
-      return new PaymentGateway_Failure($result->message());
+      return new PaymentGateway_Failure(null, $result->message());
     }
 
     $postData = array(
       'Amount' => $data['Amount'],
       'Currency' => $data['Currency'],
-      'ReturnURL' => $this->returnURL    
-    ); 
+      'ReturnURL' => $this->returnURL
+    );
 
     //Mimic HTTP failure
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
 
     if ($cents == 0.01) {
-      return new PaymentGateway_Failure(null, new SS_HTTPResponse('Internal Server Error', 500));
+      return new PaymentGateway_Failure(new SS_HTTPResponse('Internal Server Error', 500));
     }
 
     $queryString = http_build_query($postData);
     Controller::curr()->redirect($this->gatewayURL . '?' . $queryString);
   }
-  
+
   public function getResponse($response) {
     // TODO: Set different results for testing purpose
     return new PaymentGateway_Success();
@@ -166,7 +166,7 @@ class DummyGateway_Controller extends ContentController {
 
     if ($returnURL) {
       Controller::redirect($returnURL);
-    } 
+    }
     else {
       // TODO: Return a error for processor to handle rather than user_error
       user_error("Return URL is not set for this transaction", E_USER_ERROR);
