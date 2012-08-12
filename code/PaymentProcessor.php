@@ -107,6 +107,16 @@ class PaymentProcessor extends Controller {
 
     // Do pre-processing
     $this->setup();
+
+    // Validate the payment data
+    $validation = $this->gateway->validate($this->paymentData);
+    if (! $validation->valid()) {
+      // Use the exception message to identify this is a validation exception
+      // Payment pages can call gateway->getValidationResult() to get all the
+      // validation error messages
+      // TODO: It's better to have a separate exception class for this.
+      throw new Exception("Validation Exception");
+    }
   }
 
   /**
@@ -143,21 +153,16 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
     $result = $this->gateway->process($this->paymentData);
 
-    //$result will be PaymentGateway_Result, check status
-    //If failure throw an exception, payment test page can catch it
-    //Update the payment status with HTTPStatus etc.
-    //Update the payment as success or failure etc.
-
-    if ($result && $result->isSuccess()) {
-      $this->payment->updateStatus(Payment::SUCCESS);
-    } else {
-      //Gateway did not respond or did not validate
-      $HTTPStatus = $result->getHTTPResponse()->getStatusCode();
-      $this->payment->updateStatus(Payment::FAILURE, $HTTPStatus, $result->message(), $result->codeList());
-
-      // TODO: Create a separate exception for gateway result
-      throw new Exception($result->message());
-    }
+    // $result will be PaymentGateway_Result, check status
+    // Update the payment status with HTTPStatus etc.
+    // Update the payment as success or failure etc.
+    $HTTPStatus = $result->getHTTPResponse()->getStatusCode();
+    $this->payment->updateStatus(
+      $result->getStatus(),
+      $result->getHTTPResponse()->getStatusCode(),
+      $result->getMessage(),
+      $result->getErrors()
+    );
 
     // Do redirection
     $this->doRedirect();
@@ -222,21 +227,22 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     // Send a request to the gateway
     $result = $this->gateway->process($this->paymentData);
 
-    //processing may not get to here if all goes smoothly, customer will be at the 3rd party gateway
-    //$result may be a PaymentGateway_Result, if failure throw exception with message from gateway result
-    //PaymentTestPage can then use the error message in the Excpetion or call gateway->validate() to get validaiton messages
-
+    // Processing may not get to here if all goes smoothly, customer will be at the 3rd party gateway
+    // Get the errors from the
     if ($result && !$result->isSuccess()) {
-      //Gateway did not respond or did not validate
-      //Need to save the gateway response and save HTTP Status, errors etc. to Payment
+      // Gateway did not respond or respond with error
+      // Need to save the gateway response and save HTTP Status, errors etc. to Payment
       $this->payment->updateStatus(
         Payment::FAILURE,
         $result->getHTTPResponse()->getStatusCode(),
-        $result->message(),
-        $result->codeList()
+        $result->getMessage(),
+        $result->getErrors()
       );
 
-      throw new Exception($result->message());
+      // Payment has failed - redirect to confirmation page
+      // Developers can get the failure data from the database to show
+      // the proper errors to users
+      $this->doRedirect();
     }
   }
 
@@ -257,18 +263,14 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 
     // Query the gateway for the payment result
     $result = $this->gateway->getResponse($request);
-    if ($result && $result->isSuccess()) {
-      $this->payment->updateStatus(Payment::SUCCESS);
-    } else {
-      //Gateway did not respond or did not validate
-      $HTTPStatus = $result->getHTTPResponse()->getStatusCode();
-      $this->payment->updateStatus(Payment::FAILURE, $HTTPStatus, $result->message(), $result->codeList());
+    $this->payment->updateStatus(
+      $result->getStatus(),
+      $result->getHTTPResponse()->getStatusCode(),
+      $result->getMessage(),
+      $result->getErrors()
+    );
 
-      // TODO: Create a separate exception for gateway result
-      throw new Exception($result->message());
-    }
-
-    // Do post-processing
+    // Do redirection
     $this->doRedirect();
   }
 
