@@ -1,8 +1,8 @@
-<?php 
+<?php
 
 /**
  * "Abstract" class for a number of payment models
- * 
+ *
  *  @package payment
  */
 class Payment extends DataObject {
@@ -15,15 +15,15 @@ class Payment extends DataObject {
   const FAILURE = 'Failure';
   const INCOMPLETE = 'Incomplete';
   const PENDING = 'Pending';
-  
+
   public function getFormRequirements() {
     if (!$this->requiredFormFields) {
       $this->requiredFormFields = array();
     }
-    
+
     return $this->requiredFormFields;
   }
-  
+
   /**
    * Incomplete (default): Payment created but nothing confirmed as successful
    * Success: Payment successful
@@ -36,33 +36,34 @@ class Payment extends DataObject {
     'Amount' => 'Money',
     'Currency' => 'Text',
     'Message' => 'Text',
+    'ErrorMessage' => 'Text',
     'ErrorCode' => 'Text',
     'HTTPStatus' => 'Text',
     'Method' => 'Text'
   );
-  
+
   public static $has_one = array(
     'PaidBy' => 'Member',
   );
-  
+
   /**
    * Make payment table transactional.
    */
   static $create_table_options = array(
     'MySQLDatabase' => 'ENGINE=InnoDB'
   );
-  
+
   /**
    * Update the status of this payment
    *
    * @param String $status
-   * @param String HTTPStatus 
+   * @param String HTTPStatus
    * @param String $message
-   * @param array/String $error 
+   * @param array/String $error
    * @return true if successful, false otherwise
    */
   public function updateStatus($status, $HTTPStatus = null, $message = null, $error = null) {
-    if ($status == self::SUCCESS || $status == self::FAILURE || 
+    if ($status == self::SUCCESS || $status == self::FAILURE ||
         $status == self::INCOMPLETE || $status == self::PENDING) {
 
       // Save HTTP status
@@ -70,27 +71,29 @@ class Payment extends DataObject {
         $HTTPStatus = '200';
       }
       $this->HTTPStatus = $HTTPStatus;
-      
-      // Save messages and errors
+
+      // Save gateway message
       if ($message) {
         $this->Message = $message;
       }
+
+      // Save error messages and codes
       if ($error) {
-        if (is_array($error)) {
-          $this->ErrorCode = implode(',', $error);
+        if (! is_array($error)) {
+          throw new Exception("Error parameter is not an array");
         } else {
-          $this->ErrorCode = $error;
+          $this->ErrorCode = implode(';', array_keys($error));
+          $this->ErrorMessage = implode(';', array_values($error));
         }
-      } 
-      
+      }
+
       // Save payment status and write to database
       $this->Status = $status;
       $this->write();
-      
+
       return true;
-    } 
-    else {
-      return false;
+    } else {
+      throw new Exception("Payment status invalid");
     }
   }
 }
