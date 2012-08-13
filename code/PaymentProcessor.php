@@ -249,7 +249,9 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
   /**
    * Process a payment response.
    *
-   * @param SS_HTTPResponse $response
+   * @param SS_HTTPResponse $request. This is the object representation for
+   * the http request received from the gateway. This request will be forwarded
+   * to gateway->getResult() for gateway-specific processing
    */
   public function complete($request) {
     // Retrieve the payment object if none is referenced at this point
