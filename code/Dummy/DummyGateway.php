@@ -110,21 +110,19 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
   }
 
   public function getResponse($response) {
-    parse_str($response->getBody(), $responseArr);
-
-    switch($responseArr['Status']) {
+    switch($response->getVar('Status')) {
       case 'Success':
         return new PaymentGateway_Success;
         break;
       case 'Failure':
         return new PaymentGateway_Failure(
           $response,
-          $responseArr['Message'],
-          array($responseArr['ErrorCode'] => $responseArr['ErrorMessage'])
+          $response->getVar('Message'),
+          array($response->getVar('ErrorCode') => $response->getVar('ErrorMessage'))
         );
         break;
       case 'Incomplete':
-        return new PaymentGateway_Incomplete($response, $responseArr['Message']);
+        return new PaymentGateway_Incomplete($response, $response->getVar('Message'));
         break;
       default:
         return new PaymentGateway_Success();
