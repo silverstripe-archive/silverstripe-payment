@@ -1,39 +1,39 @@
-SilverStripe Payment Test Module
-================================
+# SilverStripe Payment Module
 
-Maintainer Contacts
--------------------
+
+## Maintainer Contacts
+---------------------
 *  Ryan Dao
 *  Frank Mullenger
 *  Jeremy Shipman
 
-Requirements
-------------
+## Requirements
+---------------------
 * SilverStripe 3.0
 
-Documentation
--------------
+## Documentation
+---------------------
+### Usage Overview
+This module provides the base API for various payment methods 
 
-Installation Instructions
--------------------------
+### Installation Instructions
+
 1. Place this directory in the root of your SilverStripe installation and call it 'payment'.
 2. Visit yoursite.com/dev/build to rebuild the database.
-3. Enable supported payment methods in your application yaml file
+3. Set the environment (optional). If not set, the default value is set to SilverStripe environment.
 
-e.g: mysite/_config/Mysite.yaml
-```yaml
-PaymentGateway:
-  environment:
-    'dev'
+        PaymentGateway:
+          'environment':
+            'dev'
+   
+            
+4. Enable supported payment methods in your application yaml file. Make sure that the respective sub-modules are installed. Only Dummy payment methods are shipped with the module.
 
-PaymentProcessor:
-  supported_methods:
-    dev:
-      - 'DummyMerchantHosted'
-    live:
-      - 'DummyMerchantHosted'
-      - 'DummyGatewayHosted'
-```
-
-Usage Overview
---------------
+        PaymentProcessor:
+          supported_methods:
+            'dev':
+              - 'DummyMerchantHosted'
+              - 'DummyGatewayHosted'
+            'live':
+              - 'PayPalDirect'
+              - 'PayPalExpress'
