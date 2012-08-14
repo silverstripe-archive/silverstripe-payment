@@ -34,7 +34,6 @@ class Payment extends DataObject {
   public static $db = array(
     'Status' => "Enum('Incomplete, Success, Failure, Pending')",
     'Amount' => 'Money',
-    'Currency' => 'Text',
     'Message' => 'Text',
     'ErrorMessage' => 'Text',
     'ErrorCode' => 'Text',

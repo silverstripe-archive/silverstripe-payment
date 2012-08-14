@@ -191,12 +191,12 @@ class PaymentGateway_GatewayHosted extends PaymentGateway {
   }
 
   /**
-   * Get the response object from the gateway and return the result
+   * Pass the response object to the gateway and return the result
    *
-   * @param SS_HTTPRequest $response
+   * @param SS_HTTPRequest $request
    * @return PaymentGateway_Result
    */
-   public function getResponse($response) {
+   public function getResponse($request) {
      return new PaymentGateway_Success();
    }
 }
