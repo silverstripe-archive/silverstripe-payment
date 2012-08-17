@@ -1,28 +1,16 @@
 <?php
 
 /**
- * "Abstract" class for a number of payment models
- *
- *  @package payment
+ * Model class for a number of payment models
  */
 class Payment extends DataObject {
 
-  /**
-   * Constants for payment statuses
-   * TODO maybe these constants should be linked/coupled to the Gateway constants?
-   */
+
+  /* Constants for payment statuses */
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
   const INCOMPLETE = 'Incomplete';
   const PENDING = 'Pending';
-
-  public function getFormRequirements() {
-    if (!$this->requiredFormFields) {
-      $this->requiredFormFields = array();
-    }
-
-    return $this->requiredFormFields;
-  }
 
   /**
    * Incomplete (default): Payment created but nothing confirmed as successful
@@ -56,10 +44,10 @@ class Payment extends DataObject {
    * Update the status of this payment
    *
    * @param String $status
-   * @param String HTTPStatus
+   * @param String $HTTPStatus
    * @param String $message
-   * @param array/String $error
-   * @return true if successful, false otherwise
+   * @param array|String $error
+   * @return bool true if successful, false otherwise
    */
   public function updateStatus($status, $HTTPStatus = null, $message = null, $error = null) {
     if ($status == self::SUCCESS || $status == self::FAILURE ||

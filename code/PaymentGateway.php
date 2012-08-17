@@ -1,8 +1,6 @@
 <?php
 /**
- * Abstract class for a number of payment gateways
- *
- * @package payment
+ * Parent class for a number of payment gateways
  */
 class PaymentGateway {
 
@@ -27,10 +25,25 @@ class PaymentGateway {
    */
   protected $cancelURL;
 
+  /**
+   * Object holding the gateway validation result
+   *
+   * @var ValidationResult
+   */
   private $validationResult;
 
+  /**
+   * Object holding the result from gateway
+   *
+   * @var PaymentGateway_Result
+   */
   private $gatewayResult;
 
+  /**
+   * Get the payment environment.
+   * The environment is retrieved from the config yaml file.
+   * If no environment is specified, assume SilverStripe's environment.
+   */
   public static function get_environment() {
     if (Config::inst()->get('PaymentGateway', 'environment')) {
       return Config::inst()->get('PaymentGateway', 'environment');
@@ -53,7 +66,7 @@ class PaymentGateway {
   /**
    * Get the list of credit card types supported by this gateway
    *
-   * @return array({Credit Card Type})
+   * @return array Array of credit card types
    */
   public function getSupportedCreditCardType() {
     return array();
@@ -63,7 +76,7 @@ class PaymentGateway {
    * A mapping of credit card type ids provided by the CreditCard class and
    * the credit card type ids required by the gateay.
    *
-   * @return array('CreditCard class id' => 'Gateway id')
+   * @return array Array of CreditCardClassID => GatewayID
    */
    protected function creditCardTypeIDMapping() {
      return array();
@@ -80,9 +93,8 @@ class PaymentGateway {
 
   /**
    * Validate the payment data against the gateway-specific requirements
-   * TODO use $this->data instead of passing $data
    *
-   * @param Array $data
+   * @param array $data
    * @return ValidationResult
    */
   public function validate($data) {
@@ -125,7 +137,7 @@ class PaymentGateway {
 
   /**
    * Send a request to the gateway to process the payment.
-   * To be implemented by individual gateway types
+   * To be implemented by individual gateways
    *
    * @param array $data
    * @return PaymentGateway_Result
@@ -135,7 +147,7 @@ class PaymentGateway {
   }
 
   /**
-   * Return a set of requirements for the payment data array for this gateway
+   * Return a set of requirements for the payment data to be proccessed
    *
    * @return array
    */
@@ -147,7 +159,7 @@ class PaymentGateway {
    * Post a set of payment data to a remote server
    *
    * @param array $data
-   * @param String $endpoint. If not set, assume $gatewayURL
+   * @param String $endpoint If not set, assume $gatewayURL
    *
    * @return RestfulService_Response
    */
@@ -161,8 +173,14 @@ class PaymentGateway {
   }
 }
 
+/**
+ * Parent class for all merchant-hosted gateways
+ */
 class PaymentGateway_MerchantHosted extends PaymentGateway { }
 
+/**
+ * Parent class for all gateway-hosted gateways
+ */
 class PaymentGateway_GatewayHosted extends PaymentGateway {
   /**
    * Set the return url, default to the site root
@@ -203,17 +221,15 @@ class PaymentGateway_GatewayHosted extends PaymentGateway {
 
 /**
  * Class for gateway results
- *
- * TODO break down into Failure_Result, Success_Result, Incomplete_Result for convenience?
  */
 class PaymentGateway_Result {
-
+  /* Constants for gateway result status */
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
   const INCOMPLETE = 'Incomplete';
 
   /**
-   * Status of payment processing
+   * Status of the payment being processed
    *
    * @var String
    */
@@ -286,6 +302,7 @@ class PaymentGateway_Result {
    * Set the payment result status.
    *
    * @param String $status
+   * @throws Exception when status is invalid
    */
   public function setStatus($status) {
     if ($status == self::SUCCESS || $status == self::FAILURE || $status == self::INCOMPLETE) {
@@ -296,9 +313,11 @@ class PaymentGateway_Result {
   }
 
   /**
-   * Set the gateway messages.
+   * Set the gateway messages
    *
-   * @param array/String messages
+   * @param array|String $messages
+   *        If an array is passed, take it as the $messages array.
+   *        If a string is passed, add it to the $messages array.
    */
   public function setMessages($messages) {
     if (is_array($messages)) {
@@ -311,7 +330,7 @@ class PaymentGateway_Result {
   /**
    * Set the gateway errors
    *
-   * @param array errors
+   * @param array $errors
    */
   public function setErrors($errors) {
     if (is_array($errors)) {
@@ -336,8 +355,8 @@ class PaymentGateway_Result {
   /**
    * Add an error to the error list
    *
-   * @param $message: The error message
-   * @param $code: The error code
+   * @param String $message: The error message
+   * @param String $code: The error code
    */
   public function addError($message, $code = null) {
     if ($code) {
@@ -352,13 +371,18 @@ class PaymentGateway_Result {
   }
 
   /**
-   *  Add a message to the message list
+   * Add a message to the message list
+   *
+   * @param String message
    */
   public function addMesasge($message) {
     array_push($this->messages, $messages);
   }
 }
 
+/**
+ * Wrapper class for 'success' result
+ */
 class PaymentGateway_Success extends PaymentGateway_Result {
 
   function __construct($messages = null) {
@@ -366,6 +390,9 @@ class PaymentGateway_Success extends PaymentGateway_Result {
   }
 }
 
+/**
+ * Wrapper class for 'failure' result
+ */
 class PaymentGateway_Failure extends PaymentGateway_Result {
 
   function __construct($response = null, $messages = null, $errors = null) {
@@ -373,6 +400,9 @@ class PaymentGateway_Failure extends PaymentGateway_Result {
   }
 }
 
+/**
+ * Wrapper class for 'incomplete' result
+ */
 class PaymentGateway_Incomplete extends PaymentGateway_Result {
 
   function __construct($response = null, $message = null, $errors = null) {

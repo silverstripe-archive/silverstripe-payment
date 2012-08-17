@@ -1,14 +1,9 @@
 <?php
+
 /**
- * Default class for a number of payment controllers.
+ * Default class for a number of payment controllers/processors.
  * This acts as a generic controller for all payment methods.
  * Override this class if desired to add custom functionalities.
- *
- * Configuration format for PaymentProcessor:
- * PaymentProcessor:
- *   supported_methods:
- *     {environment}:
- *       - {method name}
  */
 class PaymentProcessor extends Controller {
   /**
@@ -68,6 +63,11 @@ class PaymentProcessor extends Controller {
     $this->methodName = $method;
   }
 
+  /**
+   * Set the url to be redirected to after the payment is completed.
+   *
+   * @param String $url
+   */
   public function setRedirectURL($url) {
     Session::set('PostRedirectionURL', $url);
   }
@@ -77,7 +77,7 @@ class PaymentProcessor extends Controller {
   }
 
   /**
-   * Redirection for post-processing
+   * Redirection after payment processing
    */
   public function doRedirect() {
     // Put the payment ID in a session
@@ -97,10 +97,12 @@ class PaymentProcessor extends Controller {
   }
 
   /**
-   * Process a payment request. To be extending by individual processor type
+   * Process a payment request. To be extended by individual processor type
+   * If there's no break point (i.e exceptions and errors), this should
+   * redirect to the postRedirectURL (merchant-hosted) or the external gateway (gateway-hosted)
    *
-   * @param $data
-   * @return Payment
+   * @param array $data
+   * @return null
    */
   public function capture($data) {
     $this->paymentData = $data;
@@ -114,7 +116,6 @@ class PaymentProcessor extends Controller {
       // Use the exception message to identify this is a validation exception
       // Payment pages can call gateway->getValidationResult() to get all the
       // validation error messages
-      // TODO: It's better to have a separate exception class for this.
       throw new Exception("Validation Exception");
     }
   }
@@ -146,8 +147,16 @@ class PaymentProcessor extends Controller {
   }
 }
 
+/**
+ * Default class for merchant-hosted controllers
+ */
 class PaymentProcessor_MerchantHosted extends PaymentProcessor {
-
+  /**
+   * Process a merchant-hosted payment. Users will remain on the site
+   * until the payment is completed. Redirect to the postRedirectURL afterwards
+   *
+   * @see PaymentProcessor::capture()
+   */
   public function capture($data) {
     parent::capture($data);
 
@@ -168,6 +177,9 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     $this->doRedirect();
   }
 
+  /**
+   * Return the form fields for credit data
+   */
   public function getCreditCardFields() {
     // Retrieve the array of credit card types to be put in a credit card form field
     $creditCardTypes = $this->gateway->getSupportedCreditCardType();
@@ -188,6 +200,9 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     return $fieldList;
   }
 
+  /**
+   * Override to add credit card form fields
+   */
   public function getFormFields() {
     $fieldList = parent::getFormFields();
     $fieldList->merge($this->getCreditCardFields());
@@ -209,10 +224,19 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
   }
 }
 
+/**
+ * Default class for gateway-hosted processors
+ */
 class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 
+  /**
+   * Process a gateway-hosted payment. Users will be redirected to
+   * the external gateway to enter payment info. Redirect back to
+   * our site when the payment is completed.
+   *
+   * @see PaymentProcessor::capture()
+   */
   public function capture($data) {
-
     parent::capture($data);
 
     // Set the return link
@@ -247,17 +271,16 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
   }
 
   /**
-   * Process a payment response.
+   * Process a response from the external gateway
    *
-   * @param SS_HTTPResponse $request. This is the object representation for
+   * @param SS_HTTPResponse $request
+   * This is the object representation for
    * the http request received from the gateway. This request will be forwarded
    * to gateway->getResult() for gateway-specific processing
    */
   public function complete($request) {
-    // Retrieve the payment object if none is referenced at this point
-    if (! $this->payment) {
-      $this->payment = $this->getPaymentObject($request);
-    }
+    // Reconstruct the payment object
+    $this->payment = DataObject::get_by_id('Payment', $request->param('OtherID'));
 
     // Reconstruct the gateway object
     $methodName = $request->param('ID');
@@ -276,6 +299,9 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     $this->doRedirect();
   }
 
+  /**
+   * Reconstruct the payment object
+   */
   public function getPaymentObject($request) {
     return DataObject::get_by_id('Payment', $request->param('OtherID'));
   }

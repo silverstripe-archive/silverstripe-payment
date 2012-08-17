@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Test class for merchant-hosted payment
+ * Test class for merchant-hosted gateay
  */
 class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
 
@@ -14,7 +14,7 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
   }
 
   /**
-   * Override to cancel data validation
+   * Override to mock up data validation
    *
    * @see PaymentGateway::validate()
    *
@@ -22,9 +22,6 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
    * @return ValidationResult
    */
   public function validate($data) {
-    //Use this->validationResult so that all errors are added and can be accessible from Payment Test
-    //TODO this should do actual validation of the data
-
     $result = parent::validate($data);
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
@@ -40,6 +37,9 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
     return $result;
   }
 
+  /**
+   * @see PaymentGateway::process()
+   */
   public function process($data) {
     //Mimic failures, like a gateway response such as 404, 500 etc.
     $amount = $data['Amount'];
@@ -69,7 +69,7 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
   }
 
   /**
-   * Override to cancel validation
+   * Override to mock up validation
    *
    * @see PaymentGateway::validate()
    *
@@ -90,6 +90,9 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
     return $result;
   }
 
+  /**
+   * @see PaymentGateay::process()
+   */
   public function process($data) {
     $postData = array(
       'Amount' => $data['Amount'],
@@ -109,6 +112,9 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
     Controller::curr()->redirect($this->gatewayURL . '?' . $queryString);
   }
 
+  /**
+   * @see PaymentGateay_GatewayHosted::response()
+   */
   public function getResponse($response) {
     switch($response->getVar('Status')) {
       case 'Success':
@@ -132,10 +138,14 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
 }
 
 /**
- * Mock external gateway with payment form fields
+ * Controller class representing a mock external gateway with payment form fields
  */
 class DummyGateway_Controller extends ContentController {
-
+  /**
+   * Controller action for showing payment form
+   *
+   * @param SS_HTTPRequest
+   */
   function pay($request) {
     return array(
       'Content' => "<h1>Fill out this form to make payment</h1>",
@@ -143,6 +153,9 @@ class DummyGateway_Controller extends ContentController {
     );
   }
 
+  /**
+   * Return the payment form
+   */
   function PayForm() {
     $request = $this->getRequest();
 
@@ -164,6 +177,10 @@ class DummyGateway_Controller extends ContentController {
     return new Form($this, "PayForm", $fields, $actions);
   }
 
+  /**
+   * Make the payment after the form is submitted
+   * Redirect back to DummyGateway with the dummy response
+   */
   function dopay($data, $form) {
     $returnURL = $data['ReturnURL'];
     if (! $returnURL) {
