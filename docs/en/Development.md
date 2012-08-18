@@ -54,6 +54,6 @@ Declare the gateway in the factory:
             live: GatewayClass_Live
             dev: GatewayClass_Dev
             
-Only when the gateway is declare in the factory yaml can we call PaymentFactory::factory('<GatewayName>') to construct the respective processor object.
+Only when the gateway is declare in the factory yaml can we call PaymentFactory::factory('GatewayName') to construct the respective processor object.
 
 Please refer to the [architecture document](https://github.com/ryandao/silverstripe-payment/tree/1.0/docs/en/Architecture.md) for better understanding of how the module works. The section about [PaymentGateway](https://github.com/ryandao/silverstripe-payment/blob/1.0/docs/en/Architecture.md#paymentgateway) covers pretty much all that is needed to develop a new payment method.
