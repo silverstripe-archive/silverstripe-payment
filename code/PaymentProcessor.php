@@ -280,7 +280,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
    */
   public function complete($request) {
     // Reconstruct the payment object
-    $this->payment = DataObject::get_by_id('Payment', $request->param('OtherID'));
+    $this->payment = Payment::get()->byID($request->param('OtherID'));
 
     // Reconstruct the gateway object
     $methodName = $request->param('ID');

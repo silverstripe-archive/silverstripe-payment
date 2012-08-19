@@ -8,7 +8,7 @@ class DummyMerchantHostedTest extends SapphireTest {
   function setUp() {
     parent::setUp();
 
-    $paymentMethods = array('dev' => array('DummyMerchantHosted'));
+    $paymentMethods = array('test' => array('DummyMerchantHosted'));
     Config::inst()->remove('PaymentProcessor', 'supported_methods');
     Config::inst()->update('PaymentProcessor', 'supported_methods', $paymentMethods);
 
