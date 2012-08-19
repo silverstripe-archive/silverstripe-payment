@@ -124,8 +124,12 @@ class PaymentGateway {
         'month' => $data['MonthExpiry'],
         'year' => $data['YearExpiry'],
         'type' => $data['CreditCardType'],
-        'number' => implode('', $data['CardNumber'])
       );
+      if (is_array($data['CardNumber'])) {
+        $options['number'] = implode('', $data['CardNumber']);
+      } else {
+        $options['number'] = $data['CardNumber'];
+      }
 
       $cc = new CreditCard($options);
       $validationResult->combineAnd($cc->validate());
