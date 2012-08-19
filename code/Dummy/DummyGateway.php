@@ -23,17 +23,19 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
    */
   public function validate($data) {
     $result = parent::validate($data);
-    $amount = $data['Amount'];
-    $cents = round($amount - intval($amount), 2);
+    if (isset($data['Amount'])) {
+      $amount = $data['Amount'];
+      $cents = round($amount - intval($amount), 2);
 
-    switch ($cents) {
-      case 0.11:
+      switch ($cents) {
+        case 0.11:
         $result->error('Cents value is .11');
-        $result->error('This is another error message for cents = .11');
         break;
+      }
+
+      $this->validationResult = $result;
     }
 
-    $this->validationResult = $result;
     return $result;
   }
 
@@ -49,7 +51,7 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
       case 0.01:
         return new PaymentGateway_Failure(new SS_HTTPResponse('Connection Error', 500));
       case 0.02:
-        return new PaymentGateway_Failure(null, "Payment cannot be completed");
+        return new PaymentGateway_Failure(null, null, array("Payment cannot be completed"));
       case 0.03:
         return new PaymentGateway_Incomplete(null, "Awaiting payment confirmation");
       default:
@@ -113,22 +115,22 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
   }
 
   /**
-   * @see PaymentGateay_GatewayHosted::response()
+   * @see PaymentGateway_GatewayHosted::response()
    */
-  public function getResponse($response) {
-    switch($response->getVar('Status')) {
+  public function getResponse($request) {
+    switch($request->getVar('Status')) {
       case 'Success':
         return new PaymentGateway_Success;
         break;
       case 'Failure':
         return new PaymentGateway_Failure(
-          $response,
-          $response->getVar('Message'),
-          array($response->getVar('ErrorCode') => $response->getVar('ErrorMessage'))
+          null,
+          $request->getVar('Message'),
+          array($request->getVar('ErrorCode') => $request->getVar('ErrorMessage'))
         );
         break;
       case 'Incomplete':
-        return new PaymentGateway_Incomplete($response, $response->getVar('Message'));
+        return new PaymentGateway_Incomplete(null, $request->getVar('Message'));
         break;
       default:
         return new PaymentGateway_Success();
