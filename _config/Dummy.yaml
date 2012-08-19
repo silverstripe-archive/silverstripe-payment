@@ -7,10 +7,11 @@ Director:
 PaymentFactory:
   DummyMerchantHosted:
     title: 'Dummy Gateway (Merchant)'
-    gateway_classes: 
+    gateway_classes:
       live: 'DummyGateway_MerchantHosted'
       dev: 'DummyGateway_MerchantHosted'
-    controller: 'DummyProcessor_MerchantHosted'
+      test: 'DummyGateway_MerchantHosted'
+    processor: 'DummyProcessor_MerchantHosted'
     model: 'Payment'
 
   DummyGatewayHosted:
@@ -18,5 +19,6 @@ PaymentFactory:
     gateway_classes:
       live: 'DummyGateway_GatewayHosted'
       dev: 'DummyGateway_GatewayHosted'
-    controller: 'DummyProcessor_GatewayHosted'
+      test: 'DummyGateway_GatewayHosted'
+    processor: 'DummyProcessor_GatewayHosted'
     model: 'Payment'
