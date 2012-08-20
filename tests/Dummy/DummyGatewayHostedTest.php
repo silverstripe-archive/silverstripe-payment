@@ -59,7 +59,6 @@ class DummyGatewayHostedTest extends SapphireTest {
 
     $query = http_build_query(array(
       'Status' => 'Failure',
-      'Message' => 'Payment cannot be completed',
       'ErrorMessage' => 'Internal Server Error',
       'ErrorCode' => '101'
     ));
@@ -67,7 +66,6 @@ class DummyGatewayHostedTest extends SapphireTest {
     Director::test("DummyProcessor_GatewayHosted/complete/DummyGatewayHosted/$paymentID?$query");
     $payment = $payment = Payment::get()->byID($paymentID);
     $this->assertEquals($payment->Status, Payment::FAILURE);
-    $this->assertEquals($payment->Message, 'Payment cannot be completed');
     $this->assertEquals($payment->ErrorMessage, 'Internal Server Error');
     $this->assertEquals($payment->ErrorCode, '101');
   }
@@ -79,12 +77,13 @@ class DummyGatewayHostedTest extends SapphireTest {
 
     $query = http_build_query(array(
       'Status' => 'Incomplete',
-      'Message' => 'Awaiting payment confirmation'
+      'ErrorMessage' => 'Awaiting payment confirmation',
+      'ErrorCode' => '102'
     ));
 
     Director::test("DummyProcessor_GatewayHosted/complete/DummyGatewayHosted/$paymentID?$query");
     $payment = $payment = Payment::get()->byID($paymentID);
     $this->assertEquals($payment->Status, Payment::INCOMPLETE);
-    $this->assertEquals($payment->Message, 'Awaiting payment confirmation');
+    $this->assertEquals($payment->ErrorMessage, 'Awaiting payment confirmation');
   }
 }
