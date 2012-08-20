@@ -169,7 +169,6 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     $this->payment->updateStatus(
       $result->getStatus(),
       $result->getHTTPResponse()->getStatusCode(),
-      $result->getMessage(),
       $result->getErrors()
     );
 
@@ -259,7 +258,6 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
       $this->payment->updateStatus(
         Payment::FAILURE,
         $result->getHTTPResponse()->getStatusCode(),
-        $result->getMessage(),
         $result->getErrors()
       );
 
@@ -291,7 +289,6 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     $this->payment->updateStatus(
       $result->getStatus(),
       $result->getHTTPResponse()->getStatusCode(),
-      $result->getMessage(),
       $result->getErrors()
     );
 

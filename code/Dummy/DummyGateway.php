@@ -51,9 +51,9 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
       case 0.01:
         return new PaymentGateway_Failure(new SS_HTTPResponse('Connection Error', 500));
       case 0.02:
-        return new PaymentGateway_Failure(null, null, array("Payment cannot be completed"));
+        return new PaymentGateway_Failure(null, array("Payment cannot be completed"));
       case 0.03:
-        return new PaymentGateway_Incomplete(null, "Awaiting payment confirmation");
+        return new PaymentGateway_Incomplete(null, array("Awaiting payment confirmation"));
       default:
         return new PaymentGateway_Success();
     }
@@ -125,12 +125,14 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
       case 'Failure':
         return new PaymentGateway_Failure(
           null,
-          $request->getVar('Message'),
           array($request->getVar('ErrorCode') => $request->getVar('ErrorMessage'))
         );
         break;
       case 'Incomplete':
-        return new PaymentGateway_Incomplete(null, $request->getVar('Message'));
+        return new PaymentGateway_Incomplete(
+          null,
+          array($request->getVar('ErrorCode') => $request->getVar('ErrorMessage'))
+        );
         break;
       default:
         return new PaymentGateway_Success();
@@ -195,7 +197,6 @@ class DummyGateway_Controller extends ContentController {
       case 0.02:
         $returnArray = array(
           'Status' => 'Failure',
-          'Message' => 'Payment cannot be completed',
           'ErrorMessage' => 'Internal Server Error',
           'ErrorCode' => '101'
         );
@@ -203,7 +204,8 @@ class DummyGateway_Controller extends ContentController {
       case 0.03:
         $returnArray = array(
           'Status' => 'Incomplete',
-          'Message' => 'Awaiting payment confirmation'
+          'ErrorMessage' => 'Awaiting payment confirmation',
+          'ErrorCode' => '102'
         );
         break;
       default:

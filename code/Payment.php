@@ -5,7 +5,6 @@
  */
 class Payment extends DataObject {
 
-
   /* Constants for payment statuses */
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
@@ -13,20 +12,24 @@ class Payment extends DataObject {
   const PENDING = 'Pending';
 
   /**
-   * Incomplete (default): Payment created but nothing confirmed as successful
-   * Success: Payment successful
-   * Failure: Payment failed during process
-   * Pending: Payment awaiting receipt/bank transfer etc
-   * Incomplete: Payment cancelled
+   * Status:
+   *   - Incomplete (default): Payment created but nothing confirmed as successful
+   *   - Success: Payment successful
+   *   - Failure: Payment failed during process
+   *   - Pending: Payment awaiting receipt/bank transfer etc
+   *   - Incomplete: Payment cancelled
+   * Amount: The payment amount amd currency
+   * ErrorMessage: Error(s) returned from the gateway
+   * HTTPStatus: Status code of the HTTP response
+   * Method: The payment method used
    */
   public static $db = array(
     'Status' => "Enum('Incomplete, Success, Failure, Pending')",
     'Amount' => 'Money',
-    'Message' => 'Text',
     'ErrorMessage' => 'Text',
-    'ErrorCode' => 'Text',
-    'HTTPStatus' => 'Text',
-    'Method' => 'Text'
+    'ErrorCode' => 'Varchar(10)',
+    'HTTPStatus' => 'Varchar(10)',
+    'Method' => 'Varchar(100)'
   );
 
   public static $has_one = array(
@@ -49,7 +52,7 @@ class Payment extends DataObject {
    * @param array|String $error
    * @return bool true if successful, false otherwise
    */
-  public function updateStatus($status, $HTTPStatus = null, $message = null, $error = null) {
+  public function updateStatus($status, $HTTPStatus = null, $error = null) {
     if ($status == self::SUCCESS || $status == self::FAILURE ||
         $status == self::INCOMPLETE || $status == self::PENDING) {
 
@@ -58,11 +61,6 @@ class Payment extends DataObject {
         $HTTPStatus = '200';
       }
       $this->HTTPStatus = $HTTPStatus;
-
-      // Save gateway message
-      if ($message) {
-        $this->Message = $message;
-      }
 
       // Save error messages and codes
       if ($error) {
