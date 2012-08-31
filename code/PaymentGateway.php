@@ -83,7 +83,8 @@ class PaymentGateway {
    * @return array
    */
   public function getSupportedCurrencies() {
-    return array('USD');
+    //TODO Check if supported currencies are set in config YAML and return that first
+    return $this->supportedCurrencies;
   }
 
   /**
@@ -108,7 +109,7 @@ class PaymentGateway {
     else if (empty($data['Currency'])) {
       $validationResult->error('Payment currency cannot be null');
     }
-    else if (! in_array($data['Currency'], $this->getSupportedCurrencies())) {
+    else if (! array_key_exists($data['Currency'], $this->getSupportedCurrencies())) {
       $validationResult->error('Currency ' . $data['Currency'] . ' not supported by this gateway');
     }
 
@@ -181,6 +182,7 @@ class PaymentGateway_MerchantHosted extends PaymentGateway { }
  * Parent class for all gateway-hosted gateways
  */
 class PaymentGateway_GatewayHosted extends PaymentGateway {
+
   /**
    * Set the return url, default to the site root
    *
@@ -222,6 +224,7 @@ class PaymentGateway_GatewayHosted extends PaymentGateway {
  * Class for gateway results
  */
 class PaymentGateway_Result {
+  
   /* Constants for gateway result status */
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';

@@ -130,9 +130,7 @@ class PaymentProcessor extends Controller {
     $fieldList = new FieldList();
 
     $fieldList->push(new NumericField('Amount', 'Amount', ''));
-
-    $currencies = array_combine($this->gateway->getSupportedCurrencies(), $this->gateway->getSupportedCurrencies());
-    $fieldList->push(new DropDownField('Currency', 'Select currency :', $currencies));
+    $fieldList->push(new DropDownField('Currency', 'Select currency :', $this->gateway->getSupportedCurrencies()));
 
     return $fieldList;
   }

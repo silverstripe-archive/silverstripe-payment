@@ -10,6 +10,23 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
     'master' => 'Mastercard'
   );
 
+  protected $supportedCurrencies = array(
+    'USD' => 'United States Dollar',
+    'GBP' => 'Great British Pound'
+  );
+
+  /**
+   * Get the Dummy Merchant Hosted Gateway YAML config for current environment
+   * 
+   * @return Array
+   */
+  public function getConfig() {
+    if (!$this->config) {
+      $this->config = Config::inst()->get('DummyMerchantHosted', self::get_environment());
+    }
+    return $this->config;
+  }
+
   /**
    * Override to mock up data validation
    *
