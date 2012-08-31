@@ -151,7 +151,7 @@ class PaymentProcessor extends Controller {
  * Default class for merchant-hosted controllers
  */
 class PaymentProcessor_MerchantHosted extends PaymentProcessor {
-  
+
   /**
    * Process a merchant-hosted payment. Users will remain on the site
    * until the payment is completed. Redirect to the postRedirectURL afterwards
@@ -181,15 +181,12 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
    * Return the form fields for credit data
    */
   public function getCreditCardFields() {
-    // Retrieve the array of credit card types to be put in a credit card form field
-    $creditCardTypes = $this->gateway->getSupportedCreditCardType();
-    $creditCardTypeDisplays = CreditCard::getCreditCardTypeDisplays($creditCardTypes);
 
     $months = array_combine(range(1, 12), range(1, 12));
     $years = array_combine(range(date('Y'), date('Y') + 10), range(date('Y'), date('Y') + 10));
 
     $fieldList = new FieldList();
-    $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $creditCardTypeDisplays));
+    $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $this->gateway->getSupportedCardTypes()));
     $fieldList->push(new TextField('FirstName', 'First Name:'));
     $fieldList->push(new TextField('LastName', 'Last Name:'));
     $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number:'));

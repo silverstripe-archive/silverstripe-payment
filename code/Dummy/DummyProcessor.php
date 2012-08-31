@@ -7,14 +7,12 @@ class DummyProcessor_MerchantHosted extends PaymentProcessor_MerchantHosted {
    * @see PaymentProcessor_MerchantHosted::getCreditCardFields()
    */
   public function getCreditCardFields() {
-    $creditCardTypes = $this->gateway->getSupportedCreditCardType();
-    $creditCardTypeDisplays = CreditCard::getCreditCardTypeDisplays($creditCardTypes);
 
     $months = array_combine(range(1, 12), range(1, 12));
     $years = array_combine(range(date('Y'), date('Y') + 10), range(date('Y'), date('Y') + 10));
 
     $fieldList = new FieldList();
-    $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $creditCardTypeDisplays));
+    $fieldList->push(new DropDownField('CreditCardType', 'Select Credit Card Type :', $this->gateway->getSupportedCardTypes()));
     $fieldList->push(new TextField('FirstName', 'First Name', 'John'));
     $fieldList->push(new TextField('LastName', 'Last Name', 'Doe'));
     $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number :', '4111111111111111'));

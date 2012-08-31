@@ -5,13 +5,10 @@
  */
 class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
 
-  public function getSupportedCreditCardType() {
-    return array('visa', 'master');
-  }
-
-  protected function creditCardTypeIDMapping() {
-    return array();
-  }
+  protected $supportedCardTypes = array(
+    'visa' => 'Visa',
+    'master' => 'Mastercard'
+  );
 
   /**
    * Override to mock up data validation

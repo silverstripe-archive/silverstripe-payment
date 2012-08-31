@@ -39,6 +39,10 @@ class PaymentGateway {
    */
   private $gatewayResult;
 
+  protected $supportedCardTypes = array();
+
+  protected $supportedCurrencies = array();
+
   /**
    * Get the payment environment.
    * The environment is retrieved from the config yaml file.
@@ -68,18 +72,9 @@ class PaymentGateway {
    *
    * @return array Array of credit card types
    */
-  public function getSupportedCreditCardType() {
-    return array();
-  }
-
-  /**
-   * A mapping of credit card type ids provided by the CreditCard class and
-   * the credit card type ids required by the gateay.
-   *
-   * @return array Array of CreditCardClassID => GatewayID
-   */
-  protected function creditCardTypeIDMapping() {
-    return array();
+  public function getSupportedCardTypes() {
+    //TODO Check if card types in config for this gateway and return that instead
+    return $this->supportedCardTypes;
   }
 
   /**

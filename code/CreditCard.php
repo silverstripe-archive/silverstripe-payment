@@ -17,18 +17,6 @@ class CreditCard {
     'diners' => '/^3(0[0-5]|[68]\d)\d{11}$/'
   );
   
-  /**
-   * A mapping of the card types and their display names
-   * @var array
-   */
-  private static $card_types = array(
-    'visa' => 'Visa',
-    'master' => 'MasterCard',
-    'american_express' => 'American Express',
-    'discover' => 'Discover',
-    'diners' => 'Diners Club'
-  );
-  
   /* Credit Card data */
   public $firstName;
   public $lastName;
@@ -43,23 +31,6 @@ class CreditCard {
    * @var ValidationResult
    */ 
   private $validationResult;
-  
-  /**
-   * Helper function to retrieve the display names for an array of 
-   * credit card types.
-   * 
-   * @param array $creditCardTypes
-   * @return array('CC type id' => 'CC type displays').
-   */
-  public static function getCreditCardTypeDisplays($creditCardTypes) {
-    $displays = array();
-
-    foreach ($creditCardTypes as $type) {
-      $displays[$type] = self::$card_types[$type];
-    }
-    
-    return $displays;
-  }
   
   public function __construct($options) {
     $this->firstName = $options['firstName'];
