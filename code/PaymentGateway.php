@@ -78,9 +78,9 @@ class PaymentGateway {
    *
    * @return array Array of CreditCardClassID => GatewayID
    */
-   protected function creditCardTypeIDMapping() {
-     return array();
-   }
+  protected function creditCardTypeIDMapping() {
+    return array();
+  }
 
   /**
    * Get the list of currencies supported by this gateway
@@ -218,9 +218,9 @@ class PaymentGateway_GatewayHosted extends PaymentGateway {
    * @param SS_HTTPRequest $request
    * @return PaymentGateway_Result
    */
-   public function getResponse($request) {
-     return new PaymentGateway_Success();
-   }
+  public function getResponse($request) {
+    return new PaymentGateway_Success();
+  }
 }
 
 /**

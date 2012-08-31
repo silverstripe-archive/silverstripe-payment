@@ -9,7 +9,7 @@ class CreditCard {
    * The card number patterns for credit card companies
    * @var array
    */
-  private static $CARD_COMPANIES = array(
+  private static $card_companies = array(
     'visa' => '/^4\d{12}(\d{3})?$/',
     'master' => '/^(5[1-5]\d{4}|677189)\d{10}$/',
     'discover' => '/^(6011|65\d{2})\d{12}$/',
@@ -21,7 +21,7 @@ class CreditCard {
    * A mapping of the card types and their display names
    * @var array
    */
-  private static $CARD_TYPE_NAMES = array(
+  private static $card_types = array(
     'visa' => 'Visa',
     'master' => 'MasterCard',
     'american_express' => 'American Express',
@@ -55,7 +55,7 @@ class CreditCard {
     $displays = array();
 
     foreach ($creditCardTypes as $type) {
-      $displays[$type] = self::$CARD_TYPE_NAMES[$type];
+      $displays[$type] = self::$card_types[$type];
     }
     
     return $displays;
@@ -108,7 +108,7 @@ class CreditCard {
       $this->validationResult->error('Credit card type is required');
     }
     
-    if (!isset(self::$CARD_COMPANIES[$this->type])) {
+    if (!isset(self::$card_companies[$this->type])) {
       $this->validationResult->error('Credit card type is invalid');
     }
   }

@@ -151,6 +151,7 @@ class PaymentProcessor extends Controller {
  * Default class for merchant-hosted controllers
  */
 class PaymentProcessor_MerchantHosted extends PaymentProcessor {
+  
   /**
    * Process a merchant-hosted payment. Users will remain on the site
    * until the payment is completed. Redirect to the postRedirectURL afterwards
