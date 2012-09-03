@@ -259,7 +259,8 @@ class PaymentGateway_Result {
    * @param array $errors
    */
   function __construct($status, $response = null, $errors = null) {
-    if (! $response) {
+
+    if (!$response) {
       $response = new SS_HTTPResponse('', 200);
     }
 
@@ -269,18 +270,6 @@ class PaymentGateway_Result {
     if ($errors) {
       $this->setErrors($errors);
     }
-  }
-
-  public function getHTTPResponse() {
-    return $this->HTTPResponse;
-  }
-
-  public function getStatus() {
-    return $this->status;
-  }
-
-  public function getErrors() {
-    return $this->errors;
   }
 
   /**
@@ -297,6 +286,14 @@ class PaymentGateway_Result {
     }
   }
 
+  public function getStatus() {
+    return $this->status;
+  }
+
+  public function getHTTPResponse() {
+    return $this->HTTPResponse;
+  }
+
   /**
    * Set the gateway errors
    *
@@ -308,18 +305,6 @@ class PaymentGateway_Result {
     } else {
       throw new Exception("Gateway errors must be array");
     }
-  }
-
-  public function isSuccess() {
-    return $this->status == self::SUCCESS;
-  }
-
-  public function isFailure() {
-    return $this->status == self::FAILURE;
-  }
-
-  public function isIncomplete() {
-    return $this->status == self::INCOMPLETE;
   }
 
   /**
@@ -339,6 +324,23 @@ class PaymentGateway_Result {
       array_push($this->errors, $message);
     }
   }
+
+  public function getErrors() {
+    return $this->errors;
+  }
+
+  public function isSuccess() {
+    return $this->status == self::SUCCESS;
+  }
+
+  public function isFailure() {
+    return $this->status == self::FAILURE;
+  }
+
+  public function isIncomplete() {
+    return $this->status == self::INCOMPLETE;
+  }
+
 }
 
 /**

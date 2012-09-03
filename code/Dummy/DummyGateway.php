@@ -65,9 +65,9 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
       case 0.01:
         return new PaymentGateway_Failure(new SS_HTTPResponse('Connection Error', 500));
       case 0.02:
-        return new PaymentGateway_Failure(null, array("Payment cannot be completed"));
+        return new PaymentGateway_Failure(null, array('1A' => 'Payment cannot be completed'));
       case 0.03:
-        return new PaymentGateway_Incomplete(null, array("Awaiting payment confirmation"));
+        return new PaymentGateway_Incomplete(null, array('1B' => 'Awaiting payment confirmation'));
       default:
         return new PaymentGateway_Success();
     }
@@ -78,6 +78,11 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
  * Test class for gateway-hosted payment
  */
 class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
+
+  protected $supportedCurrencies = array(
+    'USD' => 'United States Dollar',
+    'GBP' => 'Great British Pound'
+  );
 
   public function __construct() {
     parent::__construct();

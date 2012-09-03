@@ -24,61 +24,50 @@ class Payment extends DataObject {
    * Method: The payment method used
    */
   public static $db = array(
+    'Method' => 'Varchar(100)',
     'Status' => "Enum('Incomplete, Success, Failure, Pending')",
     'Amount' => 'Money',
-    'ErrorMessage' => 'Text',
-    'ErrorCode' => 'Varchar(10)',
-    'HTTPStatus' => 'Varchar(10)',
-    'Method' => 'Varchar(100)'
+    'HTTPStatus' => 'Varchar(10)'
   );
 
   public static $has_one = array(
     'PaidBy' => 'Member',
   );
 
-  /**
-   * Make payment table transactional.
-   */
-  static $create_table_options = array(
-    'MySQLDatabase' => 'ENGINE=InnoDB'
+  public static $has_many = array(
+    'Errors' => 'Payment_Error',
   );
 
-  /**
-   * Update the status of this payment
-   *
-   * @param String $status
-   * @param String $HTTPStatus
-   * @param String $message
-   * @param array|String $error
-   * @return bool true if successful, false otherwise
-   */
-  public function updateStatus($status, $HTTPStatus = null, $error = null) {
-    if ($status == self::SUCCESS || $status == self::FAILURE ||
-        $status == self::INCOMPLETE || $status == self::PENDING) {
+  public function updateStatus(PaymentGateway_Result $result) {
 
-      // Save HTTP status
-      if (! $HTTPStatus) {
-        $HTTPStatus = '200';
-      }
-      $this->HTTPStatus = $HTTPStatus;
+    //Use the gateway result to update the payment
+    $this->Status = $result->getStatus();
+    $this->HTTPStatus = $result->getHTTPResponse()->getStatusCode();
 
-      // Save error messages and codes
-      if ($error) {
-        if (! is_array($error)) {
-          throw new Exception("Error parameter is not an array");
-        } else {
-          $this->ErrorCode = implode(';', array_keys($error));
-          $this->ErrorMessage = implode(';', array_values($error));
-        }
-      }
-
-      // Save payment status and write to database
-      $this->Status = $status;
-      $this->write();
-
-      return true;
-    } else {
-      throw new Exception("Payment status invalid");
+    $errors = $result->getErrors();
+    foreach ($errors as $code => $message) {
+      $error = new Payment_Error();
+      $error->ErrorCode = $code;
+      $error->ErrorMessage = $message;
+      $error->PaymentID = $this->ID;
+      $error->write();
     }
+
+    return $this->write();
   }
+}
+
+/**
+ * Class to represent error returned from payment gateway
+ */
+class Payment_Error extends DataObject {
+
+  public static $db = array(
+    'ErrorCode' => 'Varchar(10)',
+    'ErrorMessage' => 'Text'
+  );
+
+  public static $has_one = array(
+    'Payment' => 'Payment',
+  );
 }

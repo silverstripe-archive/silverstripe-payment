@@ -160,16 +160,7 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     parent::capture($data);
 
     $result = $this->gateway->process($this->paymentData);
-
-    // $result will be PaymentGateway_Result, check status
-    // Update the payment status with HTTPStatus etc.
-    // Update the payment as success or failure etc.
-    $HTTPStatus = $result->getHTTPResponse()->getStatusCode();
-    $this->payment->updateStatus(
-      $result->getStatus(),
-      $result->getHTTPResponse()->getStatusCode(),
-      $result->getErrors()
-    );
+    $this->payment->updateStatus($result);
 
     // Do redirection
     $this->doRedirect();
@@ -247,15 +238,11 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
     $result = $this->gateway->process($this->paymentData);
 
     // Processing may not get to here if all goes smoothly, customer will be at the 3rd party gateway
-    // Get the errors from the
     if ($result && !$result->isSuccess()) {
-      // Gateway did not respond or respond with error
+
+      // Gateway did not respond or responded with error
       // Need to save the gateway response and save HTTP Status, errors etc. to Payment
-      $this->payment->updateStatus(
-        Payment::FAILURE,
-        $result->getHTTPResponse()->getStatusCode(),
-        $result->getErrors()
-      );
+      $this->payment->updateStatus($result);
 
       // Payment has failed - redirect to confirmation page
       // Developers can get the failure data from the database to show
@@ -282,11 +269,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 
     // Query the gateway for the payment result
     $result = $this->gateway->getResponse($request);
-    $this->payment->updateStatus(
-      $result->getStatus(),
-      $result->getHTTPResponse()->getStatusCode(),
-      $result->getErrors()
-    );
+    $this->payment->updateStatus($result);
 
     // Do redirection
     $this->doRedirect();
