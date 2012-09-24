@@ -1,0 +1,16 @@
+{
+	"name": "silverstripe-labs/payment",
+	"description": "This module deals with SilverStripe-recognised payments and their APIs/gateways.",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe-labs", "payment", "ecommerce"],
+	"authors": [
+	{
+		"name": "Normann Lou",
+		"email": "normann@silverstripe.com"
+	}
+	],
+	"require":
+	{
+		"silverstripe/framework": "2.4.*"
+	}
+}
