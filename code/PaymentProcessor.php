@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 /**
  * Default class for a number of payment controllers/processors.

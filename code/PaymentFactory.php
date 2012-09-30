@@ -25,6 +25,7 @@ class PaymentFactory {
    * @param String $methodName
    */
   static function get_gateway($methodName) {
+
     // Get the gateway environment setting
     $environment = PaymentGateway::get_environment();
 
@@ -32,9 +33,11 @@ class PaymentFactory {
     // If not, apply naming convention.
     $methodConfig = self::get_factory_config($methodName);
     $gatewayClassConfig = $methodConfig['gateway_classes'];
+
     if (isset($gatewayClassConfig[$environment])) {
       $gatewayClass = $gatewayClassConfig[$environment];
-    } else {
+    } 
+    else {
       switch($environment) {
         case 'live':
           $gatewayClass = $methodName . 'Gateway_Production';
@@ -50,7 +53,8 @@ class PaymentFactory {
 
     if (class_exists($gatewayClass)) {
       return new $gatewayClass();
-    } else {
+    } 
+    else {
       throw new Exception("$gatewayClass class does not exists.");
     }
   }
@@ -64,6 +68,7 @@ class PaymentFactory {
    * @param String methodName
    */
   static function get_payment_model($methodName) {
+
     // Get the custom payment class configuration.
     // If not applicable, take the default model
     $methodConfig = self::get_factory_config($methodName);
@@ -87,6 +92,7 @@ class PaymentFactory {
    * @return PaymentProcessor
    */
   public static function factory($methodName) {
+
     $supported_methods = PaymentProcessor::get_supported_methods();
 
     if (! in_array($methodName, $supported_methods)) {
@@ -94,7 +100,9 @@ class PaymentFactory {
     }
 
     $methodConfig = self::get_factory_config($methodName);
+
     if (isset($methodConfig['processor'])) {
+
       $processorClass = $methodConfig['processor'];
       $processor = new $processorClass();
       $processor->setMethodName($methodName);
@@ -104,7 +112,8 @@ class PaymentFactory {
       $processor->payment = self::get_payment_model($methodName);
 
       return $processor;
-    } else {
+    } 
+    else {
       throw new Exception("No processor is defined for the method $methodName");
     }
   }
