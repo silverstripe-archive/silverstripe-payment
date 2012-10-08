@@ -77,7 +77,8 @@ class Payment extends DataObject {
       $this->write();
 
       return true;
-    } else {
+    } 
+    else {
       throw new Exception("Payment status invalid");
     }
   }
