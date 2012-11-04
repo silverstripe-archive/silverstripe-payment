@@ -12,6 +12,7 @@ class Payment extends DataObject {
   const PENDING = 'Pending';
 
   /**
+   * Method: The payment method used
    * Status:
    *   - Incomplete (default): Payment created but nothing confirmed as successful
    *   - Success: Payment successful
@@ -19,9 +20,7 @@ class Payment extends DataObject {
    *   - Pending: Payment awaiting receipt/bank transfer etc
    *   - Incomplete: Payment cancelled
    * Amount: The payment amount amd currency
-   * ErrorMessage: Error(s) returned from the gateway
    * HTTPStatus: Status code of the HTTP response
-   * Method: The payment method used
    */
   public static $db = array(
     'Method' => 'Varchar(100)',

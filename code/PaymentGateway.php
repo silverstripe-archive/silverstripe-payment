@@ -68,12 +68,23 @@ class PaymentGateway {
   }
 
   /**
+   * Get the YAML config for current environment
+   * 
+   * @return Array
+   */
+  public function getConfig() {
+    if (!$this->config) {
+      $this->config = Config::inst()->get(get_class($this), self::get_environment());
+    }
+    return $this->config;
+  }
+
+  /**
    * Get the list of credit card types supported by this gateway
    *
    * @return array Array of credit card types
    */
   public function getSupportedCardTypes() {
-    //TODO Check if card types in config for this gateway and return that instead
     return $this->supportedCardTypes;
   }
 
@@ -83,7 +94,6 @@ class PaymentGateway {
    * @return array
    */
   public function getSupportedCurrencies() {
-    //TODO Check if supported currencies are set in config YAML and return that first
     return $this->supportedCurrencies;
   }
 
