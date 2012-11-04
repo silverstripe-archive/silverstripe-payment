@@ -1,59 +1,73 @@
 <?php
 
 /**
- * Model class for a number of payment models
+ * Model class for Payment
  */
 class Payment extends DataObject {
 
-  /* Constants for payment statuses */
-  const SUCCESS = 'Success';
-  const FAILURE = 'Failure';
-  const INCOMPLETE = 'Incomplete';
-  const PENDING = 'Pending';
+	/* Constants for payment statuses */
+	const SUCCESS = 'Success';
+	const FAILURE = 'Failure';
+	const INCOMPLETE = 'Incomplete';
+	const PENDING = 'Pending';
 
-  /**
-   * Method: The payment method used
-   * Status:
-   *   - Incomplete (default): Payment created but nothing confirmed as successful
-   *   - Success: Payment successful
-   *   - Failure: Payment failed during process
-   *   - Pending: Payment awaiting receipt/bank transfer etc
-   *   - Incomplete: Payment cancelled
-   * Amount: The payment amount amd currency
-   * HTTPStatus: Status code of the HTTP response
-   */
-  public static $db = array(
-    'Method' => 'Varchar(100)',
-    'Status' => "Enum('Incomplete, Success, Failure, Pending')",
-    'Amount' => 'Money',
-    'HTTPStatus' => 'Varchar(10)'
-  );
+	/**
+	 * Method: The payment method used
+	 * Status:
+	 *   - Incomplete (default): Payment created but nothing confirmed as successful
+	 *   - Success: Payment successful
+	 *   - Failure: Payment failed during process
+	 *   - Pending: Payment awaiting receipt/bank transfer etc
+	 *   - Incomplete: Payment cancelled
+	 * Amount: The payment amount amd currency
+	 * HTTPStatus: Status code of the HTTP response
+	 */
+	public static $db = array(
+		'Method' => 'Varchar(100)',
+		'Status' => "Enum('Incomplete, Success, Failure, Pending')",
+		'Amount' => 'Money',
+		'HTTPStatus' => 'Varchar(10)'
+	);
 
-  public static $has_one = array(
-    'PaidBy' => 'Member',
-  );
+	/**
+	 * PaidBy: Member that processed this payment (optional)
+	 */
+	public static $has_one = array(
+		'PaidBy' => 'Member',
+	);
 
-  public static $has_many = array(
-    'Errors' => 'Payment_Error',
-  );
+	/**
+	 * Errors: Errors returned from payment gateway when processing this payment
+	 */
+	public static $has_many = array(
+		'Errors' => 'Payment_Error',
+	);
 
-  public function updateStatus(PaymentGateway_Result $result) {
+	/**
+	 * Update the payment status inclusing saving any errors from the gateway
+	 * 
+	 * @see PaymentProcessor::capture()
+	 * 
+	 * @param PaymentGateway_Result Result from the payment gateway after processing
+	 * @return Int Payment ID
+	 */
+	public function updateStatus(PaymentGateway_Result $result) {
 
-    //Use the gateway result to update the payment
-    $this->Status = $result->getStatus();
-    $this->HTTPStatus = $result->getHTTPResponse()->getStatusCode();
+		//Use the gateway result to update the payment
+		$this->Status = $result->getStatus();
+		$this->HTTPStatus = $result->getHTTPResponse()->getStatusCode();
 
-    $errors = $result->getErrors();
-    foreach ($errors as $code => $message) {
-      $error = new Payment_Error();
-      $error->ErrorCode = $code;
-      $error->ErrorMessage = $message;
-      $error->PaymentID = $this->ID;
-      $error->write();
-    }
+		$errors = $result->getErrors();
+		foreach ($errors as $code => $message) {
+			$error = new Payment_Error();
+			$error->ErrorCode = $code;
+			$error->ErrorMessage = $message;
+			$error->PaymentID = $this->ID;
+			$error->write();
+		}
 
-    return $this->write();
-  }
+		return $this->write();
+	}
 }
 
 /**
@@ -61,12 +75,19 @@ class Payment extends DataObject {
  */
 class Payment_Error extends DataObject {
 
-  public static $db = array(
-    'ErrorCode' => 'Varchar(10)',
-    'ErrorMessage' => 'Text'
-  );
+	/**
+	 * ErrorCode: Gateway specific error code
+	 * ErrorMessage: Corresponding error message from the gateway
+	 */
+	public static $db = array(
+		'ErrorCode' => 'Varchar(10)',
+		'ErrorMessage' => 'Text'
+	);
 
-  public static $has_one = array(
-    'Payment' => 'Payment',
-  );
+	/**
+	 * Payment: Payment this error is related to
+	 */
+	public static $has_one = array(
+		'Payment' => 'Payment',
+	);
 }

@@ -22,22 +22,22 @@ This module provides the base API for various payment methods
 2. Visit yoursite.com/dev/build to rebuild the database.
 3. Set the environment (optional). If not set, the default value is set to SilverStripe environment.
 
-        PaymentGateway:
-          'environment':
-            'dev'
-   
-            
+				PaymentGateway:
+					'environment':
+						'dev'
+	 
+						
 4. Enable supported payment methods in your application yaml file. Make sure that the respective sub-modules are installed. Only Dummy payment methods are shipped with the module.
 
-        PaymentProcessor:
-          supported_methods:
-            'dev':
-              - 'DummyMerchantHosted'
-              - 'DummyGatewayHosted'
-            'live':
-              - 'PayPalDirect'
-              - 'PayPalExpress'
-              
+				PaymentProcessor:
+					supported_methods:
+						'dev':
+							- 'DummyMerchantHosted'
+							- 'DummyGatewayHosted'
+						'live':
+							- 'PayPalDirect'
+							- 'PayPalExpress'
+							
 ### Testing 
 After cloning this GitHub repository, make sure all the tests in <yoursite>/dev/tests are passed to make sure the environemnt settings are correct.  
 
