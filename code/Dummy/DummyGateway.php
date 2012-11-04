@@ -79,9 +79,15 @@ class DummyGateway_MerchantHosted extends PaymentGateway_MerchantHosted {
  */
 class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
 
+  protected $supportedCardTypes = array(
+    'visa' => 'Visa',
+    'master' => 'Mastercard'
+  );
+
   protected $supportedCurrencies = array(
     'USD' => 'United States Dollar',
-    'GBP' => 'Great British Pound'
+    'GBP' => 'Great British Pound',
+    'NZD' => 'New Zealand Dollars'
   );
 
   public function __construct() {
@@ -126,7 +132,7 @@ class DummyGateway_GatewayHosted extends PaymentGateway_GatewayHosted {
     $cents = round($amount - intval($amount), 2);
 
     if ($cents == 0.01) {
-      return new PaymentGateway_Failure(new SS_HTTPResponse('Connection Erro', 500));
+      return new PaymentGateway_Failure(new SS_HTTPResponse('Connection Error', 500));
     }
 
     $queryString = http_build_query($postData);
