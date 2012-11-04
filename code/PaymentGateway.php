@@ -145,32 +145,6 @@ class PaymentGateway {
   public function process($data) {
     return new PaymentGateway_Success();
   }
-
-  /**
-   * Return a set of requirements for the payment data to be proccessed
-   *
-   * @return array
-   */
-  public function paymentDataRequirements() {
-    return array('Amount', 'Currency');
-  }
-
-  /**
-   * Post a set of payment data to a remote server
-   *
-   * @param array $data
-   * @param String $endpoint If not set, assume $gatewayURL
-   *
-   * @return RestfulService_Response
-   */
-  public function postPaymentData($data, $endpoint = null) {
-    if (! $endpoint) {
-      $endpoint = $this->gatewayURL;
-    }
-
-    $service = new RestfulService($endpoint);
-    return $service->request(null, 'POST', $data);
-  }
 }
 
 /**
