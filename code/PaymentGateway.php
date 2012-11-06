@@ -54,6 +54,13 @@ class PaymentGateway {
 	protected $supportedCurrencies = array();
 
 	/**
+	 * Array of config for this gateway
+	 *
+	 * @var Array
+	 */
+	protected $config;
+
+	/**
 	 * Get the payment environment.
 	 * The environment is retrieved from the config yaml file.
 	 * If no environment is specified, assume SilverStripe's environment.
@@ -116,6 +123,7 @@ class PaymentGateway {
 	 * @return ValidationResult
 	 */
 	public function validate($data) {
+
 		$validationResult = $this->getValidationResult();
 
 		if (! isset($data['Amount'])) {
