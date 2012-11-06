@@ -92,6 +92,7 @@ class PaymentProcessor extends Controller {
 	public function setup() {
 		$this->payment->Amount->Amount = $this->paymentData['Amount'];
 		$this->payment->Amount->Currency = $this->paymentData['Currency'];
+		$this->payment->Reference = isset($this->paymentData['Reference']) ? $this->paymentData['Reference'] : null;
 		$this->payment->Status = Payment::PENDING;
 		$this->payment->Method = $this->methodName;
 		$this->payment->write();
@@ -101,9 +102,12 @@ class PaymentProcessor extends Controller {
 	 * Process a payment request. To be extended by individual processor type
 	 * If there's no break point (i.e exceptions and errors), this should
 	 * redirect to the postRedirectURL (merchant-hosted) or the external gateway (gateway-hosted)
+	 * 
+	 * Data passed in the format (Reference is optional)
+	 * array('Amount' => 1.00, 'Currency' => 'USD', 'Reference' => 'Ref')
 	 *
-	 * @param array $data
-	 * @return null
+	 * @see paymentGateway::validate()
+	 * @param Array $data Payment data
 	 */
 	public function capture($data) {
 		$this->paymentData = $data;

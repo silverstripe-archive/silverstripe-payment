@@ -26,7 +26,8 @@ class Payment extends DataObject {
 		'Method' => 'Varchar(100)',
 		'Status' => "Enum('Incomplete, Success, Failure, Pending')",
 		'Amount' => 'Money',
-		'HTTPStatus' => 'Varchar(10)'
+		'HTTPStatus' => 'Varchar(10)',
+		'Reference' => 'Varchar'
 	);
 
 	/**
