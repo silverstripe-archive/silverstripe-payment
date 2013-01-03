@@ -450,7 +450,7 @@ JS;
 		return $required;
 	}
 	
-	static function postConnect(){
+	public function postConnect(){
 		$inputs['PostUsername'] = self::$pxPost_Username;
 		$inputs['PostPassword'] = self::$pxPost_Password;
 		$transaction = "<Txn>";
