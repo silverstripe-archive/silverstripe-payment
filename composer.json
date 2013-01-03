@@ -1,0 +1,17 @@
+{
+	"name": "silverstripe/payment",
+	"description": "SilverStripe payment provider integration. Currently supported: DPS, Eway, Paypal, Paystation, Worldpay",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "payment", "ecommerce", "paypal", "worldpay", "dps", "eway", "paystation"],
+	"authors": [
+	{
+		"name": "Normann Lou",
+		"email": "normann@silverstripe.com"
+	}
+	],
+	"require":
+	{
+		"silverstripe/framework": "~2.3",
+		"silverstripe/cms": "~2.3"
+	}
+}
