@@ -88,6 +88,12 @@ class DPSPayment extends Payment {
 	
 	static $default_sort = "ID DESC";
 
+	/**
+	 * Cached {@link SimpleXMLElement} object, containing ResponseXML. Indexed by Payment record ID.
+	 * @var SimpleXMLElement|null
+	 */
+	protected $cacheResponseXML = null;
+
 	function getPaymentFormFields() {
 		$adapter = $this->getDPSAdapter();
 		return $adapter->getPaymentFormFields();
@@ -336,6 +342,13 @@ class DPSPayment extends Payment {
 		}
 	}
 
+	protected function parsedResponseXML($cached = true) {
+		if(!$this->cacheResponseXML || !$cached) {
+			$this->cacheResponseXML = simplexml_load_string($this->ResponseXML, 'SimpleXMLElement', LIBXML_NOWARNING);
+		}
+		return $this->cacheResponseXML;
+	}
+
 	/**
 	 * From the ResponseXML, retrieve the AmountSettlement value.
 	 * CAUTION: Only works for transactions created through PXPay, not PXPost!
@@ -347,6 +360,10 @@ class DPSPayment extends Payment {
 		return ($xml) ? (string) $xml->AmountSettlement : false;
 	}
 
+	/**
+	 * From the ResponseXML, retrieve the CardName value.
+	 * @return bool|string
+	 */
 	public function getCardName() {
 		$xml = $this->parsedResponseXML();
 		if(!$xml) return false;
@@ -355,7 +372,7 @@ class DPSPayment extends Payment {
 
 	/**
 	 * From the ResponseXML, retrieve the CardHolderName value.
-	 * @return string
+	 * @return bool|string
 	 */
 	public function getCardHolderName() {
 		$xml = $this->parsedResponseXML();
@@ -375,7 +392,7 @@ class DPSPayment extends Payment {
 
 	/**
 	 * From the ResponseXML, retrieve the CardNumber value.
-	 * @return string
+	 * @return bool|string
 	 */
 	public function getCardNumber() {
 		$xml = $this->parsedResponseXML();
