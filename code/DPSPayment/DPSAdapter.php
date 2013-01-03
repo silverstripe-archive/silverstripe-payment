@@ -458,36 +458,22 @@ JS;
 			$transaction .= "<$name>$value</$name>";
 		}
 		$transaction .= "</Txn>";
-		// 2) CURL Creation
-		$clientURL = curl_init(); 
-		curl_setopt($clientURL, CURLOPT_URL, self::$pxPost_Url);
-		curl_setopt($clientURL, CURLOPT_POST, 1);
-		curl_setopt($clientURL, CURLOPT_POSTFIELDS, $transaction);
-		curl_setopt($clientURL, CURLOPT_RETURNTRANSFER, 1);
-		//curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0); //Needs to be included if no *.crt is available to verify SSL certificates
-		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
-		if(defined('CAINFO')) {
-			curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 1);
-			curl_setopt($clientURL, CURLOPT_CAINFO, CAINFO);
-		}else{
-			curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0);
-		}
-		// 3) CURL Execution
 		
-		$resultXml = curl_exec($clientURL);
+		$client = $this->getHTTPClient();
+		$resultXml = $client->post(self::$pxPost_Url, $transaction);
 		$match = preg_match('/^\<Txn\>(.*)\<\/Txn\>$/i', $resultXml, $matches);
 		return $match;
 	}
 	
 	//Payment Function
 	function doPayment($inputs, $payment) {
-		// 1) Main Settings
+		// Main Settings
 		//$inputs = array();
 		$inputs['PostUsername'] = self::$pxPost_Username;
 		$inputs['PostPassword'] = self::$pxPost_Password;
 		//$inputs = array();
 		
-		// 1) Transaction Creation
+		// Transaction Creation
 		$transaction = "<Txn>";
 		foreach($inputs as $name => $value) {
 			if($name == "Amount") {
@@ -496,36 +482,19 @@ JS;
 			$transaction .= "<$name>$value</$name>";
 		}
 		$transaction .= "</Txn>";
-		
-		// 2) CURL Creation
-		$clientURL = curl_init(); 
-		curl_setopt($clientURL, CURLOPT_URL, self::$pxPost_Url);
-		curl_setopt($clientURL, CURLOPT_POST, 1);
-		curl_setopt($clientURL, CURLOPT_POSTFIELDS, $transaction);
-		curl_setopt($clientURL, CURLOPT_RETURNTRANSFER, 1);
-		//curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0); //Needs to be included if no *.crt is available to verify SSL certificates
-		curl_setopt($clientURL, CURLOPT_SSLVERSION, 3);
-		if(defined('CAINFO')) {
-			curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 1);
-			curl_setopt($clientURL, CURLOPT_CAINFO, CAINFO);
-		}else{
-			curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0);
-		}
-		// 3) CURL Execution
-		
-		$resultXml = curl_exec($clientURL);
-		$payment->ResponseXML = $resultXml;
-		// 4) CURL Closing
-		curl_close ($clientURL);
 
-		// 5) XML Parser Creation
+		$client = $this->getHTTPClient();
+		$resultXml = $client->post(self::$pxPost_Url, $transaction);
+		$payment->ResponseXML = $resultXml;
+
+		// XML Parser Creation
 		$xmlParser = xml_parser_create();
 		$values = null;
 		$indexes = null;
 		xml_parse_into_struct($xmlParser, $resultXml, $values, $indexes);
 		xml_parser_free($xmlParser);
 		
-		// 6) XML Result Parsed In A PHP Array
+		// XML Result Parsed In A PHP Array
 		$resultPhp = array();
 		$level = array();
 		foreach($values as $xmlElement) {
@@ -544,7 +513,7 @@ JS;
 		
 		$responseFields = $resultPhp['TXN'];
 
-		// 7) DPS Response Management
+		// DPS Response Management
 		if($responseFields['SUCCESS']) {
 			$payment->Status = 'Success';
 			if($authcode = $responseFields['1']['AUTHCODE']) $payment->AuthCode = $authcode;
@@ -651,4 +620,48 @@ JS;
 			Director::redirect($payment->DPSHostedRedirectURL);
 		}
 	}
+
+	protected $httpClient;
+	
+	function setHTTPClient($client) {
+		$this->httpClient = $client;
+	}
+	
+	function getHTTPClient() {
+		if(!$this->httpClient) $this->httpClient = new DPSAdapter_HTTPClient();
+		return $this->httpClient;
+	}
+}
+
+/**
+ * Crude HTTP client to allow for basic mocking of HTTP responses.
+ */
+class DPSAdapter_HTTPClient {
+	
+	function post($url, $data) {
+		$ch = curl_init(); 
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		//curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0); //Needs to be included if no *.crt is available to verify SSL certificates
+		curl_setopt($ch, CURLOPT_SSLVERSION, 3);
+		if(defined('CAINFO')) {
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+			curl_setopt($ch, CURLOPT_CAINFO, CAINFO);
+		}else{
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+		}
+		
+		$result = curl_exec($ch);
+		
+		if(curl_error($ch)) {
+			throw new Exception(curl_error($ch));
+		}
+
+		curl_close ($ch);
+		
+		return $result;
+	}
+	
 }
