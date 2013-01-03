@@ -16,6 +16,7 @@ class PxPayResponse extends PxPayMessage
 	var $AmountSettlement;
 	var $CurrencySettlement;
 	var $CardName;
+	var $CardNumber;
 	var $CardHolderName;
 	var $CurrencyInput;
 	var $UserId;
@@ -46,6 +47,7 @@ class PxPayResponse extends PxPayMessage
 		$this->DpsTxnRef = $msg->get_element_text("DpsTxnRef");
 		$this->MerchantTxnId = $msg->get_element_text("TxnId");
 		$this->CardHolderName = $msg->get_element_text("CardHolderName");
+		$this->CardNumber = $msg->get_element_text("CardNumber");
 		$this->CurrencyInput = $msg->get_element_text("CurrencyInput");
 		
 	}
@@ -67,6 +69,9 @@ class PxPayResponse extends PxPayMessage
 	}
 	function getCardName(){
 		return $this->CardName;
+	}
+	function getCardNumber() {
+		return $this->CardNumber;
 	}
 	function getCurrencySettlement(){
 		$this->CurrencySettlement;

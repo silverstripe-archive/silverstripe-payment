@@ -325,4 +325,33 @@ class DPSPayment extends Payment {
 			}
 		}
 	}
-		}
+
+	public function getAmountSettlement() {
+		$xml = $this->parsedResponseXML();
+		return ($xml) ? (string) $xml->AmountSettlement : false;
+	}
+
+	public function getCardName() {
+		$xml = $this->parsedResponseXML();
+		return ($xml) ? (string) $xml->CardName : false;
+	}
+
+	/**
+	 * From the ResponseXML, retrieve the CardHolderName value.
+	 * @return string
+	 */
+	public function getCardHolderName() {
+		$xml = $this->parsedResponseXML();
+		return ($xml) ? (string) $xml->CardHolderName : false;
+	}
+
+	/**
+	 * From the ResponseXML, retrieve the CardNumber value.
+	 * @return string
+	 */
+	public function getCardNumber() {
+		$xml = $this->parsedResponseXML();
+		return ($xml) ? (string) $xml->CardNumber : false;
+	}
+
+}

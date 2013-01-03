@@ -94,10 +94,10 @@ class Payment extends DataObject {
 	static function set_supported_methods($methodMap) {
 		self::$supported_methods = $methodMap;
 	}
-	
+
 	function populateDefaults() {
 		parent::populateDefaults();
-		
+
 		$this->Amount->Currency = Payment::site_currency();
 		$this->setClientIP();
  	}
