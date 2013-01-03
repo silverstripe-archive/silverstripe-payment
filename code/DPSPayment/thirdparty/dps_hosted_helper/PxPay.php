@@ -1,8 +1,4 @@
 <?php
-/**
- * @package payment_dpshosted
- * @see http://civicrm.org
- */
 class PxPay
 {
 	var $PxPay_Key;

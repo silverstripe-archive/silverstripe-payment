@@ -1,9 +1,4 @@
 <?php
-/**
- * @package payment_dpshosted
- * @see http://civicrm.org
- */
-
 #******************************************************************************
 # Abstract base class for PxPay messages.
 # These are messages with certain defined elements,  which can be serialized to XML.

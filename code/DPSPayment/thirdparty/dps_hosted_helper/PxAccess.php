@@ -1,8 +1,4 @@
 <?php
-/**
- * @package payment_dpshosted
- * @see http://civicrm.org
- */
 class PxAccess
 {
 	var $Mac_Key, $Des_Key;

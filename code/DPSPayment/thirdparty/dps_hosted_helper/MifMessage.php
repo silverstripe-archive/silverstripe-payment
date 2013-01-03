@@ -1,9 +1,4 @@
 <?php
-/**
- * @package payment_dpshosted
- * @see http://civicrm.org
- */
-
 #******************************************************************************
 #* Name          : PxPay.inc
 #* Description   : The objects for PX Payment page  
