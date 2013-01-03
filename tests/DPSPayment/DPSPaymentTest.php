@@ -120,7 +120,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 		sleep(5);
 
 		$this->assertEquals($payment->Status, 'Failure');
-		$this->assertContains('Invalid Card', $payment->Message);
+		$this->assertContains('declined', $payment->Message);
 	
 		$payment->auth(self::get_expired_cc_data());
 
@@ -196,7 +196,7 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 	
 		$purchase->purchase(self::get_wrong_cc_data());
 		$this->assertEquals($purchase->Status, 'Failure');
-		$this->assertContains('Invalid Card', $purchase->Message);
+		$this->assertContains('declined', $purchase->Message);
 	
 		$purchase->purchase(self::get_expired_cc_data());
 		$this->assertEquals($purchase->Status, 'Failure');
