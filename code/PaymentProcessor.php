@@ -279,11 +279,4 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 		// Do redirection
 		$this->doRedirect();
 	}
-
-	/**
-	 * Reconstruct the payment object
-	 */
-	public function getPaymentObject($request) {
-		return DataObject::get_by_id('Payment', $request->param('OtherID'));
-	}
 }

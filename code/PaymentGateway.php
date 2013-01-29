@@ -260,8 +260,7 @@ class PaymentGateway_Result {
 	/**
 	 * @param String $status
 	 * @param SS_HTTPResponse $response
-	 * @param String or array $messages
-	 * @param array $errors
+	 * @param Array $errors
 	 */
 	public function __construct($status, $response = null, $errors = null) {
 
@@ -315,6 +314,11 @@ class PaymentGateway_Result {
 	 * @param array $errors
 	 */
 	public function setErrors($errors) {
+		
+		if (is_string($errors)) {
+			$errors = array($errors);
+		}
+		
 		if (is_array($errors)) {
 			$this->errors = $errors;
 		} else {
