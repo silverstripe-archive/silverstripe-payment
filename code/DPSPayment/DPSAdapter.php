@@ -4,6 +4,18 @@
  */
 
 class DPSAdapter extends Controller{
+
+	static $allowed_actions = array(
+		'AuthForm',
+		'CompleteForm',
+		'RefundForm',
+		'PurchaseForm',
+		'DPSHostedForm',
+		'DPSRecurringPayment',
+		'DPSHostedRecurringForm',
+		'processDPSHostedResponse',
+	);
+
 	protected static $pxPost_Username;
 	protected static $pxPost_Password;
 	protected static $pxPay_Userid;
