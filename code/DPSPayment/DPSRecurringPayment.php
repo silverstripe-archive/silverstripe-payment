@@ -59,22 +59,8 @@ class DPSRecurringPayment extends RecurringPayment{
 		'UrlFail',
 		'UrlSuccess',
 	);
-
-	protected static $testable_form = array(
-		"DPSHostedRecurringForm" => "DPS-hosted Recurring Payment Form",
-		"MerchantHostedRecurringForm" => "Merchant-hosted Recorring Payment Form",
-	);
 	
 	static $default_sort = "ID DESC";
-	
-	function getTestableForms(){
-		return self::$testable_form;
-	}
-	
-	function getForm($formType){
-		$adapter = new DPSAdapter();
-		return $adapter->getFormByName($formType);
-	}
 	
 	function recurringAuth($data){
 		DB::getConn()->transactionStart();
@@ -146,11 +132,7 @@ class DPSRecurringPayment extends RecurringPayment{
 		$inputs['CardNumber'] = implode('', $data['CardNumber']);
 		return $inputs;
 	}
-	
-	function HarnessPayNextLink(){
-		return 'harness/paynext/'.$this->ClassName."/".$this->ID;
-	}
-	
+		
 	function getNextPayment(){
 		$next = parent::getNextPayment();
 		$next->ClassName = 'DPSPayment';
