@@ -73,16 +73,8 @@ class DPSPayment extends Payment {
 		'UrlSuccess',
 	);
 	
-	protected static $testable_form = array(
-		"AuthForm" => "Authorising Payment Form",
-		"CompleteForm" => "Completing Payment Form",
-		"PurchaseForm" => "Merchant-hosted Payment Form",
-		"RefundForm" => "Refund Payment Form",
-		"DPSHostedForm" => "DPS-hosted Payment Form",
-	);
-	
 	static $default_sort = "ID DESC";
-	
+
 	function getPaymentFormFields() {
 		$adapter = new DPSAdapter();
 		return $adapter->getPaymentFormFields();
@@ -121,19 +113,6 @@ class DPSPayment extends Payment {
 		return $result;
 	}
 	
-	function getForm($formType){
-		$adapter = new DPSAdapter();
-		return $adapter->getFormByName($formType);
-	}
-	
-
-	function getTestableForms(){
-		return self::$testable_form;
-	}
-	
-	/**
-	 * called by a harness form submission
-	 */
 	function auth($data){
 		DB::getConn()->startTransaction();
 		try{
@@ -224,7 +203,7 @@ class DPSPayment extends Payment {
 			$inputs = $this->prepareRefundInputs();
 			$adapter->doPayment($inputs, $this);
 			DB::getConn()->endTransaction();
-		}catch(Exception $e){
+		} catch(Exception $e){
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
 		}
@@ -242,27 +221,27 @@ class DPSPayment extends Payment {
 	
 	function dpshostedPurchase($data){
 		DB::getConn()->startTransaction();
-		try{
+		try {
 			$this->TxnType = "Purchase";
 			$this->write();
 			$adapter = new DPSAdapter();
 			$inputs = $this->prepareDPSHostedRequest($data);
 			
 			return $adapter->doDPSHostedPayment($inputs, $this);
-		}catch(Exception $e){
+		} catch(Exception $e) {
 			DB::getConn()->transactionRollback();
 			$this->handleError($e);
 		}
 	}
-	
+
 	private function prepareDPSHostedRequest($data){
 		//never put this loop after $inputs['AmountInput'] = $amount, since it will change it to an array.
-		foreach($data as $element => $value){
-			if(in_array($element, self::$dpshosted_input_elements)){
+		foreach($data as $element => $value) {
+			if(in_array($element, self::$dpshosted_input_elements)) {
 				$inputs[$element] = $value;
 			}
 		}
-		
+
 		$inputs['TxnData1'] = $this->ID;
 		$inputs['TxnType'] = $this->TxnType;
 		$amount = (float) ltrim($this->Amount->Amount, '$');
@@ -273,10 +252,10 @@ class DPSPayment extends Payment {
 		$postProcess_url = Director::absoluteBaseURL() ."DPSAdapter/processDPSHostedResponse";
 		$inputs['UrlFail'] = $postProcess_url;
 		$inputs['UrlSuccess'] = $postProcess_url;
-		
+
 		return $inputs;
 	}
-	
+
 	function payAsRecurring() {
 		$adapter = new DPSAdapter();
 		$inputs = $this->prepareAsRecurringPaymentInputs();
@@ -325,6 +304,6 @@ class DPSPayment extends Payment {
 			}
 		}
 	}
-}
+		}
 
 ?>
