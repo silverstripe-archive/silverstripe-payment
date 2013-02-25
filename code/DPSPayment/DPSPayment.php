@@ -78,14 +78,6 @@ class DPSPayment extends Payment {
 		'UrlSuccess',
 	);
 	
-	protected static $testable_form = array(
-		"AuthForm" => "Authorising Payment Form",
-		"CompleteForm" => "Completing Payment Form",
-		"PurchaseForm" => "Merchant-hosted Payment Form",
-		"RefundForm" => "Refund Payment Form",
-		"DPSHostedForm" => "DPS-hosted Payment Form",
-	);
-	
 	static $default_sort = "ID DESC";
 
 	/**
@@ -132,19 +124,6 @@ class DPSPayment extends Payment {
 		return $result;
 	}
 	
-	function getForm($formType){
-		$adapter = $this->getDPSAdapter();
-		return $adapter->getFormByName($formType);
-	}
-	
-
-	function getTestableForms(){
-		return self::$testable_form;
-	}
-	
-	/**
-	 * called by a harness form submission
-	 */
 	function auth($data){
 		if(DPSAdapter::$using_transaction) DB::getConn()->transactionStart();
 		try{

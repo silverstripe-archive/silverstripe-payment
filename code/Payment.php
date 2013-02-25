@@ -63,12 +63,7 @@ class Payment extends DataObject {
 	 * @var string
 	 */
 	protected static $site_currency = 'USD';
-	
-	/**
-	 * the testable form of the payment method
-	 */
-	protected static $testable_form = array();
-	
+
 	/**
 	 * Set the currency code that this site uses.
 	 * @param string $currency Currency code. e.g. "NZD"
