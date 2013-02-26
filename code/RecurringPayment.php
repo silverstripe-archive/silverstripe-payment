@@ -66,11 +66,11 @@ class RecurringPayment extends DataObject{
 	}
 	
 	function SuccessPayments(){
-		return DataObject::get("Payment", "\"RecurringPaymentID\" = '".$this->ID."' AND \"Status\" = 'Success'", "\"PaymentDate\" DESC");
+		return DataObject::get("Payment", "\"RecurringPaymentID\" = '".(int)$this->ID."' AND \"Status\" = 'Success'", "\"PaymentDate\" DESC");
 	}
 	
 	function Payments(){
-		return DataObject::get("Payment", "\"RecurringPaymentID\" = '".$this->ID."'");
+		return DataObject::get("Payment", "\"RecurringPaymentID\" = '".(int)$this->ID."'");
 	}
 	
 	function getNextPayment(){
@@ -85,9 +85,9 @@ class RecurringPayment extends DataObject{
 	
 	function getLatestPayment($successonly = true){
 		if($successonly){
-			return DataObject::get_one("Payment", "\"RecurringPaymentID\" = '".$this->ID."' AND \"Status\" = 'Success'", false, "\"PaymentDate\" DESC");
+			return DataObject::get_one("Payment", "\"RecurringPaymentID\" = '".(int)$this->ID."' AND \"Status\" = 'Success'", false, "\"PaymentDate\" DESC");
 		}else{
-			return DataObject::get_one("Payment", "\"RecurringPaymentID\" = '".$this->ID."'", false, "\"PaymentDate\" DESC, \"LastEdited\" DESC");
+			return DataObject::get_one("Payment", "\"RecurringPaymentID\" = '".(int)$this->ID."'", false, "\"PaymentDate\" DESC, \"LastEdited\" DESC");
 		}
 	}
 	

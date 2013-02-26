@@ -297,7 +297,10 @@ class DPSPayment extends Payment {
 	}
 	
 	function successCompletePayment() {
-		return DataObject::get_one("DPSPayment", "\"Status\" = 'Success' AND \"TxnType\" = 'Complete' AND \"AuthPaymentID\" = '".$this->ID."'");
+		return DataObject::get_one(
+			"DPSPayment", 
+			"\"Status\" = 'Success' AND \"TxnType\" = 'Complete' AND \"AuthPaymentID\" = '".(int)$this->ID."'"
+		);
 	}
 	
 	
