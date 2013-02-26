@@ -119,7 +119,9 @@ class DPSAdapter extends Controller{
 		$inputs['PostPassword'] = self::$pxPost_Password;
 		$transaction = "<Txn>";
 		foreach($inputs as $name => $value) {
-			$transaction .= "<$name>$value</$name>";
+			$XML_name = Convert::raw2xml($name);
+			$XML_value = Convert::raw2xml($value);
+			$transaction .= "<$XML_name>$XML_value</$XML_name>";
 		}
 		$transaction .= "</Txn>";
 		
@@ -143,7 +145,9 @@ class DPSAdapter extends Controller{
 			if($name == "Amount") {
 				$value = number_format($value, 2, '.', '');
 			}
-			$transaction .= "<$name>$value</$name>";
+			$XML_name = Convert::raw2xml($name);
+			$XML_value = Convert::raw2xml($value);
+			$transaction .= "<$XML_name>$XML_value</$XML_name>";
 		}
 		$transaction .= "</Txn>";
 
@@ -212,7 +216,7 @@ class DPSAdapter extends Controller{
 		$request = new PxPayRequest();
 		foreach($inputs as $element => $value) {
 			$funcName = 'set' . $element;
-			$request->$funcName($value);
+			$request->$funcName(Convert::raw2xml($value));
 		}
 
 		// submit payment request to get the URL for redirection

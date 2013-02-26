@@ -3,6 +3,7 @@
 ## 0.4.1 - 2013-02-28
 
  * Security: Payment Information Leak in Test Harness Controller (see 0.3.2)
+ * Security: XML Injection in DPSAdapter API Requests (see 0.3.2)
 
 ## 0.3.2 - 2013-02-28
 
@@ -27,6 +28,12 @@ As a hotfix, you can also remove code/Harness.php to secure the installation.
 In this case, don't forget to flush the manifest cache by appending ?flush=1 to any SilverStripe URL.
 
 Reporter: Nicolaas Thiemen-Francken
+
+ * Security: XML Injection in DPSAdapter API Requests
+
+The `doPayment()`, `postConnect()` and `doDPSHostedPayment()` methods on `DPSAdapter` did not sanitize
+method arguments before constructing an XML request from it, and passing it on to the DPS API.
+Since these arguments are typically derived from user input, the method is considered unsafe.
 
 ## 0.4.0 - 2013-02-20
 
