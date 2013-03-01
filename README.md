@@ -1,5 +1,7 @@
 # Payment Module
 
+*Important:* The module is being restructured for SilverStripe 3 support, see "Roadmap" below
+
 ## Overview 
 
 Generic API for various payment gateways. 
@@ -35,6 +37,20 @@ it should be hook-up with any data object as long as this data object is payable
 such as a downloadable mp3, a E-book, booking a ticket on-line, donation, etc.
 DPSPayment has been re-implemented in this way, though we need to check all other payment
 methods in future releases.
+
+## Roadmap
+
+The module was heavily worked on during GSOC 2012 
+([project page](https://github.com/silverstripe/gsoc-wiki/wiki/GSOC-2012-Project:-Improve-Payment-Module)),
+which resulted in a number of forks, which we'll merge back once they're in a good state.
+
+ * https://github.com/frankmullenger/silverstripe-payment
+ * https://github.com/frankmullenger/silverstripe-payment-paypal
+ * https://github.com/frankmullenger/silverstripe-payment-paymentexpress
+ * https://github.com/frankmullenger/silverstripe-payment-cheque
+ * https://github.com/frankmullenger/silverstripe-payment-paystation
+ * https://github.com/frankmullenger/silverstripe-payment-securepaytech
+ * https://github.com/frankmullenger/silverstripe-gsoc-payment-test
 
 ## Troubleshooting
 
