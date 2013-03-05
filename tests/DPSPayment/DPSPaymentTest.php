@@ -353,8 +353,8 @@ class DPSPaymentTest extends SapphireTest implements TestOnly{
 			$payment->payNext();
 		}
 
-		$this->assertType('DataObjectSet', $payment->Payments());
-		$this->assertType('DataObjectSet', $payment->SuccessPayments());
+		$this->assertType('DataList', $payment->Payments());
+		$this->assertType('DataList', $payment->SuccessPayments());
 		$this->assertEquals($payment->Payments()->count(), 3);
 		$this->assertEquals($payment->SuccessPayments()->count(), 3);
 	}
