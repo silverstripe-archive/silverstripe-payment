@@ -159,7 +159,7 @@ class WorldpayPayment extends Payment {
 		// 3) Payment And Items Informations
 		
 		$inputs['MC_paymentID'] = $this->ID;
-		$inputs['desc'] = 'Order made on ' . DBField::create('SSDatetime', $order->Created)->Long() . ' by ' . $member->FirstName . ' ' . $member->Surname;
+		$inputs['desc'] = 'Order made on ' . DBField::create_field('SSDatetime', $order->Created)->Long() . ' by ' . $member->FirstName . ' ' . $member->Surname;
 		
 		// 4) Test Mode And Customer Name Settings
 		

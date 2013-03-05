@@ -19,7 +19,7 @@ class ChequePayment extends Payment {
 	}
 	
 	function getPaymentFormFields() {
-		return new FieldSet(
+		return new FieldList(
 			// retrieve cheque content from the ChequeContent() method on this class
 			new LiteralField("Chequeblurb", '<div id="Cheque" class="typography">' . $this->ChequeContent() . '</div>'),
 			new HiddenField("Cheque", "Cheque", 0)

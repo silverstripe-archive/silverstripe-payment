@@ -35,7 +35,7 @@ class EwayXMLPayment extends Payment {
 	function getPaymentFormFields() {
 		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by Eway"/>';
 		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read Eway\'s privacy policy">' . $logo . '</a><br/>';
-		$fields = new FieldSet(
+		$fields = new FieldList(
 			new LiteralField('EwayInfo', $privacyLink),
 			new LiteralField(
 				'EwayXMLPaymentsList',

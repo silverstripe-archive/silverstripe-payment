@@ -108,7 +108,7 @@ class PayPalPayment extends Payment {
 	function getPaymentFormFields() {
 		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by PayPal"/>';
 		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read PayPal\'s privacy policy">' . $logo . '</a><br/>';
-		return new FieldSet(
+		return new FieldList(
 			new LiteralField('PayPalInfo', $privacyLink),
 			new LiteralField(
 				'PayPalPaymentsList',

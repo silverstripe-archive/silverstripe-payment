@@ -140,7 +140,7 @@ class Payment extends DataObject {
 
 		// Create the initial form fields, which defines an OptionsetField
 		// allowing the user to choose which payment method to use.
-		$fields = new FieldSet(
+		$fields = new FieldList(
 			new HeaderField(_t('Payment.PAYMENTTYPE', 'Payment Type'), 3),
 			new OptionsetField(
 				'PaymentMethod',

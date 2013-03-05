@@ -37,7 +37,7 @@ class PaystationHostedPayment extends Payment {
 	function getPaymentFormFields() {
 		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by Paystation"/>';
 		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read Paystation\'s privacy policy">' . $logo . '</a><br/>';
-		return new FieldSet(
+		return new FieldList(
 			new LiteralField('PaystationInfo', $privacyLink),
 			new LiteralField(
 				'PaystationPaymentsList',

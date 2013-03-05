@@ -20,7 +20,7 @@ class PayPalAdapter extends Controller{
 		$customised[] = $requires;
 
 		$validator = new CustomRequiredFields($customised);
-		$actions = new FieldSet(
+		$actions = new FieldList(
 			new FormAction('doAuthPayment', "Submit")
 		);
 		$form = new Form(Controller::curr(), 'AuthForm', $fields, $actions, $validator);

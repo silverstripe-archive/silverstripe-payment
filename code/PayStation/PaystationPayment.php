@@ -68,7 +68,7 @@ class PaystationPayment extends Payment {
 		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read Paystation\'s privacy policy">' . $logo . '</a><br/>';
 		$paymentsList = '';
 		foreach(self::$credit_cards as $name => $image) $paymentsList .= '<img src="' . $image . '" alt="' . $name . '"/>';
-		$fields = new FieldSet(
+		$fields = new FieldList(
 			new LiteralField('PaystationInfo', $privacyLink),
 			new LiteralField('PaystationPaymentsList', $paymentsList),
 			new CreditCardField('Paystation_CreditCardNumber', 'Credit Card Number :'),
