@@ -216,7 +216,8 @@ class DPSAdapter extends Controller{
 		$request = new PxPayRequest();
 		foreach($inputs as $element => $value) {
 			$funcName = 'set' . $element;
-			$request->$funcName(Convert::raw2xml($value));
+			if(!is_object($value)) $value = Convert::raw2xml($value);
+			$request->$funcName($value);
 		}
 
 		// submit payment request to get the URL for redirection
