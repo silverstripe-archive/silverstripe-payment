@@ -10,7 +10,7 @@ Records payments and their status in the database.
 ## Supported Gateways and Payment Methods
 
  * [Payment Express](http://paymentexpress.com) (Merchant hosted) - Supports Auth, Complete, Purchase, Refund, Validate
- * [Payment Express]((http://paymentexpress.com)) (DPS hosted) - Supports Auth, Purchase
+ * [Payment Express](http://paymentexpress.com) (DPS hosted) - Supports Auth, Purchase
  * [Eway](http://www.eway.com.au/)
  * [PayPal](http://www.paypal.com)
  * [PayStation](http://www.paystation.com)
