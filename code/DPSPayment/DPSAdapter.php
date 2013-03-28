@@ -253,6 +253,13 @@ class DPSAdapter extends Controller{
 	 * @see {http://www.paymentexpress.com/technical_resources/ecommerce_hosted/pxaccess.html#ResultNotification}
 	 */
 	function processDPSHostedResponse(){
+
+		if(preg_match('/^PXL1/i', $_SERVER['HTTP_USER_AGENT'])){
+			$dpsDirectlyConnecting = 1;
+		}else{
+			$dpsDirectlyConnecting = 0;
+		}
+
 		$pxpay = new PxPay(self::$pxPay_Url, self::$pxPay_Userid, self::$pxPay_Key);
 
 		$enc_hex = $_REQUEST["result"];
@@ -293,10 +300,30 @@ class DPSAdapter extends Controller{
 				if(self::$using_transaction) DB::getConn()->transactionRollback();
 				$payment->handleError($e);
 			}
-			Director::redirect($payment->DPSHostedRedirectURL);
-		} else {
-			Director::redirect(Director::baseURL());
 		}
+
+		if(isset($dpsDirectlyConnecting) && $dpsDirectlyConnecting) {
+			$success = $rsp->getSuccess();   # =1 when request succeeds
+			$response = new SS_HTTPResponse();
+			//give reponse to DPS gateway a 200/201 response to stop it from sending FPRNs
+			if($success =='1') {
+				$response->setStatusCode(200);
+				$response->setStatusDescription('OK');
+				$response->output();
+			}else{
+				$response->setStatusCode(201);
+				$response->setStatusDescription('Created');
+				$response->output();
+			}
+			exit('0');
+		} else {
+			if($payment && $payment->exists()) {
+				Director::redirect($payment->DPSHostedRedirectURL);
+			}else{
+				Director::redirect(Director::baseURL());
+			}
+		}
+
 	}
 
 	protected $httpClient;
