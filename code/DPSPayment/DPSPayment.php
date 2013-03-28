@@ -324,7 +324,7 @@ class DPSPayment extends Payment {
 		}
 	}
 
-	protected function parsedResponseXML($cached = true) {
+	public function parsedResponseXML($cached = true) {
 		if(!$this->cacheResponseXML || !$cached) {
 			$this->cacheResponseXML = simplexml_load_string($this->ResponseXML, 'SimpleXMLElement', LIBXML_NOWARNING);
 		}
