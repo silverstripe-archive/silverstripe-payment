@@ -1,51 +1,91 @@
 # SilverStripe Payment Module
 
-
 ## Maintainer Contacts
----------------------
 *  [Ryan Dao](https://github.com/ryandao)
 *  [Frank Mullenger](https://github.com/frankmullenger)
 *  [Jeremy Shipman](https://github.com/jedateach)
 
 ## Requirements
----------------------
-* SilverStripe 3.0
+* SilverStripe 3.*
 
 ## Documentation
----------------------
+
 ### Usage Overview
-This module provides the base API for various payment methods 
+This module provides the base API for various payment methods. This module is usually used in conjunction with other payment modules that integrate with particular payment gateways.
 
 ### Installation 
-
 1. Place this directory in the root of your SilverStripe installation and call it 'payment'.
-2. Visit yoursite.com/dev/build to rebuild the database.
-3. Set the environment (optional). If not set, the default value is set to SilverStripe environment.
+2. Visit yoursite.com/dev/build?flush=1 to rebuild the database.
+3. Configure the payment module by creating a YAML configuration file  
+e.g: mysite/_config/Mysite.yaml
+```yaml
+PaymentGateway:
+  environment:
+    'dev'
 
-				PaymentGateway:
-					'environment':
-						'dev'
-	 
-						
-4. Enable supported payment methods in your application yaml file. Make sure that the respective sub-modules are installed. Only Dummy payment methods are shipped with the module.
-
-				PaymentProcessor:
-					supported_methods:
-						'dev':
-							- 'DummyMerchantHosted'
-							- 'DummyGatewayHosted'
-						'live':
-							- 'PayPalDirect'
-							- 'PayPalExpress'
+PaymentProcessor:
+  supported_methods:
+    dev:
+      - 'Cheque'
+    live:
+      - 'Cheque'
+```
+**Note**  
+The above configuration sets the payment into dev mode and assumes that the "payment-cheque" module is installed (see "Installing Payment Methods" below).  
+YAML configuration files need to use spaces instead of tabs.  
+You need to run a /dev/build?flush=1 each time the YAML configuration file is changed.  
 							
 ### Testing 
-After cloning this GitHub repository, make sure all the tests in <yoursite>/dev/tests are passed to make sure the environemnt settings are correct.  
+After installing this module you can access unit tests at yoursite.com/dev/tests.
 
-Install the [PaymentTest module](https://github.com/ryandao/silverstripe-gsoc-payment-test) to do UI testing for the supported payment gateways. By default, DummyMerchantHosted and DummyGatewayHosted are enabled for testing purposes. For other gateways, you must specify them under 'supported_methods' in the yaml config.
+Alternatively install the [payment test module](https://github.com/frankmullenger/silverstripe-gsoc-payment-test) for manual integration testing with different supported payment gateways. Dummy payment methods are included with the payment test module, it is also good to test with the "payment-cheque" module as this is a very simple way of processing payments.
 
-### Installing Payment methods
-Payment methods are shipped separately. Each method is one module and can be installed in the same way as other SilverStripe modules.
+### Installing Payment Methods
+Other payment methods such as cheque, PayPal, PaymentExpress, Paystation etc. can be installed as seperate modules and enabled in the YAML configuration file. 
 
-List of current supported payment methods:  
+1. Find and install a payment method module:
+- [Cheque](https://github.com/frankmullenger/silverstripe-payment-cheque)
+- [PayPal](https://github.com/frankmullenger/silverstripe-payment-paypal)
+- [Paystation](https://github.com/frankmullenger/silverstripe-payment-paystation)
+- [Payment Express](https://github.com/frankmullenger/silverstripe-payment-paymentexpress)
+- [Secure Pay Tech](https://github.com/frankmullenger/silverstripe-payment-securepaytech)
+2. Enable the payment method in the YAML configuration file  
+e.g: mysite/_config/Mysite.yaml
+```yaml
+PaymentGateway:
+  environment:
+    'dev'
 
-- [PayPal](https://github.com/ryandao/silverstripe-payment-paypal)
+PaymentProcessor:
+  supported_methods:
+    dev:
+      - 'Cheque'
+      - 'DummyMerchantHosted'
+      - 'DummyGatewayHosted'
+      - 'PayPalExpress'
+      - 'PaymentExpressPxPay'
+      - 'PaystationThreeParty'
+      - 'SecurePayTech'
+    live:
+      - 'Cheque'
+```
+**Note**  
+Payment method names can be found in each payment method module YAML configuration file as the first "node" under "PaymentFactory:".
+3. Configure the payment method in the YAML configuration file if necessary, each payment method has slightly different requirements as far as configuration  
+e.g mysite/_config/Mysite.yaml
+```yaml
+PayPalGateway_Express: 
+  live:
+    authentication:
+      username: ''
+      password: ''
+      signature: ''
+  dev:
+    authentication:
+      username: ''
+      password: ''
+      signature: ''
+```
+
+
+
