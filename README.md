@@ -15,9 +15,12 @@ This module provides the base API for various payment methods. This module is us
 
 ### Installation 
 1. Place this directory in the root of your SilverStripe installation and call it 'payment'.
+
 2. Visit yoursite.com/dev/build?flush=1 to rebuild the database.
+
 3. Configure the payment module by creating a YAML configuration file  
 e.g: mysite/_config/Mysite.yaml
+
 ```yaml
 PaymentGateway:
   environment:
@@ -30,6 +33,7 @@ PaymentProcessor:
     live:
       - 'Cheque'
 ```
+
 **Note**  
 The above configuration sets the payment into dev mode and assumes that the "payment-cheque" module is installed (see "Installing Payment Methods" below).  
 YAML configuration files need to use spaces instead of tabs.  
@@ -49,8 +53,10 @@ Other payment methods such as cheque, PayPal, PaymentExpress, Paystation etc. ca
 - [Paystation](https://github.com/frankmullenger/silverstripe-payment-paystation)
 - [Payment Express](https://github.com/frankmullenger/silverstripe-payment-paymentexpress)
 - [Secure Pay Tech](https://github.com/frankmullenger/silverstripe-payment-securepaytech)
+
 2. Enable the payment method in the YAML configuration file  
 e.g: mysite/_config/Mysite.yaml
+
 ```yaml
 PaymentGateway:
   environment:
@@ -69,10 +75,13 @@ PaymentProcessor:
     live:
       - 'Cheque'
 ```
+
 **Note**  
 Payment method names can be found in each payment method module YAML configuration file as the first "node" under "PaymentFactory:".
+
 3. Configure the payment method in the YAML configuration file if necessary, each payment method has slightly different requirements as far as configuration  
 e.g mysite/_config/Mysite.yaml
+
 ```yaml
 PayPalGateway_Express: 
   live:
