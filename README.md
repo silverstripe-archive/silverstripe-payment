@@ -47,7 +47,7 @@ Alternatively install the [payment test module](https://github.com/frankmullenge
 ### Installing Payment Methods
 Other payment methods such as cheque, PayPal, PaymentExpress, Paystation etc. can be installed as seperate modules and enabled in the YAML configuration file. 
 
-1. Find and install a payment method module, some that are currently available:
+1. Find and install a payment method module, some that are currently available:  
 	- [Cheque](https://github.com/frankmullenger/silverstripe-payment-cheque)
 	- [PayPal](https://github.com/frankmullenger/silverstripe-payment-paypal)
 	- [Paystation](https://github.com/frankmullenger/silverstripe-payment-paystation)
@@ -76,7 +76,7 @@ PaymentProcessor:
       - 'Cheque'
 ```
 
-3. Configure the payment method in the YAML configuration file if necessary, each payment method has slightly different requirements as far as configuration  
+ 3. Configure the payment method in the YAML configuration file if necessary, each payment method has slightly different requirements as far as configuration  
 e.g mysite/_config/Mysite.yaml
 
 ```yaml
