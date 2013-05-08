@@ -86,9 +86,16 @@ class Payment extends DataObject {
 	 *
 	 * @param array $methodMap A map of class names to human-readable descriptions of the payment methods.
 	 */
-	static function set_supported_methods($methodMap) {
+	public static function set_supported_methods($methodMap) {
 		self::$supported_methods = $methodMap;
 	}
+	
+	/**
+	 * @return array
+	 */
+	public static function get_supported_methods() { 
+		return self::$supported_methods; 
+	} 
 
 	function populateDefaults() {
 		parent::populateDefaults();
