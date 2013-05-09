@@ -219,6 +219,11 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
  * Default class for gateway-hosted processors
  */
 class PaymentProcessor_GatewayHosted extends PaymentProcessor {
+	
+	public static $allowed_actions = array(
+		'complete',
+		'cancel'
+	);
 
 	/**
 	 * Process a gateway-hosted payment. Users will be redirected to
@@ -238,6 +243,15 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 				$this->payment->ID
 		));
 		$this->gateway->setReturnURL($returnURL);
+		
+		// Set the cancel link
+		$cancelURL = Director::absoluteURL(Controller::join_links(
+				$this->link(),
+				'cancel',
+				$this->methodName,
+				$this->payment->ID
+		));
+		$this->gateway->setCancelURL($cancelURL);
 
 		// Send a request to the gateway
 		$result = $this->gateway->process($this->paymentData);
@@ -257,12 +271,12 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 	}
 
 	/**
-	 * Process a response from the external gateway
+	 * Process request from the external gateway, this action is usually triggered if the payment was completed on the gateway 
+	 * and the user was redirected to the returnURL.
+	 * 
+	 * The request is passed to the gateway so that it can process the request and use a mechanism to check the status of the payment.
 	 *
 	 * @param SS_HTTPResponse $request
-	 * This is the object representation for
-	 * the http request received from the gateway. This request will be forwarded
-	 * to gateway->getResult() for gateway-specific processing
 	 */
 	public function complete($request) {
 		// Reconstruct the payment object
@@ -275,6 +289,27 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 		// Query the gateway for the payment result
 		$result = $this->gateway->getResponse($request);
 		$this->payment->updateStatus($result);
+
+		// Do redirection
+		$this->doRedirect();
+	}
+	
+	/**
+	 * Process request from the external gateway, this action is usually triggered if the payment was cancelled
+	 * and the user was redirected to the cancelURL.
+	 * 
+	 * @param SS_HTTPResponse $request
+	 */
+	public function cancel($request) {
+		// Reconstruct the payment object
+		$this->payment = Payment::get()->byID($request->param('OtherID'));
+
+		// Reconstruct the gateway object
+		$methodName = $request->param('ID');
+		$this->gateway = PaymentFactory::get_gateway($methodName);
+
+		// The payment result was a failure
+		$this->payment->updateStatus(new PaymentGateway_Failure());
 
 		// Do redirection
 		$this->doRedirect();
