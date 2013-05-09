@@ -1,7 +1,6 @@
 # Development Guide
 
 ## User-facing Development
---------------------------
 First, construct the PaymentProcessor instance for the method you want to use:
 
 		$processor = PaymentFactory::factory(<MethodName>)
