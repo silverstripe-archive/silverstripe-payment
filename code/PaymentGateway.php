@@ -3,27 +3,14 @@
  * Parent class for a number of payment gateways
  */
 class PaymentGateway {
-
+	
 	/**
 	 * The gateway url
+	 * TODO: Can this just be moved to PaymentGateway_GatewayHosted?
 	 *
 	 * @var String
 	 */
 	public $gatewayURL;
-
-	/**
-	 * The link to return to after processing payment (for gateway-hosted payments only)
-	 *
-	 * @var String
-	 */
-	protected $returnURL;
-
-	/**
-	 * The link to return to after cancelling payment (for gateway-hosted payments only)
-	 *
-	 * @var String
-	 */
-	protected $cancelURL;
 
 	/**
 	 * Object holding the gateway validation result
@@ -185,8 +172,25 @@ class PaymentGateway_MerchantHosted extends PaymentGateway {
 
 /**
  * Parent class for all gateway-hosted gateways
+ * 
+ * TODO: Do the setters/getters for URLs really need to exist? Setters should either validate URL or be removed and 
+ * instance vars should be public instead of protected - similar to gatewayURL?
  */
 class PaymentGateway_GatewayHosted extends PaymentGateway {
+	
+	/**
+	 * The link to return to after processing payment (for gateway-hosted payments only)
+	 *
+	 * @var String
+	 */
+	protected $returnURL;
+
+	/**
+	 * The link to return to after cancelling payment (for gateway-hosted payments only)
+	 *
+	 * @var String
+	 */
+	protected $cancelURL;
 
 	/**
 	 * Set the return url, default to the site root
@@ -200,6 +204,10 @@ class PaymentGateway_GatewayHosted extends PaymentGateway {
 			$this->returnURL = Director::absoluteBaseURL();
 		}
 	}
+	
+	public function getReturnURL() {
+		return $this->returnURL;
+	}
 
 	/**
 	 * Set the cancel url, default to the site root
@@ -212,6 +220,10 @@ class PaymentGateway_GatewayHosted extends PaymentGateway {
 		} else {
 			$this->cancelURL = Director::absoluteBaseURL();
 		}
+	}
+
+	public function getCancelURL() {
+		return $this->cancelURL;
 	}
 
 	/**
