@@ -172,9 +172,6 @@ class PaymentGateway_MerchantHosted extends PaymentGateway {
 
 /**
  * Parent class for all gateway-hosted gateways
- * 
- * TODO: Do the setters/getters for URLs really need to exist? Setters should either validate URL or be removed and 
- * instance vars should be public instead of protected - similar to gatewayURL?
  */
 class PaymentGateway_GatewayHosted extends PaymentGateway {
 	
@@ -183,56 +180,24 @@ class PaymentGateway_GatewayHosted extends PaymentGateway {
 	 *
 	 * @var String
 	 */
-	protected $returnURL;
+	public $returnURL;
 
 	/**
 	 * The link to return to after cancelling payment (for gateway-hosted payments only)
 	 *
 	 * @var String
 	 */
-	protected $cancelURL;
-
-	/**
-	 * Set the return url, default to the site root
-	 *
-	 * @param String $url
-	 */
-	public function setReturnURL($url = null) {
-		if ($url) {
-			$this->returnURL = $url;
-		} else {
-			$this->returnURL = Director::absoluteBaseURL();
-		}
-	}
+	public $cancelURL;
 	
-	public function getReturnURL() {
-		return $this->returnURL;
-	}
-
 	/**
-	 * Set the cancel url, default to the site root
-	 *
-	 * @param String $url
-	 */
-	public function setCancelURL($url) {
-		if ($url) {
-			$this->cancelURL = $url;
-		} else {
-			$this->cancelURL = Director::absoluteBaseURL();
-		}
-	}
-
-	public function getCancelURL() {
-		return $this->cancelURL;
-	}
-
-	/**
-	 * Pass the response object to the gateway and return the result
+	 * Check the payment using gateway lookup API or request
+	 * 
+	 * TODO: Should this return PaymentGateway_Failure by default instead?
 	 *
 	 * @param SS_HTTPRequest $request
 	 * @return PaymentGateway_Result
 	 */
-	public function getResponse($request) {
+	public function check($request) {
 		return new PaymentGateway_Success();
 	}
 }

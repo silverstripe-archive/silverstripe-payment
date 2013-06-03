@@ -236,22 +236,20 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 		parent::capture($data);
 
 		// Set the return link
-		$returnURL = Director::absoluteURL(Controller::join_links(
+		$this->gateway->returnURL = Director::absoluteURL(Controller::join_links(
 				$this->link(),
 				'complete',
 				$this->methodName,
 				$this->payment->ID
 		));
-		$this->gateway->setReturnURL($returnURL);
 		
 		// Set the cancel link
-		$cancelURL = Director::absoluteURL(Controller::join_links(
+		$this->gateway->cancelURL = Director::absoluteURL(Controller::join_links(
 				$this->link(),
 				'cancel',
 				$this->methodName,
 				$this->payment->ID
 		));
-		$this->gateway->setCancelURL($cancelURL);
 
 		// Send a request to the gateway
 		$result = $this->gateway->process($this->paymentData);
@@ -287,7 +285,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 		$this->gateway = PaymentFactory::get_gateway($methodName);
 
 		// Query the gateway for the payment result
-		$result = $this->gateway->getResponse($request);
+		$result = $this->gateway->check($request);
 		$this->payment->updateStatus($result);
 
 		// Do redirection
