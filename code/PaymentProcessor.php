@@ -6,6 +6,7 @@
  * Override this class if desired to add custom functionalities.
  */
 class PaymentProcessor extends Controller {
+	
 	/**
 	 * The method name of this controller
 	 *
@@ -72,6 +73,11 @@ class PaymentProcessor extends Controller {
 		Session::set('PostRedirectionURL', $url);
 	}
 
+	/**
+	 * Get the url to be redirected to after the payment is completed.
+	 *
+	 * @return String
+	 */
 	public function getRedirectURL() {
 		return Session::get('PostRedirectionURL');
 	}
@@ -160,6 +166,7 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 	 * until the payment is completed. Redirect to the postRedirectURL afterwards
 	 *
 	 * @see PaymentProcessor::capture()
+	 * @param Array $data
 	 */
 	public function capture($data) {
 		parent::capture($data);
@@ -173,6 +180,8 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
 	/**
 	 * Return the form fields for credit data
+	 * 
+	 * @return FieldList
 	 */
 	public function getCreditCardFields() {
 
@@ -193,6 +202,8 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
 	/**
 	 * Override to add credit card form fields
+	 * 
+	 * @return FieldList
 	 */
 	public function getFormFields() {
 		$fieldList = parent::getFormFields();
@@ -201,6 +212,11 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 		return $fieldList;
 	}
 
+	/**
+	 * Override to add credit card form requirements
+	 *
+	 * @return RequiredFields
+	 */
 	public function getFormRequirements() {
 		$required = parent::getFormRequirements();
 		$required->appendRequiredFields(new RequiredFields(
@@ -231,6 +247,7 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 	 * our site when the payment is completed.
 	 *
 	 * @see PaymentProcessor::capture()
+	 * @param Array $data
 	 */
 	public function capture($data) {
 		parent::capture($data);
