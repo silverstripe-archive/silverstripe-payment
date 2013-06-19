@@ -1,5 +1,5 @@
 {
-	"name": "frankmullenger/payment",
+	"name": "silverstripe/payment",
 	"description": "SilverStripe Payment Module",
 	"type": "silverstripe-module",
 	"license": "BSD-3-Clause",
