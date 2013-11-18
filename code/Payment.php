@@ -22,7 +22,7 @@ class Payment extends DataObject {
 	 * Amount: The payment amount amd currency
 	 * HTTPStatus: Status code of the HTTP response
 	 */
-	public static $db = array(
+	private static $db = array(
 		'Method' => 'Varchar(100)',
 		'Status' => "Enum('Incomplete, Success, Failure, Pending')",
 		'Amount' => 'Money',
@@ -33,14 +33,14 @@ class Payment extends DataObject {
 	/**
 	 * PaidBy: Member that processed this payment (optional)
 	 */
-	public static $has_one = array(
+	private static $has_one = array(
 		'PaidBy' => 'Member',
 	);
 
 	/**
 	 * Errors: Errors returned from payment gateway when processing this payment
 	 */
-	public static $has_many = array(
+	private static $has_many = array(
 		'Errors' => 'Payment_Error',
 	);
 
@@ -80,7 +80,7 @@ class Payment_Error extends DataObject {
 	 * ErrorCode: Gateway specific error code
 	 * ErrorMessage: Corresponding error message from the gateway
 	 */
-	public static $db = array(
+	private static $db = array(
 		'ErrorCode' => 'Varchar(10)',
 		'ErrorMessage' => 'Text'
 	);
@@ -88,7 +88,7 @@ class Payment_Error extends DataObject {
 	/**
 	 * Payment: Payment this error is related to
 	 */
-	public static $has_one = array(
+	private static $has_one = array(
 		'Payment' => 'Payment',
 	);
 }

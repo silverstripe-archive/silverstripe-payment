@@ -235,8 +235,8 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
  * Default class for gateway-hosted processors
  */
 class PaymentProcessor_GatewayHosted extends PaymentProcessor {
-	
-	public static $allowed_actions = array(
+
+	private static $allowed_actions = array(
 		'complete',
 		'cancel'
 	);
