@@ -7,7 +7,7 @@
  */	
 class DPSPayment extends Payment {
 	static $db = array(
-		'TxnRef' => 'Text',
+		'TxnRef' => 'Varchar(1024)',
 		'TxnType' => "Enum('Purchase,Auth,Complete,Refund,Validate', 'Purchase')",
 		'AuthCode' => 'Varchar(22)',
 		'MerchantReference' => 'Varchar(64)',
@@ -22,6 +22,10 @@ class DPSPayment extends Payment {
 		'CardHolderName' => 'Varchar(255)', 
 		'DateExpiry' => 'Varchar(4)', // four digits (mm/yy)
 		'TimeOutDate' => 'SS_Datetime'
+	);
+
+	static $indexes = array(
+		'TxnRef' => true,
 	);
 	
 	static $has_one = array(
