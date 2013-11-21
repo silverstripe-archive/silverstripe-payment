@@ -26,6 +26,10 @@ class RecurringPayment extends DataObject{
 	static $has_many = array(
 		'Payments' => "Payment"
 	);
+
+	static $create_table_options = array(
+		'MySQLDatabase' => 'ENGINE=InnoDB'
+	);
 	
 	function populateDefaults() {
 		parent::populateDefaults();
