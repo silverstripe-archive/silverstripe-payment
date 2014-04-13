@@ -98,7 +98,7 @@ class PxPayMessage {
 			
 		$xml  = "<$root>";
     	while (list($prop, $val) = each($arr))
-        	$xml .= "<$prop>$val</$prop>" ;
+        	$xml .= "<$prop>".htmlspecialchars($val, ENT_QUOTES, 'UTF-8')."</$prop>" ;
 
 		$xml .= "</$root>";
 		
