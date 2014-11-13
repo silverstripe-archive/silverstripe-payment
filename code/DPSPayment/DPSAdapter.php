@@ -324,7 +324,6 @@ class DPSAdapter_HTTPClient {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		//curl_setopt($clientURL, CURLOPT_SSL_VERIFYPEER, 0); //Needs to be included if no *.crt is available to verify SSL certificates
-		curl_setopt($ch, CURLOPT_SSLVERSION, 3);
 		if(defined('CAINFO')) {
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
 			curl_setopt($ch, CURLOPT_CAINFO, CAINFO);
