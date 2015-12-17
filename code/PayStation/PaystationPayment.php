@@ -9,95 +9,107 @@
  * is not supported.
  * 
  * @package payment
- */	
+ */
 
-class PaystationPayment extends Payment {
+class PaystationPayment extends Payment
+{
 
-	static $db = array(
-		"TxnNo" => "Varchar",
-		"ReceiptNo" => "Varchar"
-	);
+    public static $db = array(
+        "TxnNo" => "Varchar",
+        "ReceiptNo" => "Varchar"
+    );
 
-	// Paystation information
-	
-	protected static $privacy_link = 'http://paystation.co.nz/privacy-policy';
-	
-	protected static $logo = 'payment/images/payments/paystation.jpg';
+    // Paystation information
 
-	// URLs
+    protected static $privacy_link = 'http://paystation.co.nz/privacy-policy';
+    
+    protected static $logo = 'payment/images/payments/paystation.jpg';
 
-	protected static $url = 'https://www.paystation.co.nz/direct/paystation.dll?paystation';
-	
-	// Payment Informations
-	
-	protected static $paystationMerchantID;
-	protected static $paystationGatewayID;
-	
-	static function set_account($paystationMerchantID, $paystationGatewayID) {
-		self::$paystationMerchantID = $paystationMerchantID;
-		self::$paystationGatewayID = $paystationGatewayID;
-	}
+    // URLs
 
-	protected static $test_mode = false;
+    protected static $url = 'https://www.paystation.co.nz/direct/paystation.dll?paystation';
+    
+    // Payment Informations
 
-	static function set_test_mode() {
-		self::$test_mode = true;
-	}
+    protected static $paystationMerchantID;
+    protected static $paystationGatewayID;
+    
+    public static function set_account($paystationMerchantID, $paystationGatewayID)
+    {
+        self::$paystationMerchantID = $paystationMerchantID;
+        self::$paystationGatewayID = $paystationGatewayID;
+    }
 
-	// Paystation API doesn't support CVN.
-	protected static $cvn_mode = false;
+    protected static $test_mode = false;
 
-	static function unset_cvn_mode() {
-		self::$cvn_mode = false;
-	}
-	
-	protected static $credit_cards = array(
-		'Visa' => 'payment/images/payments/methods/visa.jpg',
-		'MasterCard' => 'payment/images/payments/methods/mastercard.jpg',
-		'American Express' => 'payment/images/payments/methods/american-express.gif',
-		'Dinners Club' => 'payment/images/payments/methods/dinners-club.jpg',
-		'JCB' => 'payment/images/payments/methods/jcb.jpg'
-	);
+    public static function set_test_mode()
+    {
+        self::$test_mode = true;
+    }
 
-	static function remove_credit_card($creditCard) {
-		unset(self::$credit_cards[$creditCard]);
-	}
+    // Paystation API doesn't support CVN.
+    protected static $cvn_mode = false;
 
-	function getPaymentFormFields() {
-		$logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by Paystation"/>';
-		$privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read Paystation\'s privacy policy">' . $logo . '</a><br/>';
-		$paymentsList = '';
-		foreach(self::$credit_cards as $name => $image) $paymentsList .= '<img src="' . $image . '" alt="' . $name . '"/>';
-		$fields = new FieldSet(
-			new LiteralField('PaystationInfo', $privacyLink),
-			new LiteralField('PaystationPaymentsList', $paymentsList),
-			new CreditCardField('Paystation_CreditCardNumber', 'Credit Card Number :'),
-			new TextField('Paystation_CreditCardExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
-		);
-		if(self::$cvn_mode) $fields->push(new TextField('Paystation_CreditCardCVN', 'Credit Card CVN : (3 or 4 digits)', '', 4));
-		return $fields;
-	}
+    public static function unset_cvn_mode()
+    {
+        self::$cvn_mode = false;
+    }
+    
+    protected static $credit_cards = array(
+        'Visa' => 'payment/images/payments/methods/visa.jpg',
+        'MasterCard' => 'payment/images/payments/methods/mastercard.jpg',
+        'American Express' => 'payment/images/payments/methods/american-express.gif',
+        'Dinners Club' => 'payment/images/payments/methods/dinners-club.jpg',
+        'JCB' => 'payment/images/payments/methods/jcb.jpg'
+    );
 
-	/**
-	 * Returns the required fields to add to the order form, when using this payment method. 
-	 */
-	function getPaymentFormRequirements() {
-		$jsCode = <<<JS
+    public static function remove_credit_card($creditCard)
+    {
+        unset(self::$credit_cards[$creditCard]);
+    }
+
+    public function getPaymentFormFields()
+    {
+        $logo = '<img src="' . self::$logo . '" alt="Credit card payments powered by Paystation"/>';
+        $privacyLink = '<a href="' . self::$privacy_link . '" target="_blank" title="Read Paystation\'s privacy policy">' . $logo . '</a><br/>';
+        $paymentsList = '';
+        foreach (self::$credit_cards as $name => $image) {
+            $paymentsList .= '<img src="' . $image . '" alt="' . $name . '"/>';
+        }
+        $fields = new FieldSet(
+            new LiteralField('PaystationInfo', $privacyLink),
+            new LiteralField('PaystationPaymentsList', $paymentsList),
+            new CreditCardField('Paystation_CreditCardNumber', 'Credit Card Number :'),
+            new TextField('Paystation_CreditCardExpiry', 'Credit Card Expiry : (MMYY)', '', 4)
+        );
+        if (self::$cvn_mode) {
+            $fields->push(new TextField('Paystation_CreditCardCVN', 'Credit Card CVN : (3 or 4 digits)', '', 4));
+        }
+        return $fields;
+    }
+
+    /**
+     * Returns the required fields to add to the order form, when using this payment method. 
+     */
+    public function getPaymentFormRequirements()
+    {
+        $jsCode = <<<JS
 			require('Paystation_CreditCardNumber');
 			require('Paystation_CreditCardExpiry');
 JS;
-		$phpCode = '
+        $phpCode = '
 			$this->requireField("Paystation_CreditCardNumber", $data);
 			$this->requireField("Paystation_CreditCardExpiry", $data);
 		';
-		return array('js' => $jsCode, 'php' => $phpCode);
-	}
-		
-	function processPayment($data, $form) {
-	
-		// 1) Main Settings
+        return array('js' => $jsCode, 'php' => $phpCode);
+    }
+        
+    public function processPayment($data, $form)
+    {
+    
+        // 1) Main Settings
 
-		
+        
 /* pstn_pi		REQUIRED   		String value				The Paystation ID for the account that the payments will be made against
  * pstn_gi		REQUIRED		String value				The Gateway ID that the payments will be made against
  * pstn_ms		REQUIRED		String value  				Merchant Session Ð a unique identification code for each financial transaction request.
@@ -129,99 +141,110 @@ JS;
  *															Please note that pago is not a card type, but a gateway.  
  *															CT cannot be empty, but may be omitted.
  */
-		$merchantSession = $this->ID;  // FIX THIS: THE MERCHANT SESSION SHOULD BE UNIQUE VALUE FOR EACH *ATTEMPT* AT THE TRANSACITON
+        $merchantSession = $this->ID;  // FIX THIS: THE MERCHANT SESSION SHOULD BE UNIQUE VALUE FOR EACH *ATTEMPT* AT THE TRANSACITON
 
-		$inputs['pstn_pi'] = self::$paystationMerchantID;
-		$inputs['pstn_gi'] = self::$paystationGatewayID;
-		$inputs['pstn_ms'] = $merchantSession;
-		$inputs['pstn_2p'] = 't';
-		$inputs['pstn_nr'] = 't';
+        $inputs['pstn_pi'] = self::$paystationMerchantID;
+        $inputs['pstn_gi'] = self::$paystationGatewayID;
+        $inputs['pstn_ms'] = $merchantSession;
+        $inputs['pstn_2p'] = 't';
+        $inputs['pstn_nr'] = 't';
 
-		// 2) Payment Informations
-		
-		$inputs['pstn_am'] = $this->Amount;
+        // 2) Payment Informations
+
+        $inputs['pstn_am'] = $this->Amount;
 //		if ($this->Currency) $inputs['pstn_cu'] = $this->Currency;
-		$inputs['pstn_mr'] = $this->ID;
-		$inputs['pstn_af'] = 'dollars.cents';
+        $inputs['pstn_mr'] = $this->ID;
+        $inputs['pstn_af'] = 'dollars.cents';
 
-		// 3) Credit Card Informations
-		$inputs['pstn_cn'] = implode('', $data['Paystation_CreditCardNumber']);
-		$inputs['pstn_ex'] = $data['Paystation_CreditCardExpiry'];
-		$inputs['pstn_df'] = 'mmyy';
+        // 3) Credit Card Informations
+        $inputs['pstn_cn'] = implode('', $data['Paystation_CreditCardNumber']);
+        $inputs['pstn_ex'] = $data['Paystation_CreditCardExpiry'];
+        $inputs['pstn_df'] = 'mmyy';
 
-		if (self::$test_mode) {
-			// Force test values, provided by paystation for testing.
-			$inputs['pstn_cn'] = '5123456789012346';
-			$inputs['pstn_ex'] = '0513';
-			$inputs['pstn_am'] = '1.00';
-			$inputs['pstn_tm'] = 't';
-		}
-		
-		// 4) Paystation Transaction Sending
-			
-  		$responseFields = $this->doPayment($inputs);
+        if (self::$test_mode) {
+            // Force test values, provided by paystation for testing.
+            $inputs['pstn_cn'] = '5123456789012346';
+            $inputs['pstn_ex'] = '0513';
+            $inputs['pstn_am'] = '1.00';
+            $inputs['pstn_tm'] = 't';
+        }
+        
+        // 4) Paystation Transaction Sending
 
-  		// 5) Paystation Response Management
+        $responseFields = $this->doPayment($inputs);
 
-		if($responseFields['errorCode'] == 0) {
-			$this->Status = 'Success';
-			$result = new Payment_Success();
-		}
-		else {
-			$this->Status = 'Failure';
-			$result = new Payment_Failure();
-		}
+        // 5) Paystation Response Management
 
-		if($helpText = $responseFields['message']) $this->Message = $helpText;
-		if (isset($responseFields['TransactionID'])) $this->TxnNo = $responseFields['TransactionID'];
-		if (isset($responseFields['ReturnReceiptNumber'])) $this->ReceiptNo = $responseFields['ReturnReceiptNumber'];
+        if ($responseFields['errorCode'] == 0) {
+            $this->Status = 'Success';
+            $result = new Payment_Success();
+        } else {
+            $this->Status = 'Failure';
+            $result = new Payment_Failure();
+        }
 
-		$this->write();
-		return $result;
-	}
+        if ($helpText = $responseFields['message']) {
+            $this->Message = $helpText;
+        }
+        if (isset($responseFields['TransactionID'])) {
+            $this->TxnNo = $responseFields['TransactionID'];
+        }
+        if (isset($responseFields['ReturnReceiptNumber'])) {
+            $this->ReceiptNo = $responseFields['ReturnReceiptNumber'];
+        }
 
-	function doPayment(array $inputs) {
-		// Build a request
-		$formatted_data = http_build_query($inputs);
+        $this->write();
+        return $result;
+    }
 
-		$context_options = array (
-			'http' => array (
-			'method' => 'POST',
-			'header'=> "Content-type: application/x-www-form-urlencoded\r\n"
-				. "Content-Length: " . strlen($formatted_data) . "\r\n",
-			'content' => $formatted_data
-			)
-		);
+    public function doPayment(array $inputs)
+    {
+        // Build a request
+        $formatted_data = http_build_query($inputs);
 
-		// Make a direct http request
-		$ctx = stream_context_create($context_options);
-		$fp = @fopen(self::$url, 'r', false, $ctx);
-		if (!$fp) Debug::show("error sending to paystation: " . $php_errormsg);
+        $context_options = array(
+            'http' => array(
+            'method' => 'POST',
+            'header'=> "Content-type: application/x-www-form-urlencoded\r\n"
+                . "Content-Length: " . strlen($formatted_data) . "\r\n",
+            'content' => $formatted_data
+            )
+        );
 
-		$resultXml = @stream_get_contents($fp);
-		if ($resultXml === false) Debug::show("error receiving from paystation: " . $php_errormsg);
+        // Make a direct http request
+        $ctx = stream_context_create($context_options);
+        $fp = @fopen(self::$url, 'r', false, $ctx);
+        if (!$fp) {
+            Debug::show("error sending to paystation: " . $php_errormsg);
+        }
 
-		// XML Parser Creation
-		$xmlParser = xml_parser_create();
-		$values = null;
-		$indexes = null;
-		xml_parse_into_struct($xmlParser, $resultXml, $values, $indexes);
-		xml_parser_free($xmlParser);
+        $resultXml = @stream_get_contents($fp);
+        if ($resultXml === false) {
+            Debug::show("error receiving from paystation: " . $php_errormsg);
+        }
 
-		// XML Result Parsed In A PHP Array
-		// We expect XML that looks like this:
-		// <?xml version="1.0" standalone="yes"? > 
-		// <response> 
-		//   <ec>0</ec> 
-		//   <em>Transaction approved</em> 
-		// </response>
-		$result = array();
-		$map = array("EC" => "errorCode", "EM" => "message", "ReturnReceiptNumber" => "ReturnReceiptNumber", "TransactionID" => "TransactionID");
-		foreach ($values as $xmlElement) {
-			if (isset($map[$xmlElement['tag']]))
-				$result[$map[$xmlElement['tag']]] = $xmlElement['value'];
-		}
+        // XML Parser Creation
+        $xmlParser = xml_parser_create();
+        $values = null;
+        $indexes = null;
+        xml_parse_into_struct($xmlParser, $resultXml, $values, $indexes);
+        xml_parser_free($xmlParser);
 
-		return $result;
-	}
+        // XML Result Parsed In A PHP Array
+        // We expect XML that looks like this:
+        // <?xml version="1.0" standalone="yes"? > 
+        // <response> 
+        //   <ec>0</ec> 
+        //   <em>Transaction approved</em> 
+        // </response>
+        $result = array();
+        $map = array("EC" => "errorCode", "EM" => "message", "ReturnReceiptNumber" => "ReturnReceiptNumber", "TransactionID" => "TransactionID");
+        foreach ($values as $xmlElement) {
+            if (isset($map[$xmlElement['tag']])) {
+                $result[$map[$xmlElement['tag']]] = $xmlElement['value'];
+            }
+        }
+
+        return $result;
+    }
 }
