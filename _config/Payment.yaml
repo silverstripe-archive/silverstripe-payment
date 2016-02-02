@@ -3,4 +3,4 @@ name: Payment
 
 Director:
   rules:
-    'payment/$MethodName/$Action/$ID': 'PaymentProcessor_GatewayHosted'
+    'PaymentProcessor_GatewayHosted//$Action!/$ID/$OtherID': 'PaymentProcessor_GatewayHosted'
