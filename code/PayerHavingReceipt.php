@@ -1,8 +1,8 @@
 <?php
 
-class PayerHavingReceipt extends DataObjectDecorator
+class PayerHavingReceipt extends DataExtension
 {
-    public function extraStatics()
+    public function extraStatics($class = NULL, $extension = NULL)
     {
         return array(
             'db' => array(
